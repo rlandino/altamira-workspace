@@ -1,0 +1,12 @@
+{
+  "folders": [
+    {
+      "name": "Altamira",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {},
+    "explorer.excludeGitIgnore": false
+  }
+}

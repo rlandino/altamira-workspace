@@ -1,0 +1,339 @@
+{
+  "name": "Altamira - Trade Entry Logger (P0)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "altamira-trade-entry",
+        "responseMode": "responseNode",
+        "options": {
+          "responseContentType": "application/json"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: Trade Entry",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "webhookId": "altamira-trade-entry"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================\n// Altamira Capital - Trade Entry Processor\n// ============================================================\n// Expected webhook payload:\n// {\n//   ticker: 'AAPL',\n//   strategy: 'CSP',           // CSP, Momentum, Hedge, BullPutSpread, JadeLizard\n//   direction: 'STO',          // STO (Sell to Open), BTO (Buy to Open), Long, Short\n//   strike: 225,               // Strike price (options) or entry price (equity)\n//   expiration: '2026-04-17',  // Options expiration date (YYYY-MM-DD)\n//   delta: -0.22,              // Delta at entry\n//   ivRank: 45,                // IV Rank at entry (0-100)\n//   contracts: 1,              // Number of contracts or shares\n//   entryPrice: 3.20,          // Premium received (credit) or paid (debit)\n//   thesis: 'IV elevated...',  // Pre-trade thesis\n//   edge: 'IV overpriced...'   // Edge description\n// }\n// ============================================================\n\nconst input = $input.first().json;\n\n// -----------------------------------------------------------\n// Validate required fields\n// -----------------------------------------------------------\nconst requiredFields = ['ticker', 'strategy', 'direction', 'contracts', 'entryPrice', 'thesis', 'edge'];\nconst missing = requiredFields.filter(f => !input[f] && input[f] !== 0);\n\nif (missing.length > 0) {\n  return [{\n    json: {\n      error: true,\n      message: `Missing required fields: ${missing.join(', ')}`,\n      tradeLogged: false\n    }\n  }];\n}\n\n// -----------------------------------------------------------\n// Generate Trade ID (PT-XXX format)\n// Uses timestamp-based ID for uniqueness\n// In production, read last Trade ID from sheet and increment\n// -----------------------------------------------------------\nconst now = new Date();\nconst tradeNum = Math.floor(now.getTime() / 1000) % 10000;\nconst tradeId = `PT-${String(tradeNum).padStart(4, '0')}`;\n\n// -----------------------------------------------------------\n// Calculate DTE (Days to Expiration)\n// -----------------------------------------------------------\nlet dte = 0;\nif (input.expiration) {\n  const expDate = new Date(input.expiration + 'T16:00:00');\n  const today = new Date();\n  today.setHours(16, 0, 0, 0);\n  dte = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));\n}\n\n// -----------------------------------------------------------\n// Calculate estimated max loss\n// -----------------------------------------------------------\nlet estimatedMaxLoss = 0;\nconst contracts = Math.abs(input.contracts || 1);\nconst entryPrice = Math.abs(input.entryPrice || 0);\nconst strike = input.strike || 0;\n\nswitch ((input.strategy || '').toUpperCase()) {\n  case 'CSP':\n    // CSP max loss at stop-loss (200% of credit)\n    estimatedMaxLoss = entryPrice * 2 * contracts * 100;\n    break;\n  case 'BULLPUTSPREAD':\n  case 'BULL_PUT_SPREAD':\n    // Spread max loss = (width - credit) * contracts * 100\n    const spreadWidth = input.spreadWidth || 10; // Default 10-wide spread\n    estimatedMaxLoss = (spreadWidth - entryPrice) * contracts * 100;\n    break;\n  case 'JADELIZARD':\n    // Jade lizard downside = (put_strike - total_credit) * contracts * 100\n    estimatedMaxLoss = (strike - entryPrice) * contracts * 100;\n    break;\n  case 'MOMENTUM':\n  case 'EQUITY':\n    // Equity max loss at -10% hard stop\n    estimatedMaxLoss = strike * contracts * 0.10;\n    break;\n  case 'HEDGE':\n    // Hedge max loss = premium paid\n    estimatedMaxLoss = entryPrice * contracts * 100;\n    break;\n  default:\n    estimatedMaxLoss = entryPrice * 2 * contracts * 100;\n}\n\n// -----------------------------------------------------------\n// Estimated commission and slippage\n// -----------------------------------------------------------\nconst isOptions = ['CSP', 'BULLPUTSPREAD', 'BULL_PUT_SPREAD', 'JADELIZARD', 'HEDGE'].includes((input.strategy || '').toUpperCase());\nconst commission = isOptions ? contracts * 0.65 * 2 : 0; // $0.65/contract round-trip\nconst slippageFactor = 0.02; // 2% of premium for liquid names\nconst estimatedSlippage = isOptions ? entryPrice * slippageFactor * contracts * 100 : 0;\n\n// -----------------------------------------------------------\n// Build output\n// -----------------------------------------------------------\nconst dateStr = now.toISOString().split('T')[0];\n\nconst tradeRow = {\n  tradeId: tradeId,\n  dateEntry: dateStr,\n  dateExit: '',\n  ticker: (input.ticker || '').toUpperCase(),\n  strategy: input.strategy,\n  direction: input.direction,\n  strike: strike,\n  expiration: input.expiration || '',\n  dteAtEntry: dte,\n  deltaAtEntry: input.delta || 0,\n  ivRankAtEntry: input.ivRank || 0,\n  contracts: contracts,\n  entryPrice: entryPrice,\n  exitPrice: '',\n  rawPnL: '',\n  commission: commission.toFixed(2),\n  estimatedSlippage: estimatedSlippage.toFixed(2),\n  adjustedPnL: '',\n  pnlPercent: '',\n  daysHeld: '',\n  exitReason: '',\n  thesis: input.thesis || '',\n  edge: input.edge || '',\n  outcomeNotes: '',\n  ruleCompliance: 'Yes',\n  whatWouldIDoDifferently: '',\n  estimatedMaxLoss: estimatedMaxLoss.toFixed(2)\n};\n\nreturn [{ json: tradeRow }];"
+      },
+      "id": "process-trade",
+      "name": "Process Trade Entry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================\n// Altamira Capital - Pre-Trade Risk Checks\n// ============================================================\n// Validates the trade against risk management framework:\n//   1. Single position <= 5% of portfolio\n//   2. Sector exposure <= 25%\n//   3. Cash reserve >= 15%\n//   4. Options allocation <= 30% notional\n//   5. Max 3 correlated positions per sector\n// ============================================================\n\nconst trade = $input.first().json;\n\n// -----------------------------------------------------------\n// Portfolio assumptions (paper trading starting capital)\n// In production, pull these from the Daily Dashboard sheet\n// or from E-Trade API balance endpoint\n// -----------------------------------------------------------\nconst PORTFOLIO_VALUE = 100000; // $100K paper trading\nconst CURRENT_CASH = 20000;     // Placeholder - read from sheet\nconst CURRENT_OPTIONS_NOTIONAL = 0; // Placeholder - read from sheet\n\n// -----------------------------------------------------------\n// Sector mapping for core universe\n// -----------------------------------------------------------\nconst SECTOR_MAP = {\n  'AAPL': 'Technology',\n  'MSFT': 'Technology',\n  'GOOGL': 'Technology',\n  'AMZN': 'Technology',\n  'META': 'Technology',\n  'NVDA': 'Technology',\n  'AVGO': 'Technology',\n  'V': 'Financial Services',\n  'MA': 'Financial Services',\n  'COST': 'Consumer Defensive',\n  'SPY': 'Index'\n};\n\nconst riskChecks = [];\nlet allPassed = true;\n\n// -----------------------------------------------------------\n// Check 1: Single position <= 5% of portfolio\n// -----------------------------------------------------------\nconst isOptions = ['CSP', 'BULLPUTSPREAD', 'BULL_PUT_SPREAD', 'JADELIZARD', 'HEDGE'].includes((trade.strategy || '').toUpperCase());\nlet positionExposure = 0;\n\nif (isOptions) {\n  // For CSPs, exposure = strike * contracts * 100\n  positionExposure = (trade.strike || 0) * (trade.contracts || 1) * 100;\n} else {\n  // For equity, exposure = price * shares\n  positionExposure = (trade.strike || 0) * (trade.contracts || 1);\n}\n\nconst positionPercent = (positionExposure / PORTFOLIO_VALUE) * 100;\nconst positionCheck = positionPercent <= 5;\n\nriskChecks.push({\n  check: 'Position Size <= 5%',\n  value: `${positionPercent.toFixed(2)}%`,\n  limit: '5.00%',\n  passed: positionCheck\n});\nif (!positionCheck) allPassed = false;\n\n// -----------------------------------------------------------\n// Check 2: Sector exposure <= 25% (tech <= 35%)\n// -----------------------------------------------------------\nconst sector = SECTOR_MAP[trade.ticker] || 'Unknown';\nconst sectorLimit = sector === 'Technology' ? 35 : 25;\n// In production, sum all existing positions in this sector from the trade log\n// For now, we check only the new position against the limit\nconst sectorExposure = positionPercent; // Simplified - add existing sector exposure in production\nconst sectorCheck = sectorExposure <= sectorLimit;\n\nriskChecks.push({\n  check: `Sector Exposure <= ${sectorLimit}% (${sector})`,\n  value: `${sectorExposure.toFixed(2)}%`,\n  limit: `${sectorLimit}%`,\n  passed: sectorCheck\n});\nif (!sectorCheck) allPassed = false;\n\n// -----------------------------------------------------------\n// Check 3: Cash reserve >= 15% after trade\n// -----------------------------------------------------------\nlet cashAfterTrade = CURRENT_CASH;\nif (isOptions && (trade.direction === 'STO' || trade.direction === 'Short')) {\n  // CSP ties up cash = strike * contracts * 100\n  cashAfterTrade -= positionExposure;\n  // Add credit received\n  cashAfterTrade += (trade.entryPrice || 0) * (trade.contracts || 1) * 100;\n} else if (!isOptions) {\n  cashAfterTrade -= positionExposure;\n}\n\nconst cashReservePercent = (cashAfterTrade / PORTFOLIO_VALUE) * 100;\nconst cashCheck = cashReservePercent >= 15;\n\nriskChecks.push({\n  check: 'Cash Reserve >= 15%',\n  value: `${cashReservePercent.toFixed(2)}%`,\n  limit: '15.00%',\n  passed: cashCheck\n});\nif (!cashCheck) allPassed = false;\n\n// -----------------------------------------------------------\n// Check 4: Total options allocation <= 30% notional\n// -----------------------------------------------------------\nif (isOptions) {\n  const newOptionsNotional = CURRENT_OPTIONS_NOTIONAL + positionExposure;\n  const optionsPercent = (newOptionsNotional / PORTFOLIO_VALUE) * 100;\n  const optionsCheck = optionsPercent <= 30;\n\n  riskChecks.push({\n    check: 'Options Allocation <= 30%',\n    value: `${optionsPercent.toFixed(2)}%`,\n    limit: '30.00%',\n    passed: optionsCheck\n  });\n  if (!optionsCheck) allPassed = false;\n}\n\n// -----------------------------------------------------------\n// Check 5: Max loss within tolerance\n// -----------------------------------------------------------\nconst maxLossPercent = (parseFloat(trade.estimatedMaxLoss) / PORTFOLIO_VALUE) * 100;\nconst maxLossCheck = maxLossPercent <= 5; // Max 5% of portfolio per trade at stop\n\nriskChecks.push({\n  check: 'Max Loss <= 5% of Portfolio',\n  value: `${maxLossPercent.toFixed(2)}% ($${parseFloat(trade.estimatedMaxLoss).toLocaleString()})`,\n  limit: '5.00%',\n  passed: maxLossCheck\n});\nif (!maxLossCheck) allPassed = false;\n\n// -----------------------------------------------------------\n// Output\n// -----------------------------------------------------------\nreturn [{\n  json: {\n    ...trade,\n    riskChecks: riskChecks,\n    allRiskChecksPassed: allPassed,\n    riskCheckSummary: riskChecks.map(c => `${c.passed ? 'PASS' : 'FAIL'}: ${c.check} (${c.value} vs ${c.limit})`).join('\\n')\n  }\n}];"
+      },
+      "id": "risk-checks",
+      "name": "Pre-Trade Risk Checks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "risk-check-pass",
+              "leftValue": "={{ $json.allRiskChecksPassed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-risk-pass",
+      "name": "IF: Risk Checks Pass?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{$env.GOOGLE_SHEET_ID}}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Trade Log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Trade ID": "={{ $json.tradeId }}",
+            "Date (Entry)": "={{ $json.dateEntry }}",
+            "Date (Exit)": "={{ $json.dateExit }}",
+            "Ticker": "={{ $json.ticker }}",
+            "Strategy": "={{ $json.strategy }}",
+            "Direction": "={{ $json.direction }}",
+            "Strike": "={{ $json.strike }}",
+            "Expiration": "={{ $json.expiration }}",
+            "DTE at Entry": "={{ $json.dteAtEntry }}",
+            "Delta at Entry": "={{ $json.deltaAtEntry }}",
+            "IV Rank at Entry": "={{ $json.ivRankAtEntry }}",
+            "Contracts/Shares": "={{ $json.contracts }}",
+            "Entry Price": "={{ $json.entryPrice }}",
+            "Exit Price": "",
+            "Raw P&L": "",
+            "Commission": "={{ $json.commission }}",
+            "Est. Slippage": "={{ $json.estimatedSlippage }}",
+            "Adjusted P&L": "",
+            "P&L %": "",
+            "Days Held": "",
+            "Exit Reason": "",
+            "Thesis": "={{ $json.thesis }}",
+            "Edge": "={{ $json.edge }}",
+            "Outcome Notes": "",
+            "Rule Compliance": "Yes",
+            "What Would I Do Differently?": ""
+          }
+        },
+        "options": {}
+      },
+      "id": "gsheets-trade-log",
+      "name": "Google Sheets: Log Trade",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1200, 180],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$env.TELEGRAM_CHAT_ID}}",
+        "text": "={{ \n'ALTAMIRA CAPITAL - Trade Confirmed\\n' +\n'Trade ID: ' + $json.tradeId + '\\n' +\n'-------------------------------------------\\n' +\n'Ticker: ' + $json.ticker + '\\n' +\n'Strategy: ' + $json.strategy + '\\n' +\n'Direction: ' + $json.direction + '\\n' +\n'Strike: $' + $json.strike + '\\n' +\n'Expiration: ' + $json.expiration + ' (' + $json.dteAtEntry + ' DTE)\\n' +\n'Delta: ' + $json.deltaAtEntry + '\\n' +\n'IV Rank: ' + $json.ivRankAtEntry + '\\n' +\n'Contracts: ' + $json.contracts + '\\n' +\n'Entry Price: $' + $json.entryPrice + '\\n' +\n'Est. Max Loss: $' + $json.estimatedMaxLoss + '\\n' +\n'-------------------------------------------\\n' +\n'Risk Checks: ALL PASSED\\n' +\n$json.riskCheckSummary + '\\n' +\n'-------------------------------------------\\n' +\n'PRE-TRADE CHECKLIST REMINDER:\\n' +\n'1. Thesis documented? \\u2705\\n' +\n'2. Edge identified? \\u2705\\n' +\n'3. Max loss defined? \\u2705\\n' +\n'4. Exit plan set? \\u2753 Set GTC orders NOW\\n' +\n'5. Portfolio fit confirmed? \\u2705\\n' +\n'6. Buying power verified? \\u2705\\n' +\n'-------------------------------------------\\n' +\n'ACTION: Set GTC stop-loss at $' + ($json.entryPrice * 2).toFixed(2) + ' (200% of credit)\\n' +\n'ACTION: Set GTC profit target at $' + ($json.entryPrice * 0.5).toFixed(2) + ' (50% of credit)'\n}}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "telegram-trade-confirmed",
+      "name": "Telegram: Trade Confirmed",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1200, 360],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$env.TELEGRAM_CHAT_ID}}",
+        "text": "={{ \n'\\u26a0\\ufe0f ALTAMIRA CAPITAL - RISK ALERT\\n' +\n'Trade BLOCKED - Risk Check Failed\\n' +\n'-------------------------------------------\\n' +\n'Ticker: ' + $json.ticker + '\\n' +\n'Strategy: ' + $json.strategy + '\\n' +\n'Direction: ' + $json.direction + '\\n' +\n'Strike: $' + $json.strike + '\\n' +\n'Contracts: ' + $json.contracts + '\\n' +\n'-------------------------------------------\\n' +\n'FAILED CHECKS:\\n' +\n$json.riskCheckSummary + '\\n' +\n'-------------------------------------------\\n' +\n'This trade was NOT logged.\\n' +\n'Review risk limits before re-submitting.\\n' +\n'Rules are not guidelines. No exceptions.'\n}}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "telegram-risk-alert",
+      "name": "Telegram: Risk Alert (Blocked)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1200, 520],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: $json.allRiskChecksPassed !== false, tradeId: $json.tradeId, ticker: $json.ticker, riskChecks: $json.riskChecks }) }}"
+      },
+      "id": "webhook-response-pass",
+      "name": "Webhook Response: Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1460, 180]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: 'Risk checks failed', ticker: $json.ticker, riskChecks: $json.riskChecks }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "webhook-response-fail",
+      "name": "Webhook Response: Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1460, 520]
+    },
+    {
+      "parameters": {
+        "content": "## Altamira Capital - Trade Entry Logger (P0)\n\n**Trigger:** Webhook (POST to /altamira-trade-entry)\n\n**What this workflow does:**\n1. Receives trade entry data via webhook\n2. Validates required fields, generates Trade ID (PT-XXXX)\n3. Calculates DTE, estimated max loss, commission, slippage\n4. Runs pre-trade risk checks (position size, sector, cash, options allocation)\n5. IF checks pass: logs trade to Google Sheets + sends Telegram confirmation\n6. IF checks fail: sends Telegram risk alert, does NOT log trade\n7. Returns JSON response to the webhook caller\n\n**Webhook payload example:**\n```json\n{\n  \"ticker\": \"AAPL\",\n  \"strategy\": \"CSP\",\n  \"direction\": \"STO\",\n  \"strike\": 225,\n  \"expiration\": \"2026-04-17\",\n  \"delta\": -0.22,\n  \"ivRank\": 45,\n  \"contracts\": 1,\n  \"entryPrice\": 3.20,\n  \"thesis\": \"IV elevated above 30th percentile...\",\n  \"edge\": \"IV overpriced vs realized vol...\"\n}\n```\n\n**Setup required:**\n- Replace GOOGLE_SHEETS_CREDENTIAL_ID and TELEGRAM_CREDENTIAL_ID\n- Set environment variables: GOOGLE_SHEET_ID, TELEGRAM_CHAT_ID\n- The webhook URL will be provided by n8n after activation\n- For production: update PORTFOLIO_VALUE, CURRENT_CASH, CURRENT_OPTIONS_NOTIONAL to read from Daily Dashboard sheet",
+        "height": 640,
+        "width": 520,
+        "color": 4
+      },
+      "id": "sticky-note-overview",
+      "name": "Sticky Note: Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [140, -180]
+    },
+    {
+      "parameters": {
+        "content": "## Risk Check Details\n\n**Check 1 - Position Size:** CSP notional (strike * contracts * 100) must be <= 5% of portfolio.\n\n**Check 2 - Sector Exposure:** Technology <= 35%, all other sectors <= 25%.\n\n**Check 3 - Cash Reserve:** After tying up cash for the CSP, remaining cash must be >= 15% of portfolio.\n\n**Check 4 - Options Allocation:** Total notional options exposure <= 30% of portfolio.\n\n**Check 5 - Max Loss:** Estimated max loss at stop-loss (200% of credit for CSPs) must be <= 5% of portfolio.\n\nAll checks must pass. If ANY fails, the trade is blocked.",
+        "height": 380,
+        "width": 380,
+        "color": 1
+      },
+      "id": "sticky-note-risk",
+      "name": "Sticky Note: Risk Checks",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [700, -180]
+    },
+    {
+      "parameters": {
+        "content": "## IF Branch Logic\n\n**TRUE (Risk Passed):**\n- Log trade to Google Sheets Trade Log\n- Send Telegram confirmation with checklist reminder\n- Remind to set GTC stop-loss and profit target orders\n- Return 200 JSON response\n\n**FALSE (Risk Failed):**\n- Do NOT log to Google Sheets\n- Send Telegram risk alert with specific failures\n- Return 400 JSON response with failure details",
+        "height": 260,
+        "width": 340,
+        "color": 1
+      },
+      "id": "sticky-note-branch",
+      "name": "Sticky Note: Branching",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1100, -180]
+    }
+  ],
+  "connections": {
+    "Webhook: Trade Entry": {
+      "main": [
+        [
+          {
+            "node": "Process Trade Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Trade Entry": {
+      "main": [
+        [
+          {
+            "node": "Pre-Trade Risk Checks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pre-Trade Risk Checks": {
+      "main": [
+        [
+          {
+            "node": "IF: Risk Checks Pass?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Risk Checks Pass?": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Log Trade",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram: Trade Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: Risk Alert (Blocked)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Log Trade": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response: Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram: Risk Alert (Blocked)": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response: Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Altamira Capital",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    },
+    {
+      "name": "Paper Trading",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    },
+    {
+      "name": "P0",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    }
+  ],
+  "triggerCount": 1,
+  "active": false
+}

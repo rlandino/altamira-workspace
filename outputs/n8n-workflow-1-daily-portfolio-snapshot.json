@@ -1,0 +1,416 @@
+{
+  "name": "Altamira - Daily Portfolio Snapshot (P0)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 16,
+              "triggerAtMinute": 15,
+              "triggerAtDay": {
+                "weekdays": [1, 2, 3, 4, 5]
+              }
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Cron: 4:15 PM ET Mon-Fri",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://apisb.etrade.com/v1/accounts/{{ETRADE_ACCOUNT_ID_KEY}}/portfolio",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth1Api",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "etrade-portfolio",
+      "name": "E-Trade: Get Portfolio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 200],
+      "credentials": {
+        "oAuth1Api": {
+          "id": "ETRADE_OAUTH1_CREDENTIAL_ID",
+          "name": "E-Trade OAuth 1.0a Sandbox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://apisb.etrade.com/v1/accounts/{{ETRADE_ACCOUNT_ID_KEY}}/balance?instType=BROKERAGE&realTimeNAV=true",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth1Api",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "etrade-balance",
+      "name": "E-Trade: Get Balance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 420],
+      "credentials": {
+        "oAuth1Api": {
+          "id": "ETRADE_OAUTH1_CREDENTIAL_ID",
+          "name": "E-Trade OAuth 1.0a Sandbox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://financialmodelingprep.com/api/v3/quote/^VIX,SPY?apikey={{FMP_API_KEY}}",
+        "authentication": "none",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "fmp-vix-spy",
+      "name": "FMP: Get VIX & SPY",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 640]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================\n// Altamira Capital - Daily Portfolio Snapshot Calculator\n// ============================================================\n// Inputs:\n//   items[0] = E-Trade portfolio response\n//   items[1] = E-Trade balance response\n//   items[2] = FMP VIX & SPY response\n// ============================================================\n\nconst portfolioData = $input.all()[0].json;\nconst balanceData = $input.all()[1].json;\nconst marketData = $input.all()[2].json;\n\n// -----------------------------------------------------------\n// Parse E-Trade Portfolio positions\n// -----------------------------------------------------------\nconst positions = portfolioData?.PortfolioResponse?.AccountPortfolio?.[0]?.Position || [];\n\nlet netDelta = 0;\nlet dailyTheta = 0;\nlet openCSPCount = 0;\nlet openEquityCount = 0;\nlet totalPositionValue = 0;\n\nfor (const pos of positions) {\n  const quantity = pos.quantity || 0;\n  const marketValue = pos.marketValue || 0;\n  totalPositionValue += marketValue;\n\n  // Check if this is an options position\n  if (pos.Product?.securityType === 'OPTN' || pos.Product?.securityType === 'OPT') {\n    // Options position - extract Greeks\n    const delta = pos.Complete?.delta || pos.delta || 0;\n    const theta = pos.Complete?.theta || pos.theta || 0;\n\n    netDelta += delta * quantity * 100; // Delta per contract * contracts * multiplier\n    dailyTheta += theta * quantity * 100;\n\n    // Identify CSPs: short puts (negative quantity, put type)\n    const callPut = pos.Product?.callPut || pos.Product?.optionType || '';\n    if (quantity < 0 && (callPut === 'PUT' || callPut === 'P')) {\n      openCSPCount += Math.abs(quantity);\n    }\n  } else {\n    // Equity position\n    const delta = 1.0; // Equity delta is 1.0 per share\n    netDelta += delta * quantity;\n    openEquityCount += 1;\n  }\n}\n\n// -----------------------------------------------------------\n// Parse E-Trade Balance\n// -----------------------------------------------------------\nconst balanceComputed = balanceData?.BalanceResponse?.Computed || balanceData?.BalanceResponse || {};\nconst cashAvailable = balanceComputed?.cashAvailableForInvestment\n  || balanceComputed?.cashBalance\n  || balanceComputed?.Cash?.moneyMktBalance\n  || 0;\nconst accountValue = balanceComputed?.RealTimeValues?.totalAccountValue\n  || balanceComputed?.accountBalance\n  || 0;\nconst buyingPower = balanceComputed?.buyingPower || 0;\n\nconst portfolioValue = accountValue || (cashAvailable + totalPositionValue);\nconst cashPercent = portfolioValue > 0 ? ((cashAvailable / portfolioValue) * 100).toFixed(2) : 0;\n\n// -----------------------------------------------------------\n// Parse FMP Market Data (VIX and SPY)\n// -----------------------------------------------------------\nlet vixClose = 0;\nlet spyClose = 0;\n\nconst fmpQuotes = Array.isArray(marketData) ? marketData : (marketData?.json ? (Array.isArray(marketData.json) ? marketData.json : [marketData.json]) : []);\n\nfor (const quote of fmpQuotes) {\n  const symbol = (quote.symbol || '').toUpperCase();\n  if (symbol === '^VIX' || symbol === 'VIX') {\n    vixClose = quote.price || quote.previousClose || 0;\n  }\n  if (symbol === 'SPY') {\n    spyClose = quote.price || quote.previousClose || 0;\n  }\n}\n\n// -----------------------------------------------------------\n// Calculate daily P&L (requires previous day's value)\n// In production, read the last row from Google Sheets\n// For now, we set it as N/A until historical data exists\n// -----------------------------------------------------------\nconst today = new Date();\nconst dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD\n\nconst dailyPnL = 0; // Placeholder - will be calculated from sheet history\nconst dailyPnLPercent = 0;\nconst cumulativePnL = portfolioValue - 100000; // Starting capital = $100K\nconst cumulativePnLPercent = ((portfolioValue - 100000) / 100000 * 100).toFixed(2);\n\n// -----------------------------------------------------------\n// Build output row for Google Sheets\n// -----------------------------------------------------------\nconst output = {\n  date: dateStr,\n  portfolioValue: Math.round(portfolioValue * 100) / 100,\n  dailyPnL: Math.round(dailyPnL * 100) / 100,\n  dailyPnLPercent: dailyPnLPercent,\n  cumulativePnL: Math.round(cumulativePnL * 100) / 100,\n  cumulativePnLPercent: parseFloat(cumulativePnLPercent),\n  netDelta: Math.round(netDelta * 100) / 100,\n  dailyTheta: Math.round(dailyTheta * 100) / 100,\n  openCSPCount: openCSPCount,\n  openEquityCount: openEquityCount,\n  cashPercent: parseFloat(cashPercent),\n  cashAvailable: Math.round(cashAvailable * 100) / 100,\n  buyingPower: Math.round(buyingPower * 100) / 100,\n  vixClose: Math.round(vixClose * 100) / 100,\n  spyClose: Math.round(spyClose * 100) / 100,\n  notes: ''\n};\n\n// -----------------------------------------------------------\n// Build Telegram message\n// -----------------------------------------------------------\nconst deltaEmoji = netDelta > 50 ? '\\u26a0\\ufe0f HIGH' : netDelta < -30 ? '\\u26a0\\ufe0f LOW' : '\\u2705 OK';\nconst cashEmoji = parseFloat(cashPercent) < 15 ? '\\u26a0\\ufe0f BELOW MIN' : '\\u2705 OK';\nconst thetaEmoji = dailyTheta > 0 ? '\\u2705 Positive' : '\\u26a0\\ufe0f Negative';\n\nconst telegramMessage = `ALTAMIRA CAPITAL - Daily Portfolio Snapshot\\n` +\n  `Date: ${dateStr}\\n` +\n  `-------------------------------------------\\n` +\n  `Portfolio Value: $${portfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}\\n` +\n  `Cumulative P&L: $${cumulativePnL.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${cumulativePnLPercent}%)\\n` +\n  `-------------------------------------------\\n` +\n  `Net Delta: ${netDelta.toFixed(2)} ${deltaEmoji}\\n` +\n  `Daily Theta: $${dailyTheta.toFixed(2)} ${thetaEmoji}\\n` +\n  `-------------------------------------------\\n` +\n  `Open CSPs: ${openCSPCount}\\n` +\n  `Open Equity Positions: ${openEquityCount}\\n` +\n  `Cash: $${cashAvailable.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${cashPercent}%) ${cashEmoji}\\n` +\n  `Buying Power: $${buyingPower.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}\\n` +\n  `-------------------------------------------\\n` +\n  `VIX: ${vixClose}\\n` +\n  `SPY: $${spyClose}\\n` +\n  `-------------------------------------------\\n`;\n\noutput.telegramMessage = telegramMessage;\n\n// -----------------------------------------------------------\n// Build Position History rows (one per position for optimization)\n// -----------------------------------------------------------\nconst positionHistoryRows = [];\nfor (const pos of positions) {\n  const quantity = pos.quantity || 0;\n  const marketValue = pos.marketValue || 0;\n  const weightPct = portfolioValue > 0 ? (marketValue / portfolioValue) * 100 : 0;\n  const isOption = pos.Product?.securityType === 'OPTN' || pos.Product?.securityType === 'OPT';\n  const assetType = isOption ? 'OPT' : 'EQ';\n  const symbol = pos.symbol || pos.SymbolDescription || pos.Product?.symbol || '';\n  let delta = 0, theta = 0, strike = '', expiration = '', callPut = '';\n  if (isOption) {\n    delta = pos.Complete?.delta ?? pos.delta ?? 0;\n    theta = pos.Complete?.theta ?? pos.theta ?? 0;\n    strike = pos.strikePrice ?? pos.Product?.strikePrice ?? '';\n    const exp = pos.expiryDate ?? pos.Product?.expiryDate;\n    expiration = exp ? (typeof exp === 'number' ? new Date(exp).toISOString().split('T')[0] : String(exp).substring(0, 10)) : '';\n    const cp = pos.Product?.callPut || pos.Product?.optionType || '';\n    callPut = (cp === 'PUT' || cp === 'P') ? 'P' : (cp === 'CALL' || cp === 'C') ? 'C' : '';\n  } else {\n    delta = 1.0;\n  }\n  positionHistoryRows.push({\n    date: dateStr,\n    symbol: symbol,\n    assetType: assetType,\n    quantity: quantity,\n    marketValue: Math.round(marketValue * 100) / 100,\n    weightPct: Math.round(weightPct * 100) / 100,\n    sector: '',\n    delta: Math.round(delta * 100) / 100,\n    theta: Math.round(theta * 100) / 100,\n    strike: strike !== '' ? (typeof strike === 'number' ? Math.round(strike * 100) / 100 : strike) : '',\n    expiration: expiration,\n    callPut: callPut\n  });\n}\nconst summaryItem = { json: output };\nconst positionItems = positionHistoryRows.map(r => ({ json: r }));\nreturn [summaryItem, ...positionItems];"
+      },
+      "id": "calculate-metrics",
+      "name": "Calculate Portfolio Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [740, 300]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "route-summary",
+                    "leftValue": "={{ $itemIndex }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 1
+        }
+      },
+      "id": "route-by-index",
+      "name": "Route: Summary vs Positions",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [960, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{$env.GOOGLE_SHEET_ID}}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Daily Dashboard"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.date }}",
+            "Portfolio Value": "={{ $json.portfolioValue }}",
+            "Daily P&L ($)": "={{ $json.dailyPnL }}",
+            "Daily P&L (%)": "={{ $json.dailyPnLPercent }}",
+            "Cumulative P&L ($)": "={{ $json.cumulativePnL }}",
+            "Cumulative P&L (%)": "={{ $json.cumulativePnLPercent }}",
+            "Net Delta Exposure": "={{ $json.netDelta }}",
+            "Daily Theta Income": "={{ $json.dailyTheta }}",
+            "Open CSP Count": "={{ $json.openCSPCount }}",
+            "Open Equity Positions": "={{ $json.openEquityCount }}",
+            "Cash %": "={{ $json.cashPercent }}",
+            "VIX Close": "={{ $json.vixClose }}",
+            "SPY Close": "={{ $json.spyClose }}",
+            "Notes": "={{ $json.notes }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "gsheets-daily-dashboard",
+      "name": "Google Sheets: Append Daily Dashboard",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1180, 180],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{$env.GOOGLE_SHEET_ID}}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Position History"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.date }}",
+            "Symbol": "={{ $json.symbol }}",
+            "AssetType": "={{ $json.assetType }}",
+            "Quantity": "={{ $json.quantity }}",
+            "Market Value": "={{ $json.marketValue }}",
+            "Weight %": "={{ $json.weightPct }}",
+            "Sector": "={{ $json.sector }}",
+            "Delta": "={{ $json.delta }}",
+            "Theta": "={{ $json.theta }}",
+            "Strike": "={{ $json.strike }}",
+            "Expiration": "={{ $json.expiration }}",
+            "CallPut": "={{ $json.callPut }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "gsheets-position-history",
+      "name": "Google Sheets: Append Position History",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1180, 420],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$env.TELEGRAM_CHAT_ID}}",
+        "text": "={{ $json.telegramMessage }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "telegram-daily-summary",
+      "name": "Telegram: Send Daily Summary",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1000, 420],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Altamira Capital - Daily Portfolio Snapshot (P0)\n\n**Trigger:** Cron at 4:15 PM ET, Monday-Friday\n\n**What this workflow does:**\n1. Pulls portfolio positions + Greeks from E-Trade sandbox API\n2. Pulls account balance / buying power from E-Trade\n3. Gets VIX and SPY closing prices from FMP\n4. Calculates net delta, daily theta, cash %, open CSP/equity counts\n5. Appends a row to the 'Daily Dashboard' Google Sheet\n6. Sends a formatted daily summary via Telegram\n\n**Setup required:**\n- Replace ETRADE_ACCOUNT_ID_KEY with your E-Trade account ID key\n- Replace ETRADE_OAUTH1_CREDENTIAL_ID with your n8n OAuth 1.0a credential\n- Replace GOOGLE_SHEETS_CREDENTIAL_ID with your Google Sheets credential\n- Replace TELEGRAM_CREDENTIAL_ID with your Telegram bot credential\n- Set environment variables: GOOGLE_SHEET_ID, TELEGRAM_CHAT_ID, FMP_API_KEY\n- Ensure n8n timezone is set to America/New_York\n\n**E-Trade OAuth 1.0a notes:**\n- Tokens expire at midnight ET daily\n- You must re-authenticate each morning (or build a token refresh workflow)\n- Sandbox base URL: https://apisb.etrade.com\n- Rate limits: 2 req/sec market data, 4 req/sec account data",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "sticky-note-main",
+      "name": "Sticky Note: Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [140, -80]
+    },
+    {
+      "parameters": {
+        "content": "## E-Trade API Calls\n\nBoth use OAuth 1.0a authentication.\n\n**Portfolio endpoint** returns positions with:\n- Ticker, quantity, market value\n- Options: delta, gamma, theta, vega\n- Strike, expiration, call/put type\n\n**Balance endpoint** returns:\n- Cash available for investment\n- Total account value\n- Buying power\n\n**Rate limit:** Keep a 500ms+ gap between these two calls (4 req/sec max for account data).",
+        "height": 340,
+        "width": 340,
+        "color": 3
+      },
+      "id": "sticky-note-etrade",
+      "name": "Sticky Note: E-Trade API",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [380, -80]
+    },
+    {
+      "parameters": {
+        "content": "## Calculation Logic\n\n**Net Delta:** Sum of (delta * quantity * 100) for options + (1.0 * shares) for equities.\nTarget range: -30 to +50 per $100K.\n\n**Daily Theta:** Sum of (theta * quantity * 100) for all options. Should be positive (time decay earns income).\n\n**Cash %:** cashAvailable / portfolioValue * 100. Must stay above 15% minimum.\n\n**Open CSP Count:** Short put positions (negative qty, PUT type).\n\n**Open Equity Count:** Long stock positions.\n\n**Starting Capital:** $100,000 (paper trading).",
+        "height": 340,
+        "width": 340,
+        "color": 6
+      },
+      "id": "sticky-note-calc",
+      "name": "Sticky Note: Calculations",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [740, -80]
+    }
+  ],
+  "connections": {
+    "Cron: 4:15 PM ET Mon-Fri": {
+      "main": [
+        [
+          {
+            "node": "E-Trade: Get Portfolio",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "E-Trade: Get Balance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FMP: Get VIX & SPY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Trade: Get Portfolio": {
+      "main": [
+        [
+          {
+            "node": "Calculate Portfolio Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Trade: Get Balance": {
+      "main": [
+        [
+          {
+            "node": "Calculate Portfolio Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FMP: Get VIX & SPY": {
+      "main": [
+        [
+          {
+            "node": "Calculate Portfolio Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Portfolio Metrics": {
+      "main": [
+        [
+          {
+            "node": "Route: Summary vs Positions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route: Summary vs Positions": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Append Daily Dashboard",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram: Send Daily Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets: Append Position History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Append Position History": {
+      "main": []
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Altamira Capital",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    },
+    {
+      "name": "Paper Trading",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    },
+    {
+      "name": "P0",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    }
+  ],
+  "triggerCount": 1,
+  "active": false
+}

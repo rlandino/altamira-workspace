@@ -1,0 +1,617 @@
+{
+  "filer": {
+    "cik": "0001000097",
+    "name": "KINGDON CAPITAL MANAGEMENT, L.L.C."
+  },
+  "periodEnd": "2025-05-15",
+  "filingDate": "2025-05-15",
+  "form": "13F-HR",
+  "accessionNumber": "0001000097-25-000015",
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1000097/000100009725000015/filing.xml",
+  "holdingsCount": 67,
+  "holdings": [
+    {
+      "nameOfIssuer": "3M CO",
+      "titleOfClass": "COM",
+      "cusip": "88579Y101",
+      "value": 17623200,
+      "valueUsd": 17623200000,
+      "shrsOrPrnAmt": 120000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ACADIA HEALTHCARE COMPANY IN",
+      "titleOfClass": "COM",
+      "cusip": "00404A109",
+      "value": 12819296,
+      "valueUsd": 12819296000,
+      "shrsOrPrnAmt": 422800,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "AIR LEASE CORP",
+      "titleOfClass": "CL A",
+      "cusip": "00912X302",
+      "value": 3381700,
+      "valueUsd": 3381700000,
+      "shrsOrPrnAmt": 70000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALDEYRA THERAPEUTICS INC",
+      "titleOfClass": "COM",
+      "cusip": "01438T106",
+      "value": 4479250,
+      "valueUsd": 4479250000,
+      "shrsOrPrnAmt": 779000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALIBABA GROUP HLDG LTD",
+      "titleOfClass": "SPONSORED ADS",
+      "cusip": "01609W102",
+      "value": 8198260,
+      "valueUsd": 8198260000,
+      "shrsOrPrnAmt": 62000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALIGHT INC",
+      "titleOfClass": "COM CL A",
+      "cusip": "01626W101",
+      "value": 3854500,
+      "valueUsd": 3854500000,
+      "shrsOrPrnAmt": 650000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALNYLAM PHARMACEUTICALS INC",
+      "titleOfClass": "COM",
+      "cusip": "02043Q107",
+      "value": 13501000,
+      "valueUsd": 13501000000,
+      "shrsOrPrnAmt": 50000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "API GROUP CORP",
+      "titleOfClass": "COM STK",
+      "cusip": "00187Y100",
+      "value": 9834000,
+      "valueUsd": 9834000000,
+      "shrsOrPrnAmt": 275000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "BEYOND AIR INC",
+      "titleOfClass": "COM",
+      "cusip": "08862L103",
+      "value": 255246,
+      "valueUsd": 255246000,
+      "shrsOrPrnAmt": 936683,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CARVANA CO",
+      "titleOfClass": "CL A",
+      "cusip": "146869102",
+      "value": 6272400,
+      "valueUsd": 6272400000,
+      "shrsOrPrnAmt": 30000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CONFLUENT INC",
+      "titleOfClass": "CLASS A COM",
+      "cusip": "20717M103",
+      "value": 1804880,
+      "valueUsd": 1804880000,
+      "shrsOrPrnAmt": 77000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CRH PLC",
+      "titleOfClass": "ORD",
+      "cusip": "G25508105",
+      "value": 19353400,
+      "valueUsd": 19353400000,
+      "shrsOrPrnAmt": 220000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CURTISS WRIGHT CORP",
+      "titleOfClass": "COM",
+      "cusip": "231561101",
+      "value": 9518100,
+      "valueUsd": 9518100000,
+      "shrsOrPrnAmt": 30000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ENPHASE ENERGY INC",
+      "titleOfClass": "COM",
+      "cusip": "29355A107",
+      "value": 4653750,
+      "valueUsd": 4653750000,
+      "shrsOrPrnAmt": 75000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ENVVENO MEDICAL CORPORATION",
+      "titleOfClass": "COM",
+      "cusip": "29415J106",
+      "value": 2259856,
+      "valueUsd": 2259856000,
+      "shrsOrPrnAmt": 859261,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "EVERUS CONSTR GROUP",
+      "titleOfClass": "COM",
+      "cusip": "300426103",
+      "value": 9272500,
+      "valueUsd": 9272500000,
+      "shrsOrPrnAmt": 250000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "FLEX LTD",
+      "titleOfClass": "ORD",
+      "cusip": "Y2573F102",
+      "value": 8931600,
+      "valueUsd": 8931600000,
+      "shrsOrPrnAmt": 270000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "GE HEALTHCARE TECHNOLOGIES I",
+      "titleOfClass": "COMMON STOCK",
+      "cusip": "36266G107",
+      "value": 7869225,
+      "valueUsd": 7869225000,
+      "shrsOrPrnAmt": 97500,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "GE VERNOVA INC",
+      "titleOfClass": "COM",
+      "cusip": "36828A101",
+      "value": 3052800,
+      "valueUsd": 3052800000,
+      "shrsOrPrnAmt": 10000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "GLAUKOS CORP",
+      "titleOfClass": "COM",
+      "cusip": "377322102",
+      "value": 7322448,
+      "valueUsd": 7322448000,
+      "shrsOrPrnAmt": 74400,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "GLOBUS MED INC",
+      "titleOfClass": "CL A",
+      "cusip": "379577208",
+      "value": 11075160,
+      "valueUsd": 11075160000,
+      "shrsOrPrnAmt": 151300,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "GREAT ELM GROUP INC",
+      "titleOfClass": "COM NEW",
+      "cusip": "39037G109",
+      "value": 2398234,
+      "valueUsd": 2398234000,
+      "shrsOrPrnAmt": 1268907,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "HASBRO INC",
+      "titleOfClass": "COM",
+      "cusip": "418056107",
+      "value": 11129690,
+      "valueUsd": 11129690000,
+      "shrsOrPrnAmt": 181000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "HCI GROUP INC",
+      "titleOfClass": "COM",
+      "cusip": "40416E103",
+      "value": 3880129,
+      "valueUsd": 3880129000,
+      "shrsOrPrnAmt": 26001,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "HEICO CORP NEW",
+      "titleOfClass": "COM",
+      "cusip": "422806109",
+      "value": 12023550,
+      "valueUsd": 12023550000,
+      "shrsOrPrnAmt": 45000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "HUMANA INC",
+      "titleOfClass": "COM",
+      "cusip": "444859102",
+      "value": 11058163,
+      "valueUsd": 11058163000,
+      "shrsOrPrnAmt": 41792,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "IMAX CORP",
+      "titleOfClass": "COM",
+      "cusip": "45245E109",
+      "value": 11844325,
+      "valueUsd": 11844325000,
+      "shrsOrPrnAmt": 449500,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "INSMED INC",
+      "titleOfClass": "COM PAR $.01",
+      "cusip": "457669307",
+      "value": 16402350,
+      "valueUsd": 16402350000,
+      "shrsOrPrnAmt": 215000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "INTERNATIONAL PAPER CO",
+      "titleOfClass": "COM",
+      "cusip": "460146103",
+      "value": 19739500,
+      "valueUsd": 19739500000,
+      "shrsOrPrnAmt": 370000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "INVESCO QQQ TR",
+      "titleOfClass": "UNIT SER 1",
+      "cusip": "46090E103",
+      "value": 65601908,
+      "valueUsd": 65601908000,
+      "shrsOrPrnAmt": 139900,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "JASPER THERAPEUTICS INC",
+      "titleOfClass": "COM NEW",
+      "cusip": "471871202",
+      "value": 2107000,
+      "valueUsd": 2107000000,
+      "shrsOrPrnAmt": 490000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LOAR HOLDINGS INC",
+      "titleOfClass": "COM SHS",
+      "cusip": "53947R105",
+      "value": 7065000,
+      "valueUsd": 7065000000,
+      "shrsOrPrnAmt": 100000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "MAPLEBEAR INC",
+      "titleOfClass": "COM",
+      "cusip": "565394103",
+      "value": 13163700,
+      "valueUsd": 13163700000,
+      "shrsOrPrnAmt": 330000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "MATCH GROUP INC NEW",
+      "titleOfClass": "COM",
+      "cusip": "57667L107",
+      "value": 10920000,
+      "valueUsd": 10920000000,
+      "shrsOrPrnAmt": 350000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "META PLATFORMS INC",
+      "titleOfClass": "CL A",
+      "cusip": "30303M102",
+      "value": 10374480,
+      "valueUsd": 10374480000,
+      "shrsOrPrnAmt": 18000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "MIRION TECHNOLOGIES INC",
+      "titleOfClass": "COM CL A",
+      "cusip": "60471A101",
+      "value": 6525000,
+      "valueUsd": 6525000000,
+      "shrsOrPrnAmt": 450000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "MOLSON COORS BEVERAGE CO",
+      "titleOfClass": "CL B",
+      "cusip": "60871R209",
+      "value": 14620974,
+      "valueUsd": 14620974000,
+      "shrsOrPrnAmt": 240200,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "NEXGEN ENERGY LTD",
+      "titleOfClass": "COM",
+      "cusip": "65340P106",
+      "value": 8431488,
+      "valueUsd": 8431488000,
+      "shrsOrPrnAmt": 1877837,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "NIOCORP DEVS LTD",
+      "titleOfClass": "COM NEW",
+      "cusip": "654484609",
+      "value": 619496,
+      "valueUsd": 619496000,
+      "shrsOrPrnAmt": 314465,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "NVIDIA CORPORATION",
+      "titleOfClass": "COM",
+      "cusip": "67066G104",
+      "value": 16257000,
+      "valueUsd": 16257000000,
+      "shrsOrPrnAmt": 150000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "OKTA INC",
+      "titleOfClass": "CL A",
+      "cusip": "679295105",
+      "value": 5787100,
+      "valueUsd": 5787100000,
+      "shrsOrPrnAmt": 55000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "OPTINOSE INC",
+      "titleOfClass": "COM NEW",
+      "cusip": "68404V209",
+      "value": 3422987,
+      "valueUsd": 3422987000,
+      "shrsOrPrnAmt": 373281,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "PACKAGING CORP AMER",
+      "titleOfClass": "COM",
+      "cusip": "695156109",
+      "value": 9901000,
+      "valueUsd": 9901000000,
+      "shrsOrPrnAmt": 50000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "PPL CORP",
+      "titleOfClass": "COM",
+      "cusip": "69351T106",
+      "value": 12638500,
+      "valueUsd": 12638500000,
+      "shrsOrPrnAmt": 350000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "RADNET INC",
+      "titleOfClass": "COM",
+      "cusip": "750491102",
+      "value": 3828440,
+      "valueUsd": 3828440000,
+      "shrsOrPrnAmt": 77000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "RH",
+      "titleOfClass": "COM",
+      "cusip": "74967X103",
+      "value": 4575449,
+      "valueUsd": 4575449000,
+      "shrsOrPrnAmt": 19519,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ROBINHOOD MKTS INC",
+      "titleOfClass": "COM CL A",
+      "cusip": "770700102",
+      "value": 12486000,
+      "valueUsd": 12486000000,
+      "shrsOrPrnAmt": 300000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "SCPHARMACEUTICALS INC",
+      "titleOfClass": "COM",
+      "cusip": "810648105",
+      "value": 2630000,
+      "valueUsd": 2630000000,
+      "shrsOrPrnAmt": 1000000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "SCYNEXIS INC",
+      "titleOfClass": "COM NEW",
+      "cusip": "811292200",
+      "value": 2129893,
+      "valueUsd": 2129893000,
+      "shrsOrPrnAmt": 2237048,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "SPDR S&P 500 ETF TR",
+      "titleOfClass": "TR UNIT",
+      "cusip": "78462F103",
+      "value": 307664500,
+      "valueUsd": 307664500000,
+      "shrsOrPrnAmt": 550000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "SPDR SER TR",
+      "titleOfClass": "S&P REGL BKG",
+      "cusip": "78464A698",
+      "value": 5685000,
+      "valueUsd": 5685000000,
+      "shrsOrPrnAmt": 100000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "SPDR SER TR",
+      "titleOfClass": "S&P RETAIL ETF",
+      "cusip": "78464A714",
+      "value": 23836050,
+      "valueUsd": 23836050000,
+      "shrsOrPrnAmt": 345000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "STRYKER CORPORATION",
+      "titleOfClass": "COM",
+      "cusip": "863667101",
+      "value": 9901850,
+      "valueUsd": 9901850000,
+      "shrsOrPrnAmt": 26600,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "SUPER MICRO COMPUTER INC",
+      "titleOfClass": "COM NEW",
+      "cusip": "86800U302",
+      "value": 1369600,
+      "valueUsd": 1369600000,
+      "shrsOrPrnAmt": 40000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "SYNDAX PHARMACEUTICALS INC",
+      "titleOfClass": "COM",
+      "cusip": "87164F105",
+      "value": 24570000,
+      "valueUsd": 24570000000,
+      "shrsOrPrnAmt": 2000000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "TAIWAN SEMICONDUCTOR MFG LTD",
+      "titleOfClass": "SPONSORED ADS",
+      "cusip": "874039100",
+      "value": 8715000,
+      "valueUsd": 8715000000,
+      "shrsOrPrnAmt": 52500,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "TANDEM DIABETES CARE INC",
+      "titleOfClass": "COM NEW",
+      "cusip": "875372203",
+      "value": 9488588,
+      "valueUsd": 9488588000,
+      "shrsOrPrnAmt": 495229,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "TENET HEALTHCARE CORP",
+      "titleOfClass": "COM NEW",
+      "cusip": "88033G407",
+      "value": 19166250,
+      "valueUsd": 19166250000,
+      "shrsOrPrnAmt": 142500,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "UNITEDHEALTH GROUP INC",
+      "titleOfClass": "COM",
+      "cusip": "91324P102",
+      "value": 10612223,
+      "valueUsd": 10612223000,
+      "shrsOrPrnAmt": 20262,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "VANECK ETF TRUST",
+      "titleOfClass": "SEMICONDUCTR ETF",
+      "cusip": "92189F676",
+      "value": 13322610,
+      "valueUsd": 13322610000,
+      "shrsOrPrnAmt": 63000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "VISTRA CORP",
+      "titleOfClass": "COM",
+      "cusip": "92840M102",
+      "value": 2936000,
+      "valueUsd": 2936000000,
+      "shrsOrPrnAmt": 25000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "WALMART INC",
+      "titleOfClass": "COM",
+      "cusip": "931142103",
+      "value": 8779000,
+      "valueUsd": 8779000000,
+      "shrsOrPrnAmt": 100000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "WASTE MGMT INC DEL",
+      "titleOfClass": "COM",
+      "cusip": "94106L109",
+      "value": 11575500,
+      "valueUsd": 11575500000,
+      "shrsOrPrnAmt": 50000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "WESTERN DIGITAL CORP",
+      "titleOfClass": "COM",
+      "cusip": "958102105",
+      "value": 6064500,
+      "valueUsd": 6064500000,
+      "shrsOrPrnAmt": 150000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "WNS HLDGS LTD",
+      "titleOfClass": "COM SHS",
+      "cusip": "G98196101",
+      "value": 3996850,
+      "valueUsd": 3996850000,
+      "shrsOrPrnAmt": 65000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "WOLVERINE WORLD WIDE INC",
+      "titleOfClass": "COM",
+      "cusip": "978097103",
+      "value": 8689577,
+      "valueUsd": 8689577000,
+      "shrsOrPrnAmt": 624700,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "X4 PHARMACEUTICALS INC",
+      "titleOfClass": "COM",
+      "cusip": "98420X103",
+      "value": 1654800,
+      "valueUsd": 1654800000,
+      "shrsOrPrnAmt": 7000000,
+      "investmentDiscretion": "DFND"
+    }
+  ]
+}

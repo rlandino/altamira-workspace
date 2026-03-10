@@ -1,0 +1,13 @@
+# Curated 13F filers (one CIK per line; # = comment)
+# Use with: python scripts/ingest-13f.py --cik-list context/13f-filers.txt
+
+# Berkshire Hathaway
+1067983
+# Pershing Square (Bill Ackman)
+1350694
+# Appaloosa (David Tepper)
+1040273
+# Soros Fund Management
+1000097
+# Tiger Global (optional; many holdings)
+1167481

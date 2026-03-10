@@ -1,0 +1,269 @@
+{
+  "name": "Altamira - Weekly Metrics Calculator (P1)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 18,
+              "triggerAtMinute": 0,
+              "triggerAtDay": {
+                "weekdays": [0]
+              }
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Cron: Sunday 6:00 PM ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{$env.GOOGLE_SHEET_ID}}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Daily Dashboard"
+        },
+        "options": {
+          "outputFormatting": true
+        }
+      },
+      "id": "gsheets-read-daily",
+      "name": "Google Sheets: Read Daily Dashboard",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{$env.GOOGLE_SHEET_ID}}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Trade Log"
+        },
+        "options": {
+          "outputFormatting": true
+        }
+      },
+      "id": "gsheets-read-trades",
+      "name": "Google Sheets: Read Trade Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 420],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================\n// Altamira Capital - Weekly Metrics Calculator\n// ============================================================\n// Reads Daily Dashboard and Trade Log data for the past week,\n// calculates weekly and cumulative performance metrics.\n// ============================================================\n\n// -----------------------------------------------------------\n// Collect inputs from both Google Sheets reads\n// -----------------------------------------------------------\nconst allItems = $input.all();\n\n// The items come merged from both branches.\n// We need to separate daily dashboard rows from trade log rows.\n// We'll use the presence of 'Portfolio Value' field to identify dashboard rows\n// and 'Trade ID' field to identify trade log rows.\nconst dailyRows = [];\nconst tradeRows = [];\n\nfor (const item of allItems) {\n  const data = item.json;\n  if (data['Portfolio Value'] !== undefined || data['portfolioValue'] !== undefined) {\n    dailyRows.push(data);\n  }\n  if (data['Trade ID'] !== undefined || data['tradeId'] !== undefined) {\n    tradeRows.push(data);\n  }\n}\n\n// -----------------------------------------------------------\n// Date calculations\n// -----------------------------------------------------------\nconst now = new Date();\nconst weekEnd = new Date(now);\nweekEnd.setDate(now.getDate() - now.getDay()); // Sunday\nconst weekStart = new Date(weekEnd);\nweekStart.setDate(weekEnd.getDate() - 7); // Previous Sunday\n\nconst weekStartStr = weekStart.toISOString().split('T')[0];\nconst weekEndStr = weekEnd.toISOString().split('T')[0];\n\nfunction parseDate(dateStr) {\n  if (!dateStr) return null;\n  const d = new Date(dateStr);\n  return isNaN(d.getTime()) ? null : d;\n}\n\nfunction isInWeek(dateStr) {\n  const d = parseDate(dateStr);\n  if (!d) return false;\n  return d >= weekStart && d <= weekEnd;\n}\n\n// -----------------------------------------------------------\n// Filter this week's daily data\n// -----------------------------------------------------------\nconst thisWeekDaily = dailyRows.filter(row => {\n  const dateField = row['Date'] || row['date'];\n  return isInWeek(dateField);\n});\n\n// -----------------------------------------------------------\n// Filter this week's trades\n// -----------------------------------------------------------\nconst thisWeekTradesOpened = tradeRows.filter(row => {\n  const dateField = row['Date (Entry)'] || row['dateEntry'];\n  return isInWeek(dateField);\n});\n\nconst thisWeekTradesClosed = tradeRows.filter(row => {\n  const dateField = row['Date (Exit)'] || row['dateExit'];\n  return isInWeek(dateField);\n});\n\n// -----------------------------------------------------------\n// Weekly P&L\n// -----------------------------------------------------------\nlet weeklyPnL = 0;\nlet weeklyPnLPercent = 0;\nlet startingPortfolioValue = 100000;\nlet endingPortfolioValue = 100000;\n\nif (thisWeekDaily.length > 0) {\n  // Sort by date\n  thisWeekDaily.sort((a, b) => {\n    const da = new Date(a['Date'] || a['date']);\n    const db = new Date(b['Date'] || b['date']);\n    return da - db;\n  });\n\n  const firstDay = thisWeekDaily[0];\n  const lastDay = thisWeekDaily[thisWeekDaily.length - 1];\n\n  startingPortfolioValue = parseFloat(firstDay['Portfolio Value'] || firstDay['portfolioValue'] || 100000);\n  endingPortfolioValue = parseFloat(lastDay['Portfolio Value'] || lastDay['portfolioValue'] || 100000);\n\n  // If we have previous week data, use the day before the first entry\n  // For now, use the first day's value as start\n  weeklyPnL = endingPortfolioValue - startingPortfolioValue;\n  weeklyPnLPercent = startingPortfolioValue > 0 ? (weeklyPnL / startingPortfolioValue * 100) : 0;\n}\n\n// -----------------------------------------------------------\n// Win Rate (cumulative from all closed trades)\n// -----------------------------------------------------------\nconst allClosedTrades = tradeRows.filter(row => {\n  const exitDate = row['Date (Exit)'] || row['dateExit'];\n  const exitPrice = row['Exit Price'] || row['exitPrice'];\n  return exitDate && exitPrice !== '' && exitPrice !== undefined;\n});\n\nlet totalWins = 0;\nlet totalLosses = 0;\n\nfor (const trade of allClosedTrades) {\n  const rawPnL = parseFloat(trade['Raw P&L'] || trade['rawPnL'] || trade['Adjusted P&L'] || trade['adjustedPnL'] || 0);\n  if (rawPnL > 0) {\n    totalWins++;\n  } else if (rawPnL < 0) {\n    totalLosses++;\n  } else {\n    // Breakeven - count as win\n    totalWins++;\n  }\n}\n\nconst totalClosedCount = totalWins + totalLosses;\nconst winRate = totalClosedCount > 0 ? (totalWins / totalClosedCount * 100) : 0;\n\n// -----------------------------------------------------------\n// Rolling Sharpe Ratio (annualized from weekly returns)\n// -----------------------------------------------------------\n// Calculate weekly returns from all daily dashboard data\nconst RISK_FREE_WEEKLY = 0.000847; // (1 + 0.045)^(1/52) - 1\n\n// Group daily rows by week\nconst weeklyReturns = [];\nconst sortedDaily = [...dailyRows].sort((a, b) => {\n  return new Date(a['Date'] || a['date']) - new Date(b['Date'] || b['date']);\n});\n\n// Simple approach: calculate return for each 5-trading-day block\nlet weekBlocks = [];\nlet currentBlock = [];\nfor (const row of sortedDaily) {\n  currentBlock.push(row);\n  if (currentBlock.length >= 5) {\n    weekBlocks.push([...currentBlock]);\n    currentBlock = [];\n  }\n}\nif (currentBlock.length > 0) weekBlocks.push(currentBlock);\n\nfor (const block of weekBlocks) {\n  if (block.length >= 2) {\n    const startVal = parseFloat(block[0]['Portfolio Value'] || block[0]['portfolioValue'] || 100000);\n    const endVal = parseFloat(block[block.length - 1]['Portfolio Value'] || block[block.length - 1]['portfolioValue'] || 100000);\n    if (startVal > 0) {\n      weeklyReturns.push((endVal - startVal) / startVal);\n    }\n  }\n}\n\nlet rollingSharpe = 'Need 4+ weeks';\nif (weeklyReturns.length >= 4) {\n  const mean = weeklyReturns.reduce((a, b) => a + b, 0) / weeklyReturns.length;\n  const variance = weeklyReturns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / (weeklyReturns.length - 1);\n  const stdDev = Math.sqrt(variance);\n  if (stdDev > 0) {\n    rollingSharpe = ((mean - RISK_FREE_WEEKLY) / stdDev * Math.sqrt(52)).toFixed(2);\n  } else {\n    rollingSharpe = 'N/A (zero variance)';\n  }\n}\n\n// -----------------------------------------------------------\n// Max Drawdown (cumulative)\n// -----------------------------------------------------------\nlet maxDrawdown = 0;\nlet peakValue = 0;\n\nfor (const row of sortedDaily) {\n  const val = parseFloat(row['Portfolio Value'] || row['portfolioValue'] || 100000);\n  if (val > peakValue) peakValue = val;\n  if (peakValue > 0) {\n    const drawdown = (val - peakValue) / peakValue;\n    if (drawdown < maxDrawdown) maxDrawdown = drawdown;\n  }\n}\n\nconst maxDrawdownPercent = (maxDrawdown * 100).toFixed(2);\n\n// -----------------------------------------------------------\n// Rule Compliance (count violations)\n// -----------------------------------------------------------\nconst ruleViolations = tradeRows.filter(row => {\n  const compliance = (row['Rule Compliance'] || row['ruleCompliance'] || 'Yes').toString().toLowerCase();\n  return compliance === 'no' || compliance === 'false';\n}).length;\n\n// -----------------------------------------------------------\n// Weekly trades summary\n// -----------------------------------------------------------\nconst tradesOpenedCount = thisWeekTradesOpened.length;\nconst tradesClosedCount = thisWeekTradesClosed.length;\n\nlet weekWins = 0;\nlet weekLosses = 0;\nfor (const trade of thisWeekTradesClosed) {\n  const pnl = parseFloat(trade['Raw P&L'] || trade['rawPnL'] || trade['Adjusted P&L'] || trade['adjustedPnL'] || 0);\n  if (pnl >= 0) weekWins++;\n  else weekLosses++;\n}\n\n// -----------------------------------------------------------\n// Build output\n// -----------------------------------------------------------\nconst weeklyPassFail = {\n  winRate: winRate >= 60 ? 'PASS' : (winRate > 0 ? 'WATCH' : 'N/A'),\n  sharpe: typeof rollingSharpe === 'number' || !isNaN(parseFloat(rollingSharpe)) ? (parseFloat(rollingSharpe) >= 1.0 ? 'PASS' : 'FAIL') : 'PENDING',\n  maxDrawdown: parseFloat(maxDrawdownPercent) > -10 ? 'PASS' : 'FAIL',\n  weeklyLoss: weeklyPnLPercent >= -3 ? 'PASS' : 'FAIL',\n  ruleCompliance: ruleViolations === 0 ? 'PASS' : 'FAIL'\n};\n\nconst output = {\n  weekOf: weekStartStr,\n  weekEnd: weekEndStr,\n  weeklyPnL: Math.round(weeklyPnL * 100) / 100,\n  weeklyPnLPercent: Math.round(weeklyPnLPercent * 100) / 100,\n  startingValue: Math.round(startingPortfolioValue * 100) / 100,\n  endingValue: Math.round(endingPortfolioValue * 100) / 100,\n  tradesOpened: tradesOpenedCount,\n  tradesClosed: tradesClosedCount,\n  weekWins: weekWins,\n  weekLosses: weekLosses,\n  cumulativeWinRate: Math.round(winRate * 100) / 100,\n  rollingSharpe: rollingSharpe,\n  maxDrawdown: maxDrawdownPercent,\n  ruleViolations: ruleViolations,\n  totalClosedTrades: totalClosedCount,\n  totalWins: totalWins,\n  totalLosses: totalLosses,\n  passFailChecks: weeklyPassFail\n};\n\n// -----------------------------------------------------------\n// Build Telegram message\n// -----------------------------------------------------------\nconst pnlSign = weeklyPnL >= 0 ? '+' : '';\nconst sharpeDisplay = typeof rollingSharpe === 'string' ? rollingSharpe : rollingSharpe;\n\nconst telegramMsg = `ALTAMIRA CAPITAL - Weekly Report\\n` +\n  `Week: ${weekStartStr} to ${weekEndStr}\\n` +\n  `===========================================\\n` +\n  `\\nPERFORMANCE\\n` +\n  `Weekly P&L: ${pnlSign}$${weeklyPnL.toFixed(2)} (${pnlSign}${weeklyPnLPercent.toFixed(2)}%) ${weeklyPassFail.weeklyLoss}\\n` +\n  `Portfolio: $${startingPortfolioValue.toFixed(2)} -> $${endingPortfolioValue.toFixed(2)}\\n` +\n  `\\nTRADES\\n` +\n  `Opened: ${tradesOpenedCount} | Closed: ${tradesClosedCount}\\n` +\n  `This Week: ${weekWins}W / ${weekLosses}L\\n` +\n  `\\nCUMULATIVE METRICS\\n` +\n  `Win Rate: ${winRate.toFixed(1)}% (${totalWins}W/${totalLosses}L of ${totalClosedCount} closed) ${weeklyPassFail.winRate}\\n` +\n  `Rolling Sharpe: ${sharpeDisplay} ${weeklyPassFail.sharpe}\\n` +\n  `Max Drawdown: ${maxDrawdownPercent}% ${weeklyPassFail.maxDrawdown}\\n` +\n  `Rule Violations: ${ruleViolations} ${weeklyPassFail.ruleCompliance}\\n` +\n  `\\n===========================================\\n` +\n  `GO-LIVE SCORECARD\\n` +\n  `Win Rate >= 60%: ${weeklyPassFail.winRate}\\n` +\n  `Sharpe >= 1.0: ${weeklyPassFail.sharpe}\\n` +\n  `Max DD > -10%: ${weeklyPassFail.maxDrawdown}\\n` +\n  `Weekly Loss > -3%: ${weeklyPassFail.weeklyLoss}\\n` +\n  `Rule Compliance 100%: ${weeklyPassFail.ruleCompliance}\\n` +\n  `===========================================`;\n\noutput.telegramMessage = telegramMsg;\n\nreturn [{ json: output }];"
+      },
+      "id": "calculate-weekly",
+      "name": "Calculate Weekly Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [740, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{$env.GOOGLE_SHEET_ID}}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Weekly Summary"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Week Of": "={{ $json.weekOf }}",
+            "Week End": "={{ $json.weekEnd }}",
+            "Weekly P&L ($)": "={{ $json.weeklyPnL }}",
+            "Weekly P&L (%)": "={{ $json.weeklyPnLPercent }}",
+            "Starting Value": "={{ $json.startingValue }}",
+            "Ending Value": "={{ $json.endingValue }}",
+            "Trades Opened": "={{ $json.tradesOpened }}",
+            "Trades Closed": "={{ $json.tradesClosed }}",
+            "Week Wins": "={{ $json.weekWins }}",
+            "Week Losses": "={{ $json.weekLosses }}",
+            "Cumulative Win Rate (%)": "={{ $json.cumulativeWinRate }}",
+            "Rolling Sharpe": "={{ $json.rollingSharpe }}",
+            "Max Drawdown (%)": "={{ $json.maxDrawdown }}",
+            "Rule Violations": "={{ $json.ruleViolations }}",
+            "Total Closed Trades": "={{ $json.totalClosedTrades }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "gsheets-weekly-summary",
+      "name": "Google Sheets: Append Weekly Summary",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1000, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$env.TELEGRAM_CHAT_ID}}",
+        "text": "={{ $json.telegramMessage }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "telegram-weekly",
+      "name": "Telegram: Weekly Report",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1000, 420],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Altamira Capital - Weekly Metrics Calculator (P1)\n\n**Trigger:** Cron every Sunday at 6:00 PM ET\n\n**What this workflow does:**\n1. Reads all rows from 'Daily Dashboard' sheet\n2. Reads all rows from 'Trade Log' sheet\n3. Filters to the past week's data\n4. Calculates:\n   - Weekly P&L ($ and %)\n   - Cumulative win rate\n   - Rolling Sharpe ratio (annualized, risk-free = 4.5%)\n   - Maximum drawdown from peak\n   - Rule compliance count\n5. Appends row to 'Weekly Summary' sheet\n6. Sends formatted weekly report via Telegram with pass/fail against go-live targets\n\n**Go-Live Targets (from Paper Trading Plan):**\n- Win rate: > 60%\n- Sharpe ratio: > 1.0\n- Max drawdown: > -10%\n- No weekly loss > -3%\n- Rule compliance: 100%\n- Duration: >= 4 weeks\n- CSP trades: >= 20\n- Automation uptime: > 95%\n\n**Setup required:**\n- Replace GOOGLE_SHEETS_CREDENTIAL_ID and TELEGRAM_CREDENTIAL_ID\n- Set environment variables: GOOGLE_SHEET_ID, TELEGRAM_CHAT_ID\n- Ensure Google Sheets has 'Daily Dashboard', 'Trade Log', and 'Weekly Summary' tabs\n- Ensure n8n timezone is set to America/New_York",
+        "height": 580,
+        "width": 480,
+        "color": 4
+      },
+      "id": "sticky-note-overview",
+      "name": "Sticky Note: Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [140, -140]
+    },
+    {
+      "parameters": {
+        "content": "## Sharpe Ratio Calculation\n\n**Formula:**\n```\nWeekly Return = (End Value - Start Value) / Start Value\nMean = AVG(weekly returns)\nStdDev = STDEV(weekly returns)\nSharpe = (Mean - RiskFreeWeekly) / StdDev * SQRT(52)\n```\n\n**Risk-Free Rate:**\n- Annual: 4.5%\n- Weekly: (1 + 0.045)^(1/52) - 1 = 0.000847\n\n**Requirements:**\n- Needs 4+ weeks of data to calculate\n- Returns 'Need 4+ weeks' until sufficient data exists\n\n**Max Drawdown:**\n- Peak-to-trough from portfolio high watermark\n- Measured across all daily dashboard entries\n- Updated end-of-day only (no intraday)",
+        "height": 400,
+        "width": 380,
+        "color": 6
+      },
+      "id": "sticky-note-sharpe",
+      "name": "Sticky Note: Sharpe Calculation",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [660, -140]
+    }
+  ],
+  "connections": {
+    "Cron: Sunday 6:00 PM ET": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Read Daily Dashboard",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets: Read Trade Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Read Daily Dashboard": {
+      "main": [
+        [
+          {
+            "node": "Calculate Weekly Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Read Trade Log": {
+      "main": [
+        [
+          {
+            "node": "Calculate Weekly Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Weekly Metrics": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Append Weekly Summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram: Weekly Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Altamira Capital",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    },
+    {
+      "name": "Paper Trading",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    },
+    {
+      "name": "P1",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    }
+  ],
+  "triggerCount": 1,
+  "active": false
+}

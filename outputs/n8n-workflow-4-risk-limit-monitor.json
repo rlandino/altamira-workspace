@@ -1,0 +1,304 @@
+{
+  "name": "Altamira - Risk Limit Monitor (P1)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtMinute": 0
+            },
+            {
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Cron: Every 30 Min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================\n// Market Hours Gate\n// ============================================================\n// Only proceed during market hours: 9:30 AM - 4:00 PM ET, Mon-Fri\n// If outside market hours, stop execution.\n// ============================================================\n\nconst now = new Date();\n\n// Convert to ET (n8n should be set to America/New_York timezone)\nconst hour = now.getHours();\nconst minute = now.getMinutes();\nconst day = now.getDay(); // 0=Sun, 1=Mon, ..., 5=Fri, 6=Sat\n\n// Check if it's a weekday\nif (day === 0 || day === 6) {\n  // Weekend - stop\n  return [];\n}\n\n// Check market hours (9:30 AM to 4:00 PM ET)\nconst timeInMinutes = hour * 60 + minute;\nconst marketOpen = 9 * 60 + 30;  // 9:30 AM\nconst marketClose = 16 * 60;      // 4:00 PM\n\nif (timeInMinutes < marketOpen || timeInMinutes >= marketClose) {\n  // Outside market hours - stop\n  return [];\n}\n\n// Market is open - proceed\nreturn [{ json: { marketOpen: true, timestamp: now.toISOString(), hour, minute, day } }];"
+      },
+      "id": "market-hours-gate",
+      "name": "Market Hours Gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://apisb.etrade.com/v1/accounts/{{ETRADE_ACCOUNT_ID_KEY}}/portfolio",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth1Api",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "etrade-portfolio",
+      "name": "E-Trade: Get Portfolio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 200],
+      "credentials": {
+        "oAuth1Api": {
+          "id": "ETRADE_OAUTH1_CREDENTIAL_ID",
+          "name": "E-Trade OAuth 1.0a Sandbox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://apisb.etrade.com/v1/accounts/{{ETRADE_ACCOUNT_ID_KEY}}/balance?instType=BROKERAGE&realTimeNAV=true",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth1Api",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "etrade-balance",
+      "name": "E-Trade: Get Balance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 420],
+      "credentials": {
+        "oAuth1Api": {
+          "id": "ETRADE_OAUTH1_CREDENTIAL_ID",
+          "name": "E-Trade OAuth 1.0a Sandbox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================\n// Altamira Capital - Risk Limit Monitor\n// ============================================================\n// Checks ALL risk limits from the Risk Management Framework:\n//   1. Single position > 5% of portfolio\n//   2. Any sector > 25% (tech > 35%)\n//   3. Total options allocation > 30% notional\n//   4. Cash reserve < 15%\n//   5. Net delta outside -30 to +50 range (per $100K)\n//   6. Net theta negative\n//   7. Drawdown worse than -5% (Tier 1 trigger)\n// ============================================================\n\nconst allItems = $input.all();\nconst portfolioData = allItems[0]?.json || {};\nconst balanceData = allItems[1]?.json || {};\n\n// -----------------------------------------------------------\n// Configuration\n// -----------------------------------------------------------\nconst STARTING_CAPITAL = 100000;\nconst PORTFOLIO_SCALE = 100000; // Per $100K for Greeks limits\n\nconst SECTOR_MAP = {\n  'AAPL': 'Technology', 'MSFT': 'Technology', 'GOOGL': 'Technology',\n  'AMZN': 'Technology', 'META': 'Technology', 'NVDA': 'Technology',\n  'AVGO': 'Technology', 'V': 'Financial Services', 'MA': 'Financial Services',\n  'COST': 'Consumer Defensive', 'SPY': 'Index'\n};\n\nconst SECTOR_LIMITS = {\n  'Technology': 35,\n  'Financial Services': 25,\n  'Consumer Defensive': 25,\n  'Index': 100, // No limit on index hedging\n  'Unknown': 25\n};\n\n// -----------------------------------------------------------\n// Parse E-Trade Portfolio\n// -----------------------------------------------------------\nconst positions = portfolioData?.PortfolioResponse?.AccountPortfolio?.[0]?.Position || [];\n\nlet netDelta = 0;\nlet netTheta = 0;\nlet totalOptionsNotional = 0;\nlet totalPositionValue = 0;\n\n// Track per-position and per-sector exposure\nconst positionExposures = []; // { ticker, exposure, percent, type }\nconst sectorExposures = {};   // { sector: totalExposure }\n\nfor (const pos of positions) {\n  const ticker = pos.Product?.symbol || pos.symbolDescription || 'UNKNOWN';\n  const cleanTicker = ticker.split(' ')[0].toUpperCase(); // Strip option suffixes\n  const quantity = pos.quantity || 0;\n  const marketValue = Math.abs(pos.marketValue || 0);\n  const sector = SECTOR_MAP[cleanTicker] || 'Unknown';\n\n  totalPositionValue += marketValue;\n\n  if (pos.Product?.securityType === 'OPTN' || pos.Product?.securityType === 'OPT') {\n    // Options position\n    const delta = pos.Complete?.delta || pos.delta || 0;\n    const theta = pos.Complete?.theta || pos.theta || 0;\n    const strikePrice = pos.Product?.strikePrice || pos.strikePrice || 0;\n\n    netDelta += delta * Math.abs(quantity) * 100;\n    netTheta += theta * Math.abs(quantity) * 100;\n\n    // Notional = strike * contracts * 100\n    const notional = strikePrice * Math.abs(quantity) * 100;\n    totalOptionsNotional += notional;\n\n    positionExposures.push({\n      ticker: cleanTicker,\n      exposure: notional,\n      type: 'option',\n      sector: sector\n    });\n\n    // Add to sector exposure\n    sectorExposures[sector] = (sectorExposures[sector] || 0) + notional;\n  } else {\n    // Equity position\n    netDelta += quantity; // 1.0 delta per share\n\n    positionExposures.push({\n      ticker: cleanTicker,\n      exposure: marketValue,\n      type: 'equity',\n      sector: sector\n    });\n\n    sectorExposures[sector] = (sectorExposures[sector] || 0) + marketValue;\n  }\n}\n\n// -----------------------------------------------------------\n// Parse E-Trade Balance\n// -----------------------------------------------------------\nconst balanceComputed = balanceData?.BalanceResponse?.Computed || balanceData?.BalanceResponse || {};\nconst cashAvailable = balanceComputed?.cashAvailableForInvestment\n  || balanceComputed?.cashBalance\n  || balanceComputed?.Cash?.moneyMktBalance\n  || 0;\nconst accountValue = balanceComputed?.RealTimeValues?.totalAccountValue\n  || balanceComputed?.accountBalance\n  || 0;\n\nconst portfolioValue = accountValue || (cashAvailable + totalPositionValue);\n\n// -----------------------------------------------------------\n// Run Risk Checks\n// -----------------------------------------------------------\nconst breaches = [];\n\n// CHECK 1: Any single position > 5% of portfolio?\nfor (const pos of positionExposures) {\n  const percent = portfolioValue > 0 ? (pos.exposure / portfolioValue * 100) : 0;\n  if (percent > 5) {\n    breaches.push({\n      check: 'POSITION SIZE',\n      severity: 'HIGH',\n      message: `${pos.ticker} (${pos.type}) is ${percent.toFixed(1)}% of portfolio (limit: 5%)`,\n      value: percent.toFixed(1) + '%',\n      limit: '5%',\n      action: `Reduce ${pos.ticker} position to bring below 5% of portfolio value`\n    });\n  }\n}\n\n// CHECK 2: Any sector > 25% (tech > 35%)?\nfor (const [sector, exposure] of Object.entries(sectorExposures)) {\n  const percent = portfolioValue > 0 ? (exposure / portfolioValue * 100) : 0;\n  const limit = SECTOR_LIMITS[sector] || 25;\n  if (percent > limit) {\n    breaches.push({\n      check: 'SECTOR CONCENTRATION',\n      severity: 'HIGH',\n      message: `${sector} sector is ${percent.toFixed(1)}% of portfolio (limit: ${limit}%)`,\n      value: percent.toFixed(1) + '%',\n      limit: limit + '%',\n      action: `Reduce ${sector} exposure. Close or trim positions in this sector.`\n    });\n  }\n}\n\n// CHECK 3: Total options allocation > 30% notional?\nconst optionsPercent = portfolioValue > 0 ? (totalOptionsNotional / portfolioValue * 100) : 0;\nif (optionsPercent > 30) {\n  breaches.push({\n    check: 'OPTIONS ALLOCATION',\n    severity: 'HIGH',\n    message: `Total options notional is ${optionsPercent.toFixed(1)}% of portfolio (limit: 30%)`,\n    value: optionsPercent.toFixed(1) + '%',\n    limit: '30%',\n    action: 'Close one or more options positions to bring notional below 30%'\n  });\n}\n\n// CHECK 4: Cash reserve < 15%?\nconst cashPercent = portfolioValue > 0 ? (cashAvailable / portfolioValue * 100) : 0;\nif (cashPercent < 15) {\n  breaches.push({\n    check: 'CASH RESERVE',\n    severity: 'HIGH',\n    message: `Cash reserve is ${cashPercent.toFixed(1)}% (minimum: 15%). Cash: $${cashAvailable.toFixed(2)}`,\n    value: cashPercent.toFixed(1) + '%',\n    limit: '15% minimum',\n    action: 'Do NOT open new positions. Close a position to restore cash above 15%.'\n  });\n}\n\n// CHECK 5: Net delta outside -30 to +50 range (per $100K)?\nconst scaleFactor = portfolioValue / PORTFOLIO_SCALE;\nconst deltaLowerLimit = -30 * scaleFactor;\nconst deltaUpperLimit = 50 * scaleFactor;\n\nif (netDelta < deltaLowerLimit) {\n  breaches.push({\n    check: 'NET DELTA (LOW)',\n    severity: 'MEDIUM',\n    message: `Net delta is ${netDelta.toFixed(1)} (lower limit: ${deltaLowerLimit.toFixed(1)} for $${(portfolioValue/1000).toFixed(0)}K portfolio)`,\n    value: netDelta.toFixed(1),\n    limit: `${deltaLowerLimit.toFixed(1)} to ${deltaUpperLimit.toFixed(1)}`,\n    action: 'Portfolio is too short delta. Consider closing short options or adding long equity exposure.'\n  });\n} else if (netDelta > deltaUpperLimit) {\n  breaches.push({\n    check: 'NET DELTA (HIGH)',\n    severity: 'MEDIUM',\n    message: `Net delta is ${netDelta.toFixed(1)} (upper limit: ${deltaUpperLimit.toFixed(1)} for $${(portfolioValue/1000).toFixed(0)}K portfolio)`,\n    value: netDelta.toFixed(1),\n    limit: `${deltaLowerLimit.toFixed(1)} to ${deltaUpperLimit.toFixed(1)}`,\n    action: 'Portfolio is too long delta. Consider trimming equity positions or adding short delta (CSPs do not help here).'\n  });\n}\n\n// CHECK 6: Net theta negative?\nif (netTheta < 0) {\n  breaches.push({\n    check: 'NET THETA',\n    severity: 'MEDIUM',\n    message: `Net theta is -$${Math.abs(netTheta).toFixed(2)}/day. Theta should be positive for premium selling strategy.`,\n    value: '$' + netTheta.toFixed(2) + '/day',\n    limit: 'Positive (>$0/day)',\n    action: 'Review options positions. Long options (hedges) may be dragging theta negative. Consider adjusting hedge sizing.'\n  });\n}\n\n// CHECK 7: Drawdown worse than -5%? (Tier 1 trigger)\nconst drawdownPercent = portfolioValue > 0 ? ((portfolioValue - STARTING_CAPITAL) / STARTING_CAPITAL * 100) : 0;\n// Note: This uses starting capital as reference. In production, use the high watermark from Daily Dashboard.\nif (drawdownPercent < -5) {\n  let tier = 'Tier 1';\n  let severity = 'HIGH';\n  let action = 'TIER 1 PROTOCOL: Reduce sizing 25%. No new risk for 2 days. Add hedges. Increase cash to 25%.';\n\n  if (drawdownPercent < -15) {\n    tier = 'Tier 3';\n    severity = 'CRITICAL';\n    action = 'TIER 3 - CAPITAL PRESERVATION: Close ALL options. 60% cash. No new positions for 20 trading days. Full strategy review.';\n  } else if (drawdownPercent < -10) {\n    tier = 'Tier 2';\n    severity = 'CRITICAL';\n    action = 'TIER 2 PROTOCOL: Close bottom 50% conviction positions. Reduce sizing 50%. Cash to 40%. No new risk for 5 days.';\n  }\n\n  breaches.push({\n    check: `DRAWDOWN (${tier})`,\n    severity: severity,\n    message: `Portfolio drawdown: ${drawdownPercent.toFixed(1)}% from starting capital. ${tier} triggered.`,\n    value: drawdownPercent.toFixed(1) + '%',\n    limit: '-5% (Tier 1), -10% (Tier 2), -15% (Tier 3)',\n    action: action\n  });\n}\n\n// -----------------------------------------------------------\n// Build output\n// -----------------------------------------------------------\nconst hasBreaches = breaches.length > 0;\nconst hasCritical = breaches.some(b => b.severity === 'CRITICAL');\n\nconst now = new Date();\nconst timestampStr = now.toISOString();\n\nlet telegramMessage = '';\nif (hasBreaches) {\n  const severityIcon = hasCritical ? '\\ud83d\\udea8' : '\\u26a0\\ufe0f';\n  telegramMessage = `${severityIcon} ALTAMIRA CAPITAL - RISK ALERT ${severityIcon}\\n` +\n    `Time: ${timestampStr}\\n` +\n    `Portfolio: $${portfolioValue.toFixed(2)}\\n` +\n    `===========================================\\n\\n`;\n\n  for (const breach of breaches) {\n    telegramMessage += `[${breach.severity}] ${breach.check}\\n` +\n      `  ${breach.message}\\n` +\n      `  ACTION: ${breach.action}\\n\\n`;\n  }\n\n  telegramMessage += `===========================================\\n` +\n    `CURRENT METRICS:\\n` +\n    `  Net Delta: ${netDelta.toFixed(1)}\\n` +\n    `  Net Theta: $${netTheta.toFixed(2)}/day\\n` +\n    `  Cash: $${cashAvailable.toFixed(2)} (${cashPercent.toFixed(1)}%)\\n` +\n    `  Options Notional: ${optionsPercent.toFixed(1)}%\\n` +\n    `  Open Positions: ${positions.length}\\n` +\n    `===========================================\\n` +\n    `Rules are not guidelines. Execute the prescribed action.`;\n}\n\nreturn [{\n  json: {\n    timestamp: timestampStr,\n    portfolioValue: portfolioValue,\n    hasBreaches: hasBreaches,\n    hasCritical: hasCritical,\n    breachCount: breaches.length,\n    breaches: breaches,\n    metrics: {\n      netDelta: Math.round(netDelta * 100) / 100,\n      netTheta: Math.round(netTheta * 100) / 100,\n      cashPercent: Math.round(cashPercent * 100) / 100,\n      optionsPercent: Math.round(optionsPercent * 100) / 100,\n      drawdownPercent: Math.round(drawdownPercent * 100) / 100,\n      positionCount: positions.length\n    },\n    telegramMessage: telegramMessage\n  }\n}];"
+      },
+      "id": "check-risk-limits",
+      "name": "Check All Risk Limits",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [980, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "breach-check",
+              "leftValue": "={{ $json.hasBreaches }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-breaches",
+      "name": "IF: Any Limits Breached?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1220, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{$env.TELEGRAM_CHAT_ID}}",
+        "text": "={{ $json.telegramMessage }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "telegram-risk-alert",
+      "name": "Telegram: Risk Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1460, 200],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot - Altamira"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// No breaches detected - silently complete.\n// This node exists to cleanly terminate the 'no breach' branch.\n// No Telegram message is sent when all limits are within bounds.\nreturn [{ json: { status: 'all_clear', timestamp: new Date().toISOString() } }];"
+      },
+      "id": "no-breach-handler",
+      "name": "All Clear (No Alert)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1460, 420]
+    },
+    {
+      "parameters": {
+        "content": "## Altamira Capital - Risk Limit Monitor (P1)\n\n**Trigger:** Cron every 30 minutes\n**Effective hours:** 9:30 AM - 4:00 PM ET, Monday-Friday only\n(The Market Hours Gate node filters out weekends and outside-hours runs)\n\n**What this workflow does:**\n1. Checks if market is open (skips if not)\n2. Pulls portfolio positions from E-Trade sandbox API\n3. Pulls account balance from E-Trade sandbox API\n4. Checks ALL risk limits from the Risk Management Framework v1.0:\n   - Single position > 5% of portfolio\n   - Sector > 25% (tech > 35%)\n   - Options allocation > 30% notional\n   - Cash reserve < 15%\n   - Net delta outside -30 to +50 range\n   - Net theta negative\n   - Drawdown worse than -5% / -10% / -15% (Tier 1/2/3)\n5. IF any breach: sends Telegram alert with specific details and action\n6. IF no breach: silently completes (no alert spam)\n\n**Setup required:**\n- Replace ETRADE_ACCOUNT_ID_KEY with your E-Trade account ID key\n- Replace ETRADE_OAUTH1_CREDENTIAL_ID with your E-Trade OAuth 1.0a credential\n- Replace TELEGRAM_CREDENTIAL_ID with your Telegram bot credential\n- Set environment variable: TELEGRAM_CHAT_ID\n- Ensure n8n timezone is set to America/New_York\n\n**Rate limit note:** This workflow makes 2 API calls every 30 minutes.\nAt 4 req/sec account data limit, this is well within bounds.\nTotal: ~26 calls/day (13 intervals * 2 calls).",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "sticky-note-overview",
+      "name": "Sticky Note: Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [140, -160]
+    },
+    {
+      "parameters": {
+        "content": "## Risk Limits Reference\n\nFrom the Risk Management Framework v1.0:\n\n**Position Limits:**\n- Single position: 5% max\n- Sector: 25% max (tech: 35%)\n- Options total: 30% notional max\n- Cash reserve: 15% minimum\n\n**Greeks Limits (per $100K):**\n- Net Delta: -30 to +50\n- Net Theta: Must be positive\n\n**Drawdown Tiers:**\n- Tier 1 (-5%): Reduce 25%, no new risk 2 days\n- Tier 2 (-10%): Close 50%, reduce 50%, cash to 40%\n- Tier 3 (-15%): Close all options, 60% cash, halt 20 days\n\n**Severity Levels:**\n- CRITICAL: Drawdown Tier 2+\n- HIGH: Position, sector, cash, options breaches\n- MEDIUM: Delta, theta warnings",
+        "height": 440,
+        "width": 380,
+        "color": 1
+      },
+      "id": "sticky-note-limits",
+      "name": "Sticky Note: Risk Limits",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [700, -160]
+    },
+    {
+      "parameters": {
+        "content": "## Alert Logic\n\n**TRUE branch (breaches detected):**\nSends Telegram alert with:\n- Each breach: severity, check name, current value, limit, recommended action\n- Current portfolio metrics snapshot\n- Reminder: 'Rules are not guidelines'\n\n**FALSE branch (no breaches):**\nSilently completes. No alert sent.\nThis prevents alert fatigue - you only hear from this workflow when something is wrong.\n\n**Alert frequency:** Max 1 alert per 30 minutes. If the same breach persists, you will get repeat alerts every 30 minutes until resolved.",
+        "height": 300,
+        "width": 380,
+        "color": 3
+      },
+      "id": "sticky-note-alerts",
+      "name": "Sticky Note: Alert Logic",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1120, -160]
+    }
+  ],
+  "connections": {
+    "Cron: Every 30 Min": {
+      "main": [
+        [
+          {
+            "node": "Market Hours Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Market Hours Gate": {
+      "main": [
+        [
+          {
+            "node": "E-Trade: Get Portfolio",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "E-Trade: Get Balance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Trade: Get Portfolio": {
+      "main": [
+        [
+          {
+            "node": "Check All Risk Limits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Trade: Get Balance": {
+      "main": [
+        [
+          {
+            "node": "Check All Risk Limits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check All Risk Limits": {
+      "main": [
+        [
+          {
+            "node": "IF: Any Limits Breached?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Any Limits Breached?": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Risk Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "All Clear (No Alert)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Altamira Capital",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    },
+    {
+      "name": "Paper Trading",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    },
+    {
+      "name": "P1",
+      "createdAt": "2026-02-18T00:00:00.000Z",
+      "updatedAt": "2026-02-18T00:00:00.000Z"
+    }
+  ],
+  "triggerCount": 1,
+  "active": false
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "ticker": "AVGO",
+    "rows": [
+      {
+        "month": "2025-11",
+        "date": "2025-11-30",
+        "qty": 606.0,
+        "ticker": "AVGO",
+        "costBasis": null,
+        "marketValue": 73500.0,
+        "monthChgDollar": null,
+        "monthChgPct": null
+      },
+      {
+        "month": "2025-12",
+        "date": "2025-12-31",
+        "qty": 606.0,
+        "ticker": "AVGO",
+        "costBasis": null,
+        "marketValue": 78000.0,
+        "monthChgDollar": 4500.0,
+        "monthChgPct": 6.12
+      },
+      {
+        "month": "2026-01",
+        "date": "2026-01-31",
+        "qty": 606.0,
+        "ticker": "AVGO",
+        "costBasis": null,
+        "marketValue": 190000.0,
+        "monthChgDollar": 112000.0,
+        "monthChgPct": 143.59
+      },
+      {
+        "month": "2026-02",
+        "date": "2026-02-18",
+        "qty": 606.0,
+        "ticker": "AVGO",
+        "costBasis": null,
+        "marketValue": 202107.0,
+        "monthChgDollar": 12107.0,
+        "monthChgPct": 6.37
+      }
+    ]
+  },
+  {
+    "ticker": "SPY",
+    "rows": [
+      {
+        "month": "2025-11",
+        "date": "2025-11-30",
+        "qty": 300.0,
+        "ticker": "SPY",
+        "costBasis": null,
+        "marketValue": 145500.0,
+        "monthChgDollar": null,
+        "monthChgPct": null
+      },
+      {
+        "month": "2025-12",
+        "date": "2025-12-31",
+        "qty": 300.0,
+        "ticker": "SPY",
+        "costBasis": null,
+        "marketValue": 148200.0,
+        "monthChgDollar": 2700.0,
+        "monthChgPct": 1.86
+      },
+      {
+        "month": "2026-01",
+        "date": "2026-01-31",
+        "qty": 300.0,
+        "ticker": "SPY",
+        "costBasis": null,
+        "marketValue": 150900.0,
+        "monthChgDollar": 2700.0,
+        "monthChgPct": 1.82
+      },
+      {
+        "month": "2026-02",
+        "date": "2026-02-18",
+        "qty": 300.0,
+        "ticker": "SPY",
+        "costBasis": null,
+        "marketValue": 205887.0,
+        "monthChgDollar": 54987.0,
+        "monthChgPct": 36.44
+      }
+    ]
+  }
+]

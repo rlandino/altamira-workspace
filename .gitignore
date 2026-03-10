@@ -1,0 +1,39 @@
+# Environment and secrets (never commit API keys)
+.env
+.env.*
+*.env.local
+
+# Cache and temp
+cache/
+temp/
+*.pyc
+__pycache__/
+
+# Large or temporary data files (regenerate from APIs)
+fmp_data.json
+massive_*.json
+temp_*.json
+temp-*.json
+
+# Optional: uncomment if context has sensitive portfolio/account data
+# context/
+
+# OS and IDE
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Python
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node (if any)
+node_modules/
+
+# Nested clones (optional; remove to track as submodules)
+repos/

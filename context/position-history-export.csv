@@ -1,0 +1,9 @@
+Date,Symbol,AssetType,Quantity,MarketValue,WeightPct,Sector,Delta,Theta,Strike,Expiration,CallPut,CostBasis
+2025-11-30,SPY,EQ,300,145500,17.1,Technology,300,0,,,,
+2025-12-31,SPY,EQ,300,148200,17.2,Technology,300,0,,,,
+2026-01-31,SPY,EQ,300,150900,17.3,Technology,300,0,,,,
+2026-02-18,SPY,EQ,300,205887,17.1,Technology,300,0,,,,
+2025-11-30,AVGO,EQ,606,73500,8.6,Semiconductors,606,0,,,,
+2025-12-31,AVGO,EQ,606,78000,8.8,Semiconductors,606,0,,,,
+2026-01-31,AVGO,EQ,606,190000,21.0,Semiconductors,606,0,,,,
+2026-02-18,AVGO,EQ,606,202107,16.7,Semiconductors,606,0,,,,

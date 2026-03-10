@@ -1,0 +1,41 @@
+{
+  "ticker": "GOOGL",
+  "core_four": {
+    "revenue": {
+      "3yr_cagr_pct": 12.52,
+      "latest_yoy_pct": 15.13,
+      "latest_value": 402963000000
+    },
+    "eps": {
+      "3yr_cagr_pct": 30.14,
+      "latest_yoy_pct": 32.01,
+      "latest_value": 10.9087
+    },
+    "fcf_margin": {
+      "3yr_cagr_pct": 13.5,
+      "latest_yoy_pp": 12.76,
+      "latest_value_pct": 63.57
+    },
+    "roic": {
+      "3yr_cagr_pct": 1.22,
+      "latest_yoy_pct": -15.73,
+      "latest_value_pct": 26.22
+    }
+  },
+  "optional": {
+    "operating_margin_pct": 32.05,
+    "operating_margin_yoy_pp": -0.06,
+    "gross_margin_pct": 59.67,
+    "net_income_yoy_pct": 32.01,
+    "net_income_3yr_cagr_pct": 30.14,
+    "fcf_dollar_3yr_cagr_pct": 27.71,
+    "fcf_dollar_yoy_pct": 44.04,
+    "roe_pct": 31.83
+  },
+  "suggested_grade": "A",
+  "rule_of_40": {
+    "score": 47.2,
+    "tier": "Elite"
+  },
+  "revenue_trajectory": "Accelerating"
+}

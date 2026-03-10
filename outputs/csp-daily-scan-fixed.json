@@ -1,0 +1,201 @@
+{
+  "name": "Altamira - CSP Daily Scan (Fixed)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{"triggerAtHour": 10, "triggerAtMinute": 30}]
+        }
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000001",
+      "name": "Cron: 10:30 AM ET Mon-Fri",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [224, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst etString = now.toLocaleString('en-US', { timeZone: 'America/New_York' });\nconst etDate = new Date(etString);\nconst hours = etDate.getHours();\nconst minutes = etDate.getMinutes();\nconst month = etDate.getMonth() + 1;\nconst day = etDate.getDate();\nconst dayOfWeek = etDate.getDay();\nconst year = etDate.getFullYear();\nconst dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;\n\nif (dayOfWeek === 0 || dayOfWeek === 6) {\n  return [];\n}\n\nconst holidays2026 = [\n  '2026-01-01', '2026-01-19', '2026-02-16', '2026-04-03', '2026-05-25',\n  '2026-06-19', '2026-07-03', '2026-09-07', '2026-11-26', '2026-12-25'\n];\n\nif (holidays2026.includes(dateStr)) {\n  return [];\n}\n\nconst timeInMinutes = hours * 60 + minutes;\nconst MARKET_OPEN = 9 * 60 + 30;\nconst MARKET_CLOSE = 16 * 60;\n\nif (timeInMinutes < MARKET_OPEN || timeInMinutes >= MARKET_CLOSE) {\n  return [];\n}\n\nreturn [{\n  json: {\n    marketOpen: true,\n    timestamp: now.toISOString(),\n    etTime: `${hours}:${String(minutes).padStart(2, '0')}`,\n    dateStr: dateStr,\n    scanType: 'CSP_DAILY'\n  }\n}];"
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000002",
+      "name": "Market Hours Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [464, 400]
+    },
+    {
+      "parameters": {
+        "url": "https://financialmodelingprep.com/api/v3/quote/%5EVIX,SPY",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [{"name": "apikey", "value": "=FAAjnYQTvfGg8j7RoPSvHYRVtSKTvJyz"}]
+        },
+        "options": {"timeout": 10000}
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000003",
+      "name": "FMP: VIX & SPY Quote",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [704, 304],
+      "credentials": {"httpQueryAuth": {"id": "epKOfYPygiMS8X2X", "name": "Query Auth account 2"}}
+    },
+    {
+      "parameters": {
+        "url": "https://financialmodelingprep.com/api/v3/quote/AAPL,MSFT,GOOGL,AMZN,AVGO,COST,V,MA,META,NVDA,SPY",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [{"name": "apikey", "value": "=FAAjnYQTvfGg8j7RoPSvHYRVtSKTvJyz"}]
+        },
+        "options": {"timeout": 10000}
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000004",
+      "name": "FMP: Universe Quotes (11 Tickers)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [704, 512],
+      "credentials": {"httpQueryAuth": {"id": "epKOfYPygiMS8X2X", "name": "Query Auth account 2"}}
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "id": "merge-quotes-001",
+      "name": "Merge Quotes",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [880, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// FUNDAMENTAL QUALITY SCREEN (FIXED)\n// ============================================================\n// Receives merged data from both FMP HTTP nodes via Merge node\n// ============================================================\n\nconst allItems = $input.all();\nconst allQuotes = [];\n\nfor (const item of allItems) {\n  const data = item.json;\n  if (Array.isArray(data)) {\n    allQuotes.push(...data);\n  } else if (data && data.symbol) {\n    allQuotes.push(data);\n  }\n}\n\nconst vixArray = [];\nconst quotesArray = [];\n\nfor (const q of allQuotes) {\n  if (!q || !q.symbol) continue;\n  if (q.symbol === '^VIX' || q.symbol === 'VIX') {\n    vixArray.push(q);\n  } else if (q.symbol !== 'SPY') {\n    quotesArray.push(q);\n  }\n}\n\nlet triggerData = null;\ntry {\n  const node = $('Market Hours Check');\n  if (node && node.first()) {\n    triggerData = node.first().json;\n  }\n} catch (e) {}\n\nif (!triggerData || !triggerData.dateStr) {\n  const now = new Date();\n  const etDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));\n  triggerData = {\n    dateStr: `${etDate.getFullYear()}-${String(etDate.getMonth()+1).padStart(2,'0')}-${String(etDate.getDate()).padStart(2,'0')}`,\n    timestamp: now.toISOString()\n  };\n}\n\nconst vixQuote = vixArray.find(q => q.symbol === '^VIX' || q.symbol === 'VIX');\nconst vix = vixQuote ? vixQuote.price : 20;\n\nlet regime, sizingPct;\nif (vix < 15) { regime = 'LOW'; sizingPct = 75; }\nelse if (vix <= 25) { regime = 'NORMAL'; sizingPct = 100; }\nelse if (vix <= 35) { regime = 'ELEVATED'; sizingPct = 50; }\nelse { regime = 'CRISIS'; sizingPct = 25; }\n\nconst SECTORS = {\n  'AAPL': 'Technology', 'MSFT': 'Technology', 'GOOGL': 'Technology',\n  'AMZN': 'Technology', 'AVGO': 'Technology', 'META': 'Technology',\n  'NVDA': 'Technology', 'V': 'Financial', 'MA': 'Financial',\n  'COST': 'Consumer Defensive', 'SPY': 'Index'\n};\n\nconst qualifying = [];\nconst rejected = [];\n\nfor (const q of quotesArray) {\n  const ticker = q.symbol;\n  if (!ticker) continue;\n  \n  const reasons = [];\n\n  if (q.priceAvg50 && q.price < q.priceAvg50) {\n    reasons.push(`Below 50-day SMA ($${q.price.toFixed(2)} < $${q.priceAvg50.toFixed(2)})`);\n  }\n\n  if (q.changesPercentage && q.changesPercentage > 8) {\n    reasons.push(`Overbought today (+${q.changesPercentage.toFixed(1)}%)`);\n  }\n\n  if (!q.volume || q.volume < 100000) {\n    reasons.push(`Low/no volume (${q.volume || 0})`);\n  }\n\n  if (reasons.length === 0) {\n    qualifying.push({\n      ticker, price: q.price, priceAvg50: q.priceAvg50, priceAvg200: q.priceAvg200,\n      changesPercentage: q.changesPercentage, volume: q.volume, avgVolume: q.avgVolume,\n      marketCap: q.marketCap, yearHigh: q.yearHigh, yearLow: q.yearLow,\n      sector: SECTORS[ticker] || 'Unknown'\n    });\n  } else {\n    rejected.push({ ticker, reasons });\n  }\n}\n\nreturn [{\n  json: {\n    qualifying, rejected,\n    qualifyingCount: qualifying.length,\n    rejectedCount: rejected.length,\n    vix, regime, sizingPct,\n    dateStr: triggerData.dateStr,\n    timestamp: triggerData.timestamp\n  }\n}];"
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000005",
+      "name": "Fundamental Quality Screen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1056, 400]
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/api/v3/earning_calendar?from={{ $json.dateStr }}&to={{ new Date(new Date($json.dateStr).getTime() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [{"name": "apikey", "value": "=FAAjnYQTvfGg8j7RoPSvHYRVtSKTvJyz"}]
+        },
+        "options": {"timeout": 10000}
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000006",
+      "name": "FMP: Earnings Calendar (Next 45 Days)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1296, 304],
+      "credentials": {"httpQueryAuth": {"id": "epKOfYPygiMS8X2X", "name": "Query Auth account 2"}}
+    },
+    {
+      "parameters": {
+        "jsCode": "const screenData = $('Fundamental Quality Screen').first().json;\nconst earningsRaw = $('FMP: Earnings Calendar (Next 45 Days)').first().json;\n\nconst earningsArray = Array.isArray(earningsRaw) ? earningsRaw : [];\nconst UNIVERSE = ['AAPL','MSFT','GOOGL','AMZN','AVGO','COST','V','MA','META','NVDA','SPY'];\n\nconst earningsTickers = new Set();\nconst earningsDetails = {};\n\nfor (const e of earningsArray) {\n  if (UNIVERSE.includes(e.symbol)) {\n    earningsTickers.add(e.symbol);\n    earningsDetails[e.symbol] = {\n      date: e.date,\n      epsEstimated: e.epsEstimated,\n      revenueEstimated: e.revenueEstimated\n    };\n  }\n}\n\nconst cleared = [];\nconst earningsExcluded = [];\n\nfor (const q of screenData.qualifying) {\n  if (earningsTickers.has(q.ticker)) {\n    earningsExcluded.push({\n      ticker: q.ticker,\n      earningsDate: earningsDetails[q.ticker].date,\n      reason: `Earnings on ${earningsDetails[q.ticker].date} - within DTE window`\n    });\n  } else {\n    cleared.push(q);\n  }\n}\n\nreturn [{\n  json: {\n    cleared, earningsExcluded,\n    clearedCount: cleared.length,\n    excludedCount: earningsExcluded.length,\n    vix: screenData.vix,\n    regime: screenData.regime,\n    sizingPct: screenData.sizingPct,\n    rejected: screenData.rejected,\n    dateStr: screenData.dateStr,\n    timestamp: screenData.timestamp\n  }\n}];"
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000007",
+      "name": "Filter Earnings Conflicts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1536, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Filter Earnings Conflicts').first().json;\nconst cleared = data.cleared;\n\nif (!cleared || cleared.length === 0) {\n  return [{\n    json: {\n      chains: [], chainCount: 0,\n      vix: data.vix, regime: data.regime, sizingPct: data.sizingPct,\n      earningsExcluded: data.earningsExcluded,\n      rejected: data.rejected,\n      dateStr: data.dateStr, timestamp: data.timestamp\n    }\n  }];\n}\n\nconst FMP_API_KEY = 'FAAjnYQTvfGg8j7RoPSvHYRVtSKTvJyz';\nconst chains = [];\n\nfor (const ticker of cleared) {\n  const strikeMin = Math.floor(ticker.price * 0.85);\n  const strikeMax = Math.ceil(ticker.price * 0.97);\n  let contracts = [];\n  let source = '';\n\n  try {\n    const fmpUrl = `https://financialmodelingprep.com/api/v4/options-chain/${ticker.ticker}?apikey=${FMP_API_KEY}`;\n    const fmpResp = await fetch(fmpUrl, { method: 'GET', signal: AbortSignal.timeout(8000) });\n\n    if (fmpResp.ok) {\n      const fmpData = await fmpResp.json();\n      const filtered = (Array.isArray(fmpData) ? fmpData : []).filter(o => {\n        const isPut = (o.type === 'put' || o.putCall === 'put' || o.side === 'put');\n        const inRange = o.strike >= strikeMin && o.strike <= strikeMax;\n        return isPut && inRange;\n      });\n      contracts = filtered;\n      source = 'fmp';\n    }\n  } catch (err) {\n    source = 'failed';\n  }\n\n  chains.push({\n    ticker: ticker.ticker, price: ticker.price, sector: ticker.sector,\n    priceAvg50: ticker.priceAvg50, yearHigh: ticker.yearHigh, yearLow: ticker.yearLow,\n    contracts, contractCount: contracts.length, source\n  });\n}\n\nreturn [{\n  json: {\n    chains, chainCount: chains.length,\n    vix: data.vix, regime: data.regime, sizingPct: data.sizingPct,\n    earningsExcluded: data.earningsExcluded, rejected: data.rejected,\n    dateStr: data.dateStr, timestamp: data.timestamp\n  }\n}];"
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000008",
+      "name": "Fetch Options Chains",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1808, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Fetch Options Chains').first().json;\nconst chains = data.chains || [];\nconst PORTFOLIO_VALUE = 100000;\nconst MAX_POSITION_PCT = 0.05;\nconst MAX_SECTOR_POSITIONS = 3;\nconst MAX_SECTOR_EXPOSURE_PCT = 0.25;\nconst today = new Date();\n\nfunction normalizeContract(c) {\n  return {\n    strike: c.strike || c.strikePrice,\n    bid: c.bid || c.bidPrice || 0,\n    ask: c.ask || c.askPrice || 0,\n    delta: c.delta || null,\n    iv: c.impliedVolatility || c.iv || null,\n    openInterest: c.openInterest || 0,\n    volume: c.volume || 0,\n    expiration: c.expiration || c.expirationDate,\n    dte: c.dte || c.daysToExpiration || null\n  };\n}\n\nfunction calcDTE(exp) {\n  if (!exp) return null;\n  return Math.ceil((new Date(exp).getTime() - today.getTime()) / (1000*60*60*24));\n}\n\nconst allOpportunities = [];\n\nfor (const chain of chains) {\n  if (!chain.contracts || chain.contracts.length === 0) continue;\n\n  for (const raw of chain.contracts) {\n    const c = normalizeContract(raw);\n    const dte = c.dte || calcDTE(c.expiration);\n    if (!dte || dte < 30 || dte > 45) continue;\n    const absDelta = Math.abs(c.delta || 0);\n    if (absDelta < 0.20 || absDelta > 0.30) continue;\n    if (!c.bid || c.bid <= 0 || (c.openInterest || 0) < 10) continue;\n\n    const premium = c.bid;\n    const strike = c.strike;\n    const annualizedReturn = (premium / strike) * (365 / dte) * 100;\n    const collateralPerContract = strike * 100;\n    const maxAllocation = PORTFOLIO_VALUE * MAX_POSITION_PCT * (data.sizingPct / 100);\n    const maxContracts = Math.floor(maxAllocation / collateralPerContract);\n    if (maxContracts < 1) continue;\n\n    let ivRankProxy = c.iv ? Math.min(100, Math.max(0, ((c.iv - 0.15) / 0.35) * 100)) : 50;\n    if (ivRankProxy < 30) continue;\n\n    const returnScore = Math.min(100, Math.max(0, (annualizedReturn - 8) / 32 * 100));\n    const liquidityScore = Math.min(100, (c.openInterest / 1000 + c.volume / 100) * 25);\n    let trendScore = chain.yearHigh ? Math.min(100, (chain.price / chain.yearHigh) * 100) : 70;\n    const compositeScore = returnScore * 0.40 + ivRankProxy * 0.30 + liquidityScore * 0.20 + trendScore * 0.10;\n\n    allOpportunities.push({\n      ticker: chain.ticker, sector: chain.sector, currentPrice: chain.price,\n      strike, expiration: c.expiration, dte, bid: premium, ask: c.ask,\n      delta: c.delta, absDelta, iv: c.iv, ivRankProxy: Math.round(ivRankProxy),\n      openInterest: c.openInterest, volume: c.volume,\n      annualizedReturn: Math.round(annualizedReturn * 100) / 100,\n      breakeven: Math.round((strike - premium) * 100) / 100,\n      maxLossPerContract: Math.round((strike - premium) * 100),\n      collateralPerContract: Math.round(collateralPerContract),\n      maxContracts, totalPremium: Math.round(premium * maxContracts * 100),\n      totalCollateral: Math.round(collateralPerContract * maxContracts),\n      compositeScore: Math.round(compositeScore * 100) / 100,\n      returnScore: Math.round(returnScore * 100) / 100,\n      ivScore: Math.round(ivRankProxy * 100) / 100,\n      liquidityScore: Math.round(liquidityScore * 100) / 100,\n      trendScore: Math.round(trendScore * 100) / 100,\n      profitTarget: Math.round(premium * 0.50 * 100) / 100,\n      stopLoss: Math.round(premium * 2.00 * 100) / 100,\n      source: chain.source\n    });\n  }\n}\n\nallOpportunities.sort((a, b) => b.compositeScore - a.compositeScore);\n\nconst sectorCount = {};\nconst sectorExposure = {};\nconst top3 = [];\nconst sectorWarnings = [];\n\nfor (const opp of allOpportunities) {\n  if (top3.length >= 3) break;\n  const sector = opp.sector;\n  const cnt = sectorCount[sector] || 0;\n  const exp = sectorExposure[sector] || 0;\n  const posExp = opp.totalCollateral / PORTFOLIO_VALUE;\n\n  if (cnt >= MAX_SECTOR_POSITIONS) {\n    sectorWarnings.push(`${opp.ticker}: Skipped - ${sector} has ${MAX_SECTOR_POSITIONS} positions`);\n    continue;\n  }\n  if (exp + posExp > MAX_SECTOR_EXPOSURE_PCT) {\n    sectorWarnings.push(`${opp.ticker}: Skipped - ${sector} would exceed 25%`);\n    continue;\n  }\n\n  sectorCount[sector] = cnt + 1;\n  sectorExposure[sector] = exp + posExp;\n  opp.rank = top3.length + 1;\n  top3.push(opp);\n}\n\nconst totalCollateralDeployed = top3.reduce((s, o) => s + o.totalCollateral, 0);\nconst cashAfterTrades = PORTFOLIO_VALUE - totalCollateralDeployed;\n\nreturn [{\n  json: {\n    top3, totalScanned: allOpportunities.length,\n    sectorCount, sectorExposure, sectorWarnings,\n    totalCollateralDeployed,\n    totalPremiumCollected: top3.reduce((s, o) => s + o.totalPremium, 0),\n    cashAfterTrades,\n    cashPct: Math.round((cashAfterTrades / PORTFOLIO_VALUE) * 100),\n    vix: data.vix, regime: data.regime, sizingPct: data.sizingPct,\n    earningsExcluded: data.earningsExcluded || [],\n    rejected: data.rejected || [],\n    dateStr: data.dateStr,\n    portfolioValue: PORTFOLIO_VALUE\n  }\n}];"
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000009",
+      "name": "CSP Opportunity Scorer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2064, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('CSP Opportunity Scorer').first().json;\nconst top3 = data.top3 || [];\n\nif (top3.length === 0) {\n  const msg = [\n    `📊 CSP DAILY SCAN — ${data.dateStr}`,\n    `VIX: ${data.vix.toFixed(1)} (${data.regime}) | Sizing: ${data.sizingPct}%`,\n    '', '⚠️ No qualifying CSP opportunities today.', '',\n    `Scanned: ${data.totalScanned || 0} contracts`\n  ];\n  if (data.earningsExcluded?.length > 0) {\n    msg.push('', 'Earnings exclusions:');\n    data.earningsExcluded.forEach(e => msg.push(`  • ${e.ticker}: ${e.earningsDate}`));\n  }\n  if (data.rejected?.length > 0) {\n    msg.push('', 'Quality screen rejections:');\n    data.rejected.forEach(r => msg.push(`  • ${r.ticker}: ${r.reasons.join(', ')}`));\n  }\n  return [{ json: { text: msg.join('\\n'), hasOpportunities: false } }];\n}\n\nconst medals = ['🥇', '🥈', '🥉'];\nconst lines = [\n  `📊 CSP DAILY SCAN — ${data.dateStr}`,\n  `VIX: ${data.vix.toFixed(1)} (${data.regime}) | Sizing: ${data.sizingPct}%`,\n  `Scanned: ${data.totalScanned} contracts`, ''\n];\n\ntop3.forEach((o, i) => {\n  lines.push(`${medals[i]} #${i+1} ${o.ticker} $${o.strike}P ${o.expiration}`);\n  lines.push(`  Credit: $${o.bid.toFixed(2)} | Delta: ${o.delta?.toFixed(3) || 'N/A'} | DTE: ${o.dte}`);\n  lines.push(`  Annual Return: ${o.annualizedReturn}% | Breakeven: $${o.breakeven}`);\n  lines.push(`  Score: ${o.compositeScore} | Contracts: ${o.maxContracts} | Collateral: $${o.totalCollateral.toLocaleString()}`);\n  lines.push('');\n});\n\nlines.push('⚠️ Risk Checks:');\nif (data.sectorExposure) {\n  Object.entries(data.sectorExposure).forEach(([s, e]) => lines.push(`  • ${s}: ${(e*100).toFixed(1)}%`));\n}\nlines.push(`  • Total collateral: $${data.totalCollateralDeployed.toLocaleString()} (${((data.totalCollateralDeployed/data.portfolioValue)*100).toFixed(1)}%)`);\nlines.push(`  • Cash after: $${data.cashAfterTrades.toLocaleString()} (${data.cashPct}%)`);\nlines.push('', 'Use /paper-trade to log a trade.');\n\nreturn [{ json: { text: lines.join('\\n'), hasOpportunities: true, top3, dateStr: data.dateStr } }];"
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000010",
+      "name": "Format Telegram Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2320, 400]
+    },
+    {
+      "parameters": {
+        "chatId": "=7830722515",
+        "text": "={{ $json.text }}",
+        "additionalFields": {"disable_web_page_preview": true}
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000011",
+      "name": "Send Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [2560, 304],
+      "webhookId": "70b172ba-a8a9-4fbd-b16f-f25f8efaedec",
+      "credentials": {"telegramApi": {"id": "iLwlr9jw1FkihoNl", "name": "Telegram Bot - Market Commenter"}}
+    },
+    {
+      "parameters": {
+        "jsCode": "const alertData = $('Format Telegram Alert').first().json;\nconst scorerData = $('CSP Opportunity Scorer').first().json;\nconst top3 = scorerData.top3 || [];\n\nreturn [{ json: {\n  Date: scorerData.dateStr, VIX: scorerData.vix, Regime: scorerData.regime,\n  'Sizing%': scorerData.sizingPct,\n  Ticker1: top3[0]?.ticker||'', Strike1: top3[0]?.strike||'', Expiry1: top3[0]?.expiration||'',\n  Premium1: top3[0]?.bid||'', Delta1: top3[0]?.delta||'', AnnReturn1: top3[0]?.annualizedReturn||'',\n  Score1: top3[0]?.compositeScore||'',\n  Ticker2: top3[1]?.ticker||'', Strike2: top3[1]?.strike||'', Premium2: top3[1]?.bid||'',\n  Ticker3: top3[2]?.ticker||'', Strike3: top3[2]?.strike||'', Premium3: top3[2]?.bid||'',\n  TotalCollateral: scorerData.totalCollateralDeployed||0,\n  'Cash%': scorerData.cashPct||100,\n  ContractsScanned: scorerData.totalScanned||0,\n  Notes: alertData.hasOpportunities ? `${top3.length} opportunities` : 'No opportunities'\n}}];"
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000012",
+      "name": "Prepare Sheets Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2560, 512]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {"__rl": true, "mode": "id", "value": "=1qewriwBq_66vW2P15GGbXsn_vO5Ei-wcFoHOdLcQAEA"},
+        "sheetName": {"__rl": true, "value": 1446158866, "mode": "list", "cachedResultName": "CSP"},
+        "columns": {"mappingMode": "autoMapInputData"},
+        "options": {}
+      },
+      "id": "a1b2c3d4-1111-4aaa-b111-000000000013",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2800, 512],
+      "credentials": {"googleSheetsOAuth2Api": {"id": "0CoxBS0drGLlM7yb", "name": "Google Sheets account 4"}}
+    }
+  ],
+  "connections": {
+    "Cron: 10:30 AM ET Mon-Fri": {"main": [[{"node": "Market Hours Check", "type": "main", "index": 0}]]},
+    "Market Hours Check": {"main": [[{"node": "FMP: VIX & SPY Quote", "type": "main", "index": 0}, {"node": "FMP: Universe Quotes (11 Tickers)", "type": "main", "index": 0}]]},
+    "FMP: VIX & SPY Quote": {"main": [[{"node": "Merge Quotes", "type": "main", "index": 0}]]},
+    "FMP: Universe Quotes (11 Tickers)": {"main": [[{"node": "Merge Quotes", "type": "main", "index": 1}]]},
+    "Merge Quotes": {"main": [[{"node": "Fundamental Quality Screen", "type": "main", "index": 0}]]},
+    "Fundamental Quality Screen": {"main": [[{"node": "FMP: Earnings Calendar (Next 45 Days)", "type": "main", "index": 0}]]},
+    "FMP: Earnings Calendar (Next 45 Days)": {"main": [[{"node": "Filter Earnings Conflicts", "type": "main", "index": 0}]]},
+    "Filter Earnings Conflicts": {"main": [[{"node": "Fetch Options Chains", "type": "main", "index": 0}]]},
+    "Fetch Options Chains": {"main": [[{"node": "CSP Opportunity Scorer", "type": "main", "index": 0}]]},
+    "CSP Opportunity Scorer": {"main": [[{"node": "Format Telegram Alert", "type": "main", "index": 0}]]},
+    "Format Telegram Alert": {"main": [[{"node": "Send Telegram Alert", "type": "main", "index": 0}, {"node": "Prepare Sheets Row", "type": "main", "index": 0}]]},
+    "Prepare Sheets Row": {"main": [[{"node": "Log to Google Sheets", "type": "main", "index": 0}]]}
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveManualExecutions": true
+  }
+}

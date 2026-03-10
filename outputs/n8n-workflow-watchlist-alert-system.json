@@ -1,0 +1,381 @@
+{
+  "name": "Altamira - Watchlist Alert System (P0)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 * * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 15 Min (Mon-Fri)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Market Hours Check - 9:30 AM to 4:00 PM ET\n// Also skip if no alerts needed (outside trading window)\n\nconst now = new Date();\n\n// Convert to ET\nconst etString = now.toLocaleString('en-US', { timeZone: 'America/New_York' });\nconst etDate = new Date(etString);\nconst hours = etDate.getHours();\nconst minutes = etDate.getMinutes();\nconst timeInMinutes = hours * 60 + minutes;\n\n// Market hours: 9:30 AM (570 min) to 4:00 PM (960 min)\nconst MARKET_OPEN = 9 * 60 + 30;  // 570\nconst MARKET_CLOSE = 16 * 60;      // 960\n\nconst isMarketHours = timeInMinutes >= MARKET_OPEN && timeInMinutes < MARKET_CLOSE;\n\nif (!isMarketHours) {\n  // Return empty to signal no processing needed\n  return [];\n}\n\n// Market is open - pass through with timestamp\nreturn [{\n  json: {\n    marketOpen: true,\n    timestamp: etDate.toISOString(),\n    etTime: `${hours}:${String(minutes).padStart(2, '0')}`,\n    checkType: (hours === 9 && minutes === 30) ? 'first_of_day' : 'intraday'\n  }\n}];"
+      },
+      "id": "market-hours-check",
+      "name": "Market Hours Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://financialmodelingprep.com/api/v3/quote/AAPL,MSFT,GOOGL,AMZN,AVGO,COST,V,MA,META,NVDA,SPY",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $credentials.httpQueryAuth.value }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "retry": {
+            "maxTries": 2,
+            "retryInterval": 5000
+          }
+        }
+      },
+      "id": "fmp-batch-quote",
+      "name": "FMP Batch Quote (11 Tickers)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 300],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "FMP_API_CREDENTIAL_ID",
+          "name": "FMP API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://financialmodelingprep.com/api/v3/earning_calendar?from={{ $now.format('yyyy-MM-dd') }}&to={{ $now.plus(7, 'days').format('yyyy-MM-dd') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $credentials.httpQueryAuth.value }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "fmp-earnings-calendar",
+      "name": "FMP Earnings Calendar (Next 7 Days)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 520],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "FMP_API_CREDENTIAL_ID",
+          "name": "FMP API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// WATCHLIST ALERT ENGINE\n// =============================================================\n// Processes batch quotes + earnings calendar.\n// Compares current state against previous state (static data).\n// Generates alerts for:\n//   1. 50-day & 200-day SMA crosses\n//   2. Intraday price move > +/-2%\n//   3. Volume spike > 2x 20-day average\n//   4. 52-week high/low proximity (within 1%)\n//   5. Round number crosses\n//   6. Earnings within 5 trading days\n// Deduplicates alerts with a 2-hour cooldown.\n// =============================================================\n\nconst UNIVERSE = ['AAPL','MSFT','GOOGL','AMZN','AVGO','COST','V','MA','META','NVDA','SPY'];\nconst COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 hours\n\n// ---- Inputs ----\nconst quotes = $('FMP Batch Quote (11 Tickers)').first().json;\nconst earningsRaw = $('FMP Earnings Calendar (Next 7 Days)').first().json;\nconst triggerData = $('Market Hours Check').first().json;\n\n// quotes from FMP come as an array\nconst quotesArray = Array.isArray(quotes) ? quotes : [quotes];\n\n// Earnings calendar - filter to our universe\nconst earningsArray = Array.isArray(earningsRaw) ? earningsRaw : [];\nconst universeEarnings = earningsArray.filter(e => UNIVERSE.includes(e.symbol));\n\n// ---- Load previous state from static data ----\nconst staticData = $getWorkflowStaticData('global');\nconst prevState = staticData.watchlistState || {};\nconst alertLog = staticData.alertLog || {};\n\n// ---- Helper functions ----\nfunction crossedAbove(prevPrice, currPrice, level) {\n  if (!prevPrice || !level) return false;\n  return prevPrice < level && currPrice >= level;\n}\n\nfunction crossedBelow(prevPrice, currPrice, level) {\n  if (!prevPrice || !level) return false;\n  return prevPrice > level && currPrice <= level;\n}\n\nfunction getRoundLevels(price) {\n  const levels = [];\n  let interval;\n  if (price < 50) interval = 5;\n  else if (price < 200) interval = 10;\n  else if (price < 500) interval = 25;\n  else if (price < 1000) interval = 50;\n  else interval = 100;\n\n  // Get the round levels near current price\n  const base = Math.floor(price / interval) * interval;\n  levels.push(base);\n  levels.push(base + interval);\n  if (base - interval > 0) levels.push(base - interval);\n  return levels;\n}\n\nfunction isOnCooldown(ticker, alertType) {\n  const key = `${ticker}_${alertType}`;\n  const lastSent = alertLog[key];\n  if (!lastSent) return false;\n  return (Date.now() - lastSent) < COOLDOWN_MS;\n}\n\nfunction recordAlert(ticker, alertType) {\n  const key = `${ticker}_${alertType}`;\n  alertLog[key] = Date.now();\n}\n\nfunction formatNumber(num) {\n  if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';\n  if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';\n  if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';\n  return num.toString();\n}\n\n// ---- Process each ticker ----\nconst alerts = [];\nconst newState = {};\n\nfor (const q of quotesArray) {\n  const ticker = q.symbol;\n  if (!UNIVERSE.includes(ticker)) continue;\n\n  const prev = prevState[ticker] || {};\n  const currPrice = q.price;\n  const prevPrice = prev.price;\n\n  // Save current state\n  newState[ticker] = {\n    price: currPrice,\n    volume: q.volume,\n    priceAvg50: q.priceAvg50,\n    priceAvg200: q.priceAvg200,\n    yearHigh: q.yearHigh,\n    yearLow: q.yearLow,\n    avgVolume: q.avgVolume,\n    timestamp: Date.now()\n  };\n\n  // --- 1. 50-day SMA Cross ---\n  if (q.priceAvg50) {\n    if (crossedAbove(prevPrice, currPrice, q.priceAvg50) && !isOnCooldown(ticker, 'MA50_CROSS_UP')) {\n      alerts.push({\n        ticker,\n        type: 'SMA CROSS (Bullish)',\n        icon: '\\u2B06',\n        detail: `Price $${currPrice.toFixed(2)} crossed ABOVE 50-day SMA ($${q.priceAvg50.toFixed(2)})`,\n        action: 'Momentum signal ACTIVE -- eligible for CSP and long position entry',\n        price: currPrice,\n        level: q.priceAvg50,\n        priority: 'HIGH'\n      });\n      recordAlert(ticker, 'MA50_CROSS_UP');\n    }\n    if (crossedBelow(prevPrice, currPrice, q.priceAvg50) && !isOnCooldown(ticker, 'MA50_CROSS_DOWN')) {\n      alerts.push({\n        ticker,\n        type: 'SMA CROSS (Bearish)',\n        icon: '\\u2B07',\n        detail: `Price $${currPrice.toFixed(2)} crossed BELOW 50-day SMA ($${q.priceAvg50.toFixed(2)})`,\n        action: 'Momentum signal LOST -- reduce or avoid new long exposure',\n        price: currPrice,\n        level: q.priceAvg50,\n        priority: 'HIGH'\n      });\n      recordAlert(ticker, 'MA50_CROSS_DOWN');\n    }\n  }\n\n  // --- 200-day SMA Cross ---\n  if (q.priceAvg200) {\n    if (crossedAbove(prevPrice, currPrice, q.priceAvg200) && !isOnCooldown(ticker, 'MA200_CROSS_UP')) {\n      alerts.push({\n        ticker,\n        type: '200-DAY SMA CROSS (Bullish)',\n        icon: '\\u2B06\\u2B06',\n        detail: `Price $${currPrice.toFixed(2)} crossed ABOVE 200-day SMA ($${q.priceAvg200.toFixed(2)})`,\n        action: 'Major trend signal -- long-term bullish. Review for position building.',\n        price: currPrice,\n        level: q.priceAvg200,\n        priority: 'HIGH'\n      });\n      recordAlert(ticker, 'MA200_CROSS_UP');\n    }\n    if (crossedBelow(prevPrice, currPrice, q.priceAvg200) && !isOnCooldown(ticker, 'MA200_CROSS_DOWN')) {\n      alerts.push({\n        ticker,\n        type: '200-DAY SMA CROSS (Bearish)',\n        icon: '\\u2B07\\u2B07',\n        detail: `Price $${currPrice.toFixed(2)} crossed BELOW 200-day SMA ($${q.priceAvg200.toFixed(2)})`,\n        action: 'Major trend break -- avoid new long exposure. Consider hedging.',\n        price: currPrice,\n        level: q.priceAvg200,\n        priority: 'HIGH'\n      });\n      recordAlert(ticker, 'MA200_CROSS_DOWN');\n    }\n  }\n\n  // --- 2. Intraday Move > +/-2% ---\n  const intradayChangePct = q.changesPercentage;\n  if (Math.abs(intradayChangePct) >= 2 && !isOnCooldown(ticker, 'BIG_MOVE')) {\n    const direction = intradayChangePct > 0 ? 'UP' : 'DOWN';\n    alerts.push({\n      ticker,\n      type: `BIG MOVE ${direction}`,\n      icon: intradayChangePct > 0 ? '\\u{1F7E2}' : '\\u{1F534}',\n      detail: `Intraday move: ${intradayChangePct > 0 ? '+' : ''}${intradayChangePct.toFixed(2)}% ($${currPrice.toFixed(2)})`,\n      action: direction === 'DOWN'\n        ? 'Unusual weakness -- check for news. Potential CSP entry if fundamentals intact.'\n        : 'Unusual strength -- check for news. Avoid chasing; wait for pullback.',\n      price: currPrice,\n      changePct: intradayChangePct,\n      priority: Math.abs(intradayChangePct) >= 5 ? 'HIGH' : 'MEDIUM'\n    });\n    recordAlert(ticker, 'BIG_MOVE');\n  }\n\n  // --- 3. Volume Spike > 2x Average ---\n  if (q.volume && q.avgVolume && q.avgVolume > 0) {\n    const volRatio = q.volume / q.avgVolume;\n    if (volRatio >= 2 && !isOnCooldown(ticker, 'VOLUME_SPIKE')) {\n      alerts.push({\n        ticker,\n        type: 'VOLUME SPIKE',\n        icon: '\\u{1F4CA}',\n        detail: `Volume: ${formatNumber(q.volume)} (${volRatio.toFixed(1)}x avg ${formatNumber(q.avgVolume)})`,\n        action: 'Possible institutional activity -- monitor for direction confirmation.',\n        price: currPrice,\n        volume: q.volume,\n        avgVolume: q.avgVolume,\n        volRatio: volRatio,\n        priority: 'MEDIUM'\n      });\n      recordAlert(ticker, 'VOLUME_SPIKE');\n    }\n  }\n\n  // --- 4. 52-Week High/Low Proximity ---\n  if (q.yearHigh && currPrice >= q.yearHigh * 0.99 && !isOnCooldown(ticker, '52W_HIGH')) {\n    alerts.push({\n      ticker,\n      type: '52-WEEK HIGH',\n      icon: '\\u{1F451}',\n      detail: `Price $${currPrice.toFixed(2)} within 1% of 52-week high ($${q.yearHigh.toFixed(2)})`,\n      action: 'At resistance -- watch for breakout or reversal. Tighten stops on longs.',\n      price: currPrice,\n      level: q.yearHigh,\n      priority: 'MEDIUM'\n    });\n    recordAlert(ticker, '52W_HIGH');\n  }\n\n  if (q.yearLow && currPrice <= q.yearLow * 1.01 && !isOnCooldown(ticker, '52W_LOW')) {\n    alerts.push({\n      ticker,\n      type: '52-WEEK LOW',\n      icon: '\\u26A0',\n      detail: `Price $${currPrice.toFixed(2)} within 1% of 52-week low ($${q.yearLow.toFixed(2)})`,\n      action: 'At support -- potential CSP opportunity if thesis intact. High risk zone.',\n      price: currPrice,\n      level: q.yearLow,\n      priority: 'HIGH'\n    });\n    recordAlert(ticker, '52W_LOW');\n  }\n\n  // --- 5. Round Number Crosses ---\n  if (prevPrice) {\n    const roundLevels = getRoundLevels(currPrice);\n    for (const level of roundLevels) {\n      if (crossedAbove(prevPrice, currPrice, level) && !isOnCooldown(ticker, `ROUND_${level}`)) {\n        alerts.push({\n          ticker,\n          type: 'ROUND NUMBER CROSS',\n          icon: '\\u{1F4B0}',\n          detail: `Price crossed above $${level}`,\n          action: `Psychological level $${level} -- watch for momentum continuation.`,\n          price: currPrice,\n          level: level,\n          priority: 'LOW'\n        });\n        recordAlert(ticker, `ROUND_${level}`);\n      }\n      if (crossedBelow(prevPrice, currPrice, level) && !isOnCooldown(ticker, `ROUND_${level}`)) {\n        alerts.push({\n          ticker,\n          type: 'ROUND NUMBER BREAK',\n          icon: '\\u{1F4B0}',\n          detail: `Price broke below $${level}`,\n          action: `Lost $${level} support -- watch for follow-through selling.`,\n          price: currPrice,\n          level: level,\n          priority: 'LOW'\n        });\n        recordAlert(ticker, `ROUND_${level}`);\n      }\n    }\n  }\n}\n\n// --- 6. Earnings Proximity (within 5 trading days) ---\nconst today = new Date();\nfor (const earning of universeEarnings) {\n  const earningsDate = new Date(earning.date);\n  const diffDays = Math.ceil((earningsDate - today) / (1000 * 60 * 60 * 24));\n  if (diffDays > 0 && diffDays <= 7 && !isOnCooldown(earning.symbol, 'EARNINGS_PROXIMITY')) {\n    alerts.push({\n      ticker: earning.symbol,\n      type: 'EARNINGS APPROACHING',\n      icon: '\\u{1F4C5}',\n      detail: `Earnings on ${earning.date} (${diffDays} day${diffDays > 1 ? 's' : ''} away)`,\n      action: 'Review open options positions. Close or roll CSPs expiring near earnings. Do NOT sell new options through earnings unless planned.',\n      price: (newState[earning.symbol] || {}).price,\n      earningsDate: earning.date,\n      daysAway: diffDays,\n      priority: diffDays <= 2 ? 'HIGH' : 'MEDIUM'\n    });\n    recordAlert(earning.symbol, 'EARNINGS_PROXIMITY');\n  }\n}\n\n// --- Save state ---\nstaticData.watchlistState = newState;\nstaticData.alertLog = alertLog;\n\n// --- Filter out LOW priority round-number alerts if there are too many ---\nlet finalAlerts = alerts;\nif (finalAlerts.length > 10) {\n  finalAlerts = finalAlerts.filter(a => a.priority !== 'LOW');\n}\n\n// --- Return alerts ---\nif (finalAlerts.length === 0) {\n  return [{ json: { noAlerts: true, timestamp: triggerData.etTime } }];\n}\n\nreturn finalAlerts.map(a => ({ json: a }));"
+      },
+      "id": "alert-engine",
+      "name": "Alert Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "alert-check",
+              "leftValue": "={{ $json.noAlerts }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notTrue"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-alerts-exist",
+      "name": "Alerts Triggered?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1100, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// FORMAT TELEGRAM MESSAGE\n// =============================================================\n// Groups alerts by ticker, formats for Telegram readability.\n// Uses Telegram MarkdownV2 formatting.\n// =============================================================\n\nconst items = $input.all();\nconst alerts = items.map(i => i.json);\n\n// Group alerts by ticker\nconst grouped = {};\nfor (const alert of alerts) {\n  if (!grouped[alert.ticker]) grouped[alert.ticker] = [];\n  grouped[alert.ticker].push(alert);\n}\n\n// Build timestamp\nconst now = new Date();\nconst etString = now.toLocaleString('en-US', { timeZone: 'America/New_York' });\n\nlet message = `WATCHLIST ALERT -- ${etString}\\n`;\nmessage += `${'='.repeat(40)}\\n\\n`;\n\nfor (const [ticker, tickerAlerts] of Object.entries(grouped)) {\n  for (const alert of tickerAlerts) {\n    message += `${alert.ticker} -- ${alert.type}\\n`;\n    message += `${alert.detail}\\n`;\n    if (alert.price) {\n      message += `Price: $${alert.price.toFixed(2)}`;\n      if (alert.changePct) message += ` (${alert.changePct > 0 ? '+' : ''}${alert.changePct.toFixed(2)}%)`;\n      message += `\\n`;\n    }\n    message += `Action: ${alert.action}\\n`;\n    message += `\\n`;\n  }\n}\n\nmessage += `---\\nAltamira Capital | Watchlist Monitor`;\n\n// Ensure message is under Telegram 4096 char limit\nif (message.length > 4000) {\n  message = message.substring(0, 3950) + '\\n\\n... (truncated, too many alerts)';\n}\n\nreturn [{\n  json: {\n    message,\n    alertCount: alerts.length,\n    tickers: Object.keys(grouped),\n    timestamp: etString\n  }\n}];"
+      },
+      "id": "format-telegram",
+      "name": "Format Telegram Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "TELEGRAM_CHAT_ID",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "disable_notification": false
+        }
+      },
+      "id": "telegram-send",
+      "name": "Send Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1540, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// FORMAT GOOGLE SHEETS ROWS\n// =============================================================\n// Converts each alert into a row for the Watchlist Alerts sheet.\n// =============================================================\n\nconst items = $('Alert Engine').all();\nconst alerts = items.filter(i => !i.json.noAlerts);\n\nif (alerts.length === 0) return [];\n\nconst now = new Date();\nconst etString = now.toLocaleString('en-US', { timeZone: 'America/New_York' });\nconst dateStr = now.toISOString().split('T')[0];\n\nreturn alerts.map(item => {\n  const a = item.json;\n  return {\n    json: {\n      Date: dateStr,\n      Time: etString.split(', ')[1] || etString,\n      Ticker: a.ticker,\n      'Alert Type': a.type,\n      Price: a.price ? `$${a.price.toFixed(2)}` : '',\n      Level: a.level ? `$${a.level}` : '',\n      Detail: a.detail,\n      Action: a.action,\n      Priority: a.priority\n    }\n  };\n});"
+      },
+      "id": "format-sheets-rows",
+      "name": "Format Sheets Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 500]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Watchlist Alerts"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "google-sheets-log",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1540, 500],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Watchlist Alert System (P0)\n\n**Trigger:** Every 15 minutes, Mon-Fri\n**Active window:** 9:30 AM - 4:00 PM ET only\n\n**Monitors:**\n- 50-day & 200-day SMA crosses\n- Intraday moves > +/-2%\n- Volume spikes > 2x average\n- 52-week high/low proximity\n- Round number crosses\n- Earnings within 5 trading days\n\n**Deduplication:** 2-hour cooldown per ticker/alert type\n\n**Universe:** AAPL, MSFT, GOOGL, AMZN, AVGO, COST, V, MA, META, NVDA, SPY",
+        "width": 350,
+        "height": 380
+      },
+      "id": "sticky-overview",
+      "name": "Workflow Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [180, -120]
+    },
+    {
+      "parameters": {
+        "content": "## API Calls\n\n- **FMP Batch Quote:** 1 call per execution (~26/day)\n- **FMP Earnings Calendar:** 1 call per execution (~26/day, but could be cached)\n- **Total:** ~52 FMP calls/day\n\n## Credentials Required\n- FMP API Key (httpQueryAuth)\n- Telegram Bot API\n- Google Sheets OAuth2\n\n## Setup\n1. Replace `FMP_API_CREDENTIAL_ID` with your FMP credential ID\n2. Replace `TELEGRAM_CREDENTIAL_ID` and `TELEGRAM_CHAT_ID`\n3. Replace `GOOGLE_SHEETS_CREDENTIAL_ID` and `GOOGLE_SHEET_ID`\n4. Create \"Watchlist Alerts\" tab in your Google Sheet with columns:\n   Date, Time, Ticker, Alert Type, Price, Level, Detail, Action, Priority",
+        "width": 420,
+        "height": 350
+      },
+      "id": "sticky-setup",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [580, -120]
+    },
+    {
+      "parameters": {
+        "content": "## Alert Logic\n\nThe Alert Engine Code node uses n8n **static data** to persist state between executions:\n\n- `watchlistState` — previous prices for cross detection\n- `alertLog` — timestamps of sent alerts for deduplication (2hr cooldown)\n\nFirst execution after deploy will NOT generate cross alerts (no previous state). This is expected — state builds after one execution cycle.\n\nIf static data gets corrupted, it auto-recovers on next execution (resets to empty).",
+        "width": 350,
+        "height": 260
+      },
+      "id": "sticky-alert-logic",
+      "name": "Alert Logic Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [840, -120]
+    },
+    {
+      "parameters": {
+        "content": "## No Alerts Path\n\nWhen no alerts are triggered, the workflow ends silently.\nNo Telegram message, no Sheets write.\nState is still saved for next execution.",
+        "width": 280,
+        "height": 150
+      },
+      "id": "sticky-no-alerts",
+      "name": "No Alerts Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1100, 560]
+    }
+  ],
+  "connections": {
+    "Every 15 Min (Mon-Fri)": {
+      "main": [
+        [
+          {
+            "node": "Market Hours Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Market Hours Check": {
+      "main": [
+        [
+          {
+            "node": "FMP Batch Quote (11 Tickers)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FMP Earnings Calendar (Next 7 Days)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FMP Batch Quote (11 Tickers)": {
+      "main": [
+        [
+          {
+            "node": "Alert Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FMP Earnings Calendar (Next 7 Days)": {
+      "main": [
+        [
+          {
+            "node": "Alert Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Engine": {
+      "main": [
+        [
+          {
+            "node": "Alerts Triggered?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alerts Triggered?": {
+      "main": [
+        [
+          {
+            "node": "Format Telegram Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Format Sheets Rows",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Format Telegram Message": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Sheets Rows": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "",
+    "timezone": "America/New_York"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Altamira",
+      "id": "altamira-tag"
+    },
+    {
+      "name": "Market Monitoring",
+      "id": "monitoring-tag"
+    },
+    {
+      "name": "P0",
+      "id": "p0-tag"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-18T00:00:00.000Z",
+  "versionId": "1"
+}

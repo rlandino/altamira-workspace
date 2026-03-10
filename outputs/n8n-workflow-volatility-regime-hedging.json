@@ -1,0 +1,518 @@
+{
+  "name": "Altamira - Volatility Regime & Hedging Trigger (P0)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/30 * * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 30 Min (Mon-Fri)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Market Hours Check - 9:30 AM to 4:00 PM ET\n// Returns market status + whether this is the 4:00 PM close execution\n\nconst now = new Date();\nconst etString = now.toLocaleString('en-US', { timeZone: 'America/New_York' });\nconst etDate = new Date(etString);\nconst hours = etDate.getHours();\nconst minutes = etDate.getMinutes();\nconst timeInMinutes = hours * 60 + minutes;\n\n// Market hours: 9:30 AM (570 min) to 4:00 PM (960 min)\nconst MARKET_OPEN = 9 * 60 + 30;  // 570\nconst MARKET_CLOSE = 16 * 60;      // 960\n\nconst isMarketHours = timeInMinutes >= MARKET_OPEN && timeInMinutes <= MARKET_CLOSE;\n\nif (!isMarketHours) {\n  return [];\n}\n\n// Check if this is the close execution (3:30-4:00 PM window)\nconst isCloseExecution = (hours === 15 && minutes >= 30) || hours === 16;\n\nreturn [{\n  json: {\n    marketOpen: true,\n    isCloseExecution,\n    timestamp: etDate.toISOString(),\n    etTime: `${hours}:${String(minutes).padStart(2, '0')}`,\n    dateStr: now.toISOString().split('T')[0]\n  }\n}];"
+      },
+      "id": "market-hours-check",
+      "name": "Market Hours Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://financialmodelingprep.com/api/v3/quote/VIXY",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $credentials.httpQueryAuth.value }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "retry": {
+            "maxTries": 2,
+            "retryInterval": 5000
+          }
+        }
+      },
+      "id": "fmp-vix-quote",
+      "name": "FMP VIX Quote (VIXY Proxy)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 200],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "FMP_API_CREDENTIAL_ID",
+          "name": "FMP API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://financialmodelingprep.com/api/v3/quote/%5EVIX",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $credentials.httpQueryAuth.value }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "retry": {
+            "maxTries": 2,
+            "retryInterval": 5000
+          }
+        }
+      },
+      "id": "fmp-vix-index",
+      "name": "FMP VIX Index (^VIX)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 380],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "FMP_API_CREDENTIAL_ID",
+          "name": "FMP API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://financialmodelingprep.com/api/v3/historical-price-full/VIXY?timeseries=50",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $credentials.httpQueryAuth.value }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "fmp-vix-historical",
+      "name": "FMP VIX Historical (50 Days)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 560],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "FMP_API_CREDENTIAL_ID",
+          "name": "FMP API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// VOLATILITY REGIME ENGINE\n// =============================================================\n// Classifies the current volatility regime based on VIX level.\n// Detects regime CHANGES by comparing to stored previous regime.\n// Generates hedging triggers when thresholds are crossed.\n// Calculates 20-day and 50-day VIX averages for context.\n//\n// Regime Classification:\n//   VIX < 15       -> LOW_COMPLACENT\n//   VIX 15-25      -> NORMAL\n//   VIX 25-35      -> ELEVATED\n//   VIX > 35       -> CRISIS\n//\n// Hedging Triggers:\n//   VIX < 18       -> Cheap protection available\n//   VIX crosses 25 -> Reduce position sizes 25%\n//   VIX crosses 35 -> Crisis mode, halt new positions\n//   VIX drops < 20 from above -> Vol normalizing, resume\n// =============================================================\n\n// ---- Gather inputs ----\nconst triggerData = $('Market Hours Check').first().json;\n\n// Try ^VIX first, fall back to VIXY proxy\nlet vixData;\ntry {\n  const vixIndex = $('FMP VIX Index (^VIX)').first().json;\n  const vixArray = Array.isArray(vixIndex) ? vixIndex : [vixIndex];\n  vixData = vixArray[0];\n} catch (e) {\n  // Fallback to VIXY proxy\n  const vixyData = $('FMP VIX Quote (VIXY Proxy)').first().json;\n  const vixyArray = Array.isArray(vixyData) ? vixyData : [vixyData];\n  vixData = vixyArray[0];\n}\n\nif (!vixData || !vixData.price) {\n  return [{ json: { error: true, message: 'Could not fetch VIX data' } }];\n}\n\n// Historical data for averages\nlet historicalData = [];\ntry {\n  const histRaw = $('FMP VIX Historical (50 Days)').first().json;\n  if (histRaw && histRaw.historical) {\n    historicalData = histRaw.historical;\n  } else if (Array.isArray(histRaw)) {\n    historicalData = histRaw;\n  }\n} catch (e) {\n  // Continue without historical data\n}\n\n// ---- Load previous state ----\nconst staticData = $getWorkflowStaticData('global');\nconst prevState = staticData.volRegimeState || {\n  vixLevel: null,\n  regime: null,\n  termStructure: null,\n  lastRegimeChange: null,\n  lastNotifiedTriggers: {}\n};\n\n// ---- Current VIX values ----\nconst vixPrice = vixData.price;\nconst vixChange = vixData.change || 0;\nconst vixChangePct = vixData.changesPercentage || 0;\nconst vixDayHigh = vixData.dayHigh || vixPrice;\nconst vixDayLow = vixData.dayLow || vixPrice;\nconst vixPrevClose = vixData.previousClose || vixPrice;\n\n// ---- Calculate averages from historical data ----\nlet vix20DayAvg = null;\nlet vix50DayAvg = null;\nlet vix5DayTrend = [];\n\nif (historicalData.length >= 20) {\n  const last20 = historicalData.slice(0, 20);\n  vix20DayAvg = last20.reduce((sum, d) => sum + d.close, 0) / 20;\n}\nif (historicalData.length >= 50) {\n  const last50 = historicalData.slice(0, 50);\n  vix50DayAvg = last50.reduce((sum, d) => sum + d.close, 0) / 50;\n}\nif (historicalData.length >= 5) {\n  vix5DayTrend = historicalData.slice(0, 5).map(d => ({\n    date: d.date,\n    close: d.close\n  })).reverse();\n}\n\n// ---- Regime Classification ----\nfunction classifyRegime(vix) {\n  if (vix < 15) return 'LOW_COMPLACENT';\n  if (vix <= 25) return 'NORMAL';\n  if (vix <= 35) return 'ELEVATED';\n  return 'CRISIS';\n}\n\nfunction getRegimeLabel(regime) {\n  const labels = {\n    'LOW_COMPLACENT': 'LOW / COMPLACENT',\n    'NORMAL': 'NORMAL',\n    'ELEVATED': 'ELEVATED',\n    'CRISIS': 'CRISIS'\n  };\n  return labels[regime] || regime;\n}\n\nfunction getSizingGuidance(regime) {\n  const guidance = {\n    'LOW_COMPLACENT': 'Standard sizing. INCREASE hedging -- protection is cheap. Consider SPY put spreads.',\n    'NORMAL': 'Standard sizing applies. Normal hedging posture.',\n    'ELEVATED': 'Reduce new position sizes by 25%. Premium selling more attractive but size conservatively. Review all open positions for delta exposure.',\n    'CRISIS': 'Reduce position sizes by 50%. Capital preservation mode. HALT new positions until regime normalizes. Consider closing short premium at a loss rather than risking assignment.'\n  };\n  return guidance[regime] || 'Review positioning.';\n}\n\nconst currentRegime = classifyRegime(vixPrice);\nconst prevRegime = prevState.regime;\nconst regimeChanged = prevRegime && currentRegime !== prevRegime;\n\n// ---- Trigger Detection ----\nconst triggers = [];\nconst prevVix = prevState.vixLevel;\nconst TRIGGER_COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 hours between same trigger\n\nfunction triggerOnCooldown(triggerType) {\n  const lastNotified = (prevState.lastNotifiedTriggers || {})[triggerType];\n  if (!lastNotified) return false;\n  return (Date.now() - lastNotified) < TRIGGER_COOLDOWN_MS;\n}\n\n// Regime change trigger\nif (regimeChanged) {\n  triggers.push({\n    type: 'REGIME_CHANGE',\n    priority: currentRegime === 'CRISIS' ? 'CRITICAL' : 'HIGH',\n    from: getRegimeLabel(prevRegime),\n    to: getRegimeLabel(currentRegime),\n    detail: `Volatility regime changed from ${getRegimeLabel(prevRegime)} to ${getRegimeLabel(currentRegime)}`\n  });\n}\n\n// VIX crosses above 25\nif (prevVix && prevVix <= 25 && vixPrice > 25 && !triggerOnCooldown('VIX_ABOVE_25')) {\n  triggers.push({\n    type: 'VIX_ABOVE_25',\n    priority: 'HIGH',\n    detail: 'VIX crossed ABOVE 25 -- elevated volatility',\n    action: 'Reduce new position sizes by 25%. Review open short premium positions.'\n  });\n}\n\n// VIX crosses above 35\nif (prevVix && prevVix <= 35 && vixPrice > 35 && !triggerOnCooldown('VIX_ABOVE_35')) {\n  triggers.push({\n    type: 'VIX_ABOVE_35',\n    priority: 'CRITICAL',\n    detail: 'VIX crossed ABOVE 35 -- CRISIS LEVEL',\n    action: 'HALT all new positions. Reduce existing positions by 50%. Capital preservation mode. Consider closing short premium at a loss rather than risking assignment.'\n  });\n}\n\n// VIX drops below 15 (complacency)\nif (prevVix && prevVix >= 15 && vixPrice < 15 && !triggerOnCooldown('VIX_BELOW_15')) {\n  triggers.push({\n    type: 'VIX_BELOW_15',\n    priority: 'MEDIUM',\n    detail: 'VIX dropped BELOW 15 -- low volatility / complacency',\n    action: 'Protection is CHEAP. Consider adding SPY put spread hedge. Standard position sizing.'\n  });\n}\n\n// VIX drops below 18 (cheap protection)\nif (prevVix && prevVix >= 18 && vixPrice < 18 && !triggerOnCooldown('VIX_BELOW_18')) {\n  triggers.push({\n    type: 'VIX_BELOW_18',\n    priority: 'MEDIUM',\n    detail: 'VIX dropped BELOW 18 -- cheap protection available',\n    action: 'Favorable time to add portfolio hedges. Consider SPY put spread for downside protection.'\n  });\n}\n\n// VIX drops below 20 from above (normalizing)\nif (prevVix && prevVix >= 20 && vixPrice < 20 && !triggerOnCooldown('VIX_NORMALIZING')) {\n  triggers.push({\n    type: 'VIX_NORMALIZING',\n    priority: 'MEDIUM',\n    detail: 'VIX dropped BELOW 20 from above -- volatility normalizing',\n    action: 'Resume standard position sizing. Vol environment returning to normal.'\n  });\n}\n\n// VIX rate of change > 20% in a day\nif (Math.abs(vixChangePct) > 20 && !triggerOnCooldown('VIX_ROC_20')) {\n  triggers.push({\n    type: 'VIX_ROC_20',\n    priority: 'HIGH',\n    detail: `VIX moved ${vixChangePct > 0 ? '+' : ''}${vixChangePct.toFixed(1)}% today -- rapid change`,\n    action: vixChangePct > 0\n      ? 'Volatility spiking rapidly. Review all positions. Consider reducing delta exposure.'\n      : 'Volatility dropping rapidly. Caution -- rapid drops can reverse. Wait for stabilization.'\n  });\n}\n\n// VIX rate of change > 30% in a day (extreme)\nif (Math.abs(vixChangePct) > 30 && !triggerOnCooldown('VIX_ROC_30')) {\n  triggers.push({\n    type: 'VIX_ROC_30',\n    priority: 'CRITICAL',\n    detail: `EMERGENCY: VIX moved ${vixChangePct > 0 ? '+' : ''}${vixChangePct.toFixed(1)}% today`,\n    action: 'EXTREME vol move. Review ALL positions immediately. No new trades until further notice.'\n  });\n}\n\n// ---- Update trigger cooldowns ----\nconst notifiedTriggers = { ...(prevState.lastNotifiedTriggers || {}) };\nfor (const t of triggers) {\n  notifiedTriggers[t.type] = Date.now();\n}\n\n// ---- Calculate regime duration ----\nlet regimeDuration = 'Unknown';\nif (regimeChanged) {\n  regimeDuration = 'Just started';\n} else if (prevState.lastRegimeChange) {\n  const durationMs = Date.now() - prevState.lastRegimeChange;\n  const durationHours = Math.floor(durationMs / (1000 * 60 * 60));\n  const durationDays = Math.floor(durationHours / 24);\n  if (durationDays > 0) {\n    regimeDuration = `${durationDays} day${durationDays > 1 ? 's' : ''}`;\n  } else {\n    regimeDuration = `${durationHours} hour${durationHours !== 1 ? 's' : ''}`;\n  }\n}\n\n// ---- Save updated state ----\nstaticData.volRegimeState = {\n  vixLevel: vixPrice,\n  regime: currentRegime,\n  termStructure: null, // updated if Massive.com data available\n  lastRegimeChange: regimeChanged ? Date.now() : (prevState.lastRegimeChange || Date.now()),\n  lastNotifiedTriggers: notifiedTriggers,\n  lastUpdate: Date.now()\n};\n\n// ---- Build output ----\nreturn [{\n  json: {\n    vixPrice,\n    vixChange,\n    vixChangePct,\n    vixDayHigh,\n    vixDayLow,\n    vixPrevClose,\n    vix20DayAvg: vix20DayAvg ? parseFloat(vix20DayAvg.toFixed(2)) : null,\n    vix50DayAvg: vix50DayAvg ? parseFloat(vix50DayAvg.toFixed(2)) : null,\n    vix5DayTrend,\n    currentRegime,\n    currentRegimeLabel: getRegimeLabel(currentRegime),\n    prevRegime: prevRegime ? getRegimeLabel(prevRegime) : 'N/A (first run)',\n    prevVixLevel: prevVix,\n    regimeChanged,\n    regimeDuration,\n    sizingGuidance: getSizingGuidance(currentRegime),\n    triggers,\n    hasTriggers: triggers.length > 0,\n    isCloseExecution: triggerData.isCloseExecution,\n    timestamp: triggerData.etTime,\n    dateStr: triggerData.dateStr\n  }\n}];"
+      },
+      "id": "vol-regime-engine",
+      "name": "Volatility Regime Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 380]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "trigger-check",
+              "leftValue": "={{ $json.hasTriggers }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-triggers",
+      "name": "Triggers Fired?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1100, 280]
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// FORMAT TRIGGER ALERT FOR TELEGRAM\n// =============================================================\n// Formats regime change and hedging trigger alerts.\n// =============================================================\n\nconst data = $input.first().json;\nconst triggers = data.triggers;\n\nif (!triggers || triggers.length === 0) {\n  return [{ json: { message: '', skip: true } }];\n}\n\n// Determine highest priority\nconst priorityOrder = { 'CRITICAL': 0, 'HIGH': 1, 'MEDIUM': 2, 'LOW': 3 };\nconst maxPriority = triggers.reduce((max, t) =>\n  (priorityOrder[t.priority] || 3) < (priorityOrder[max] || 3) ? t.priority : max,\n  'LOW'\n);\n\nlet message = '';\n\n// Header\nif (data.regimeChanged) {\n  message += `VOL REGIME CHANGE -- ${data.timestamp} ET\\n`;\n  message += `${'='.repeat(40)}\\n\\n`;\n  message += `Previous: ${data.prevRegime} (VIX ${data.prevVixLevel ? data.prevVixLevel.toFixed(1) : 'N/A'})\\n`;\n  message += `Current: ${data.currentRegimeLabel} (VIX ${data.vixPrice.toFixed(1)})\\n\\n`;\n} else {\n  message += `VOL REGIME ALERT -- ${maxPriority}\\n`;\n  message += `${'='.repeat(40)}\\n\\n`;\n}\n\n// Triggers\nif (triggers.length > 0) {\n  message += `ACTIONS REQUIRED:\\n`;\n  for (const trigger of triggers) {\n    message += `\\n[${trigger.priority}] ${trigger.detail}\\n`;\n    if (trigger.action) {\n      message += `-> ${trigger.action}\\n`;\n    }\n  }\n  message += `\\n`;\n}\n\n// Context\nmessage += `---\\n`;\nmessage += `VIX: ${data.vixPrice.toFixed(2)} (${data.vixChangePct >= 0 ? '+' : ''}${data.vixChangePct.toFixed(1)}% today)\\n`;\nmessage += `Regime: ${data.currentRegimeLabel}\\n`;\nif (data.vix20DayAvg) message += `VIX 20-day avg: ${data.vix20DayAvg}\\n`;\nif (data.vix50DayAvg) message += `VIX 50-day avg: ${data.vix50DayAvg}\\n`;\nmessage += `Regime duration: ${data.regimeDuration}\\n`;\nmessage += `\\n---\\nAltamira Capital | Vol Regime Monitor`;\n\nreturn [{ json: { message, priority: maxPriority } }];"
+      },
+      "id": "format-trigger-alert",
+      "name": "Format Trigger Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 180]
+    },
+    {
+      "parameters": {
+        "chatId": "TELEGRAM_CHAT_ID",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "disable_notification": false
+        }
+      },
+      "id": "telegram-trigger-alert",
+      "name": "Telegram: Trigger Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1540, 180],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "close-check",
+              "leftValue": "={{ $('Volatility Regime Engine').item.json.isCloseExecution }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-close-execution",
+      "name": "End of Day (4 PM)?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1100, 520]
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// FORMAT DAILY VOL SUMMARY FOR TELEGRAM\n// =============================================================\n// End-of-day summary sent at 4:00 PM ET.\n// =============================================================\n\nconst data = $('Volatility Regime Engine').first().json;\n\nlet message = `VOL REGIME DAILY SUMMARY -- ${data.dateStr}\\n`;\nmessage += `${'='.repeat(40)}\\n\\n`;\n\nmessage += `VIX Close:        ${data.vixPrice.toFixed(2)}  (${data.vixChangePct >= 0 ? '+' : ''}${data.vixChangePct.toFixed(1)}% today)\\n`;\nmessage += `VIX Regime:       ${data.currentRegimeLabel}\\n`;\nif (data.vix20DayAvg) message += `VIX 20-day avg:   ${data.vix20DayAvg}\\n`;\nif (data.vix50DayAvg) message += `VIX 50-day avg:   ${data.vix50DayAvg}\\n`;\nmessage += `Day Range:        ${data.vixDayLow.toFixed(2)} - ${data.vixDayHigh.toFixed(2)}\\n`;\nmessage += `Regime Duration:  ${data.regimeDuration}\\n\\n`;\n\n// Today's trigger count\nconst triggerCount = data.triggers ? data.triggers.length : 0;\nmessage += `Today's Triggers:  ${triggerCount}${triggerCount === 0 ? ' (quiet session)' : ''}\\n`;\nif (triggerCount > 0) {\n  for (const t of data.triggers) {\n    message += `  - ${t.detail}\\n`;\n  }\n}\nmessage += `\\n`;\n\nmessage += `Sizing Guidance:   ${data.sizingGuidance}\\n\\n`;\n\n// 5-day VIX trend\nif (data.vix5DayTrend && data.vix5DayTrend.length > 0) {\n  message += `5-Day VIX Trend:\\n`;\n  for (const day of data.vix5DayTrend) {\n    message += `  ${day.date}: ${day.close.toFixed(2)}\\n`;\n  }\n  message += `  Today:  ${data.vixPrice.toFixed(2)}`;\n\n  // Add trend direction\n  if (data.vix5DayTrend.length > 0) {\n    const firstDay = data.vix5DayTrend[0].close;\n    if (data.vixPrice > firstDay * 1.05) {\n      message += `   <-- trending higher, watch for thresholds`;\n    } else if (data.vixPrice < firstDay * 0.95) {\n      message += `   <-- trending lower, protection getting cheaper`;\n    } else {\n      message += `   <-- stable range`;\n    }\n  }\n  message += `\\n`;\n}\n\nmessage += `\\n---\\nAltamira Capital | Vol Regime Monitor (Daily Summary)`;\n\nreturn [{ json: { message, dateStr: data.dateStr } }];"
+      },
+      "id": "format-daily-summary",
+      "name": "Format Daily Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 420]
+    },
+    {
+      "parameters": {
+        "chatId": "TELEGRAM_CHAT_ID",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "disable_notification": true
+        }
+      },
+      "id": "telegram-daily-summary",
+      "name": "Telegram: Daily Summary",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1540, 420],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// FORMAT GOOGLE SHEETS ROW\n// =============================================================\n// Logs vol regime data to the Vol Regime sheet.\n// Written on every close execution AND on regime changes.\n// =============================================================\n\nconst data = $('Volatility Regime Engine').first().json;\n\nreturn [{\n  json: {\n    Date: data.dateStr,\n    Time: data.timestamp,\n    'VIX Level': data.vixPrice.toFixed(2),\n    'VIX Change (%)': `${data.vixChangePct >= 0 ? '+' : ''}${data.vixChangePct.toFixed(1)}%`,\n    'VIX Day High': data.vixDayHigh.toFixed(2),\n    'VIX Day Low': data.vixDayLow.toFixed(2),\n    'Regime': data.currentRegimeLabel,\n    'Regime Changed': data.regimeChanged ? 'YES' : 'No',\n    'Previous Regime': data.prevRegime,\n    'VIX 20-Day Avg': data.vix20DayAvg || '',\n    'VIX 50-Day Avg': data.vix50DayAvg || '',\n    'Regime Duration': data.regimeDuration,\n    'Triggers Fired': data.triggers ? data.triggers.length : 0,\n    'Trigger Details': data.triggers ? data.triggers.map(t => t.type).join(', ') : '',\n    'Sizing Guidance': data.sizingGuidance\n  }\n}];"
+      },
+      "id": "format-sheets-row",
+      "name": "Format Sheets Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 620]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Vol Regime"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "google-sheets-log",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1540, 620],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Volatility Regime & Hedging Trigger (P0)\n\n**Trigger:** Every 30 minutes, Mon-Fri\n**Active window:** 9:30 AM - 4:00 PM ET only\n\n**Regime Classification:**\n- VIX < 15: LOW / COMPLACENT (buy protection)\n- VIX 15-25: NORMAL (standard sizing)\n- VIX 25-35: ELEVATED (reduce 25%)\n- VIX > 35: CRISIS (reduce 50%, halt new)\n\n**Triggers (only on changes/crosses):**\n- Regime change detection\n- VIX crosses 15, 18, 20, 25, 35\n- VIX daily move > 20% or > 30%\n\n**Daily Summary:** Sent at 4:00 PM ET close\n\n**Cooldown:** 4 hours per trigger type",
+        "width": 380,
+        "height": 380
+      },
+      "id": "sticky-overview",
+      "name": "Workflow Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [180, -140]
+    },
+    {
+      "parameters": {
+        "content": "## API Calls\n\n- **FMP VIX Quote (^VIX):** 1 per execution (~13/day)\n- **FMP VIXY Proxy:** 1 per execution (~13/day, fallback)\n- **FMP VIX Historical:** 1 per execution (~13/day)\n- **Total:** ~39 FMP calls/day\n\nNote: The historical endpoint could be cached daily to reduce to ~15 calls/day. Currently fetches each execution for simplicity.\n\n## Credentials Required\n- FMP API Key (httpQueryAuth)\n- Telegram Bot API\n- Google Sheets OAuth2\n\n## Setup\n1. Replace `FMP_API_CREDENTIAL_ID` with your FMP credential ID\n2. Replace `TELEGRAM_CREDENTIAL_ID` and `TELEGRAM_CHAT_ID`\n3. Replace `GOOGLE_SHEETS_CREDENTIAL_ID` and `GOOGLE_SHEET_ID`\n4. Create \"Vol Regime\" tab in your Google Sheet with columns:\n   Date, Time, VIX Level, VIX Change (%), VIX Day High, VIX Day Low,\n   Regime, Regime Changed, Previous Regime, VIX 20-Day Avg,\n   VIX 50-Day Avg, Regime Duration, Triggers Fired, Trigger Details,\n   Sizing Guidance",
+        "width": 480,
+        "height": 400
+      },
+      "id": "sticky-setup",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [600, -140]
+    },
+    {
+      "parameters": {
+        "content": "## State Management\n\nThe Volatility Regime Engine uses n8n **static data** to persist:\n\n- `volRegimeState.vixLevel` -- previous VIX for cross detection\n- `volRegimeState.regime` -- previous regime for change detection\n- `volRegimeState.lastRegimeChange` -- timestamp for duration calc\n- `volRegimeState.lastNotifiedTriggers` -- cooldown tracking (4hr)\n\nFirst execution will NOT detect regime changes (no baseline).\nAfter first run, state persists across all subsequent executions.\n\nIf static data corrupts, engine auto-recovers with a fresh baseline on next run.",
+        "width": 380,
+        "height": 300
+      },
+      "id": "sticky-state",
+      "name": "State Management Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1120, -140]
+    },
+    {
+      "parameters": {
+        "content": "## VIX Data Sources\n\nTwo FMP endpoints are tried:\n1. **^VIX (primary):** Direct VIX index quote\n2. **VIXY (fallback):** ProShares VIX Short-Term ETF as proxy\n\nFMP may not support ^VIX in all plans. The engine tries ^VIX first and falls back to VIXY.\n\nThe historical endpoint uses VIXY for reliable data availability. For 20/50-day averages, the VIXY proxy is close enough for regime classification purposes.\n\n**Future enhancement:** Add Massive.com SPY options chain for VIX term structure calculation (near-month vs far-month ATM IV comparison).",
+        "width": 380,
+        "height": 300
+      },
+      "id": "sticky-vix-sources",
+      "name": "VIX Data Sources",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [180, 660]
+    }
+  ],
+  "connections": {
+    "Every 30 Min (Mon-Fri)": {
+      "main": [
+        [
+          {
+            "node": "Market Hours Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Market Hours Check": {
+      "main": [
+        [
+          {
+            "node": "FMP VIX Quote (VIXY Proxy)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FMP VIX Index (^VIX)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FMP VIX Historical (50 Days)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FMP VIX Quote (VIXY Proxy)": {
+      "main": [
+        [
+          {
+            "node": "Volatility Regime Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FMP VIX Index (^VIX)": {
+      "main": [
+        [
+          {
+            "node": "Volatility Regime Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FMP VIX Historical (50 Days)": {
+      "main": [
+        [
+          {
+            "node": "Volatility Regime Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Volatility Regime Engine": {
+      "main": [
+        [
+          {
+            "node": "Triggers Fired?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "End of Day (4 PM)?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Triggers Fired?": {
+      "main": [
+        [
+          {
+            "node": "Format Trigger Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Format Trigger Alert": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Trigger Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "End of Day (4 PM)?": {
+      "main": [
+        [
+          {
+            "node": "Format Daily Summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Format Sheets Row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Format Daily Summary": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Daily Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Sheets Row": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "",
+    "timezone": "America/New_York"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Altamira",
+      "id": "altamira-tag"
+    },
+    {
+      "name": "Market Monitoring",
+      "id": "monitoring-tag"
+    },
+    {
+      "name": "P0",
+      "id": "p0-tag"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-18T00:00:00.000Z",
+  "versionId": "1"
+}

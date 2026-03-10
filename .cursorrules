@@ -1,0 +1,29 @@
+# Cursor Rules — Altamira Capital Workspace
+
+## Context
+
+This is a Claude Code workspace template for Ricardo Landino, Founder of Altamira Capital. The workspace is designed for AI-assisted productivity, strategy, and automation development.
+
+## Workspace Conventions
+
+- Run `/prime` at the start of every Claude Code session
+- Use `/create-plan` before significant structural changes
+- Use `/implement` to execute plans
+- Keep CLAUDE.md updated when workspace structure changes
+- Context files in `context/` are the source of truth for user info and strategy
+- Plans go in `plans/` with dated filenames (YYYY-MM-DD-descriptive-name.md)
+- Outputs go in `outputs/` organized by type
+
+## Coding Style
+
+- Python: PEP 8, type hints, docstrings for public functions
+- JavaScript/TypeScript: ES2020+, async/await, minimal dependencies
+- Markdown: ATX headings, consistent formatting
+- File naming: kebab-case for files, snake_case for Python modules
+
+## Project-Specific Rules
+
+- Financial calculations must include disclaimers
+- API keys must use environment variables, never hardcoded
+- All scripts should handle errors gracefully with informative messages
+- Prefer concise, actionable outputs over verbose explanations

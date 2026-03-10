@@ -1,0 +1,7 @@
+Project,Task ID,Title,Column,Priority,Labels,Description,Created
+"Altamira Dashboard","alt-dash-01","Comprehensive Stock Analysis","backlog","high","feature; qualtrim","15+ interactive charts: Price, Revenue, EBITDA, FCF, EPS, key ratios. AI-generated competitive advantages and investment risks.","2026-02-23T12:00:00.000Z"
+"Altamira Dashboard","alt-dash-02","Professional DCF Calculator","backlog","high","feature; qualtrim","Built-in DCF with configurable assumptions. Input growth and desired returns to determine fair value for any stock.","2026-02-23T12:00:00.000Z"
+"Altamira Dashboard","alt-dash-03","Portfolio Management & Tracking","backlog","high","feature; qualtrim","Multiple portfolios, real-time performance, dividend analysis, sector breakdowns, AI insights. Multi-currency support.","2026-02-23T12:00:00.000Z"
+"Altamira Dashboard","alt-dash-04","Earnings Transcripts Archive","backlog","medium","feature; qualtrim","Search/analyze earnings transcripts back to 2005. AI summaries for key themes, guidance changes, management commentary.","2026-02-23T12:00:00.000Z"
+"Altamira Dashboard","alt-dash-05","Advanced Watchlists & Alerts","backlog","medium","feature; qualtrim","Unlimited watchlists, price alerts, momentum tracking. 200-day MA indicators and integrated news feeds.","2026-02-23T12:00:00.000Z"
+"Altamira Dashboard","alt-dash-06","Real-time Market Data","backlog","high","feature; qualtrim","Live prices, after-hours, earnings dates, financial metrics. Market index and insider trading data.","2026-02-23T12:00:00.000Z"

@@ -1,0 +1,41 @@
+{
+  "ticker": "AVGO",
+  "core_four": {
+    "revenue": {
+      "3yr_cagr_pct": 24.38,
+      "latest_yoy_pct": 23.87,
+      "latest_value": 63887000000
+    },
+    "eps": {
+      "3yr_cagr_pct": 26.24,
+      "latest_yoy_pct": 292.3,
+      "latest_value": 4.9079
+    },
+    "fcf_margin": {
+      "3yr_cagr_pct": -5.17,
+      "latest_yoy_pp": 4.31,
+      "latest_value_pct": 44.08
+    },
+    "roic": {
+      "3yr_cagr_pct": -8.06,
+      "latest_yoy_pct": 84.79,
+      "latest_value_pct": 16.7
+    }
+  },
+  "optional": {
+    "operating_margin_pct": 39.89,
+    "operating_margin_yoy_pp": 13.78,
+    "gross_margin_pct": 67.77,
+    "net_income_yoy_pct": 292.3,
+    "net_income_3yr_cagr_pct": 26.24,
+    "fcf_dollar_3yr_cagr_pct": 17.95,
+    "fcf_dollar_yoy_pct": 37.3,
+    "roe_pct": 28.45
+  },
+  "suggested_grade": "A",
+  "rule_of_40": {
+    "score": 63.8,
+    "tier": "Elite"
+  },
+  "revenue_trajectory": "Accelerating"
+}

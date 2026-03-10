@@ -1,0 +1,41 @@
+{
+  "ticker": "COST",
+  "core_four": {
+    "revenue": {
+      "3yr_cagr_pct": 6.64,
+      "latest_yoy_pct": 8.17,
+      "latest_value": 275235000000
+    },
+    "eps": {
+      "3yr_cagr_pct": 11.49,
+      "latest_yoy_pct": 9.94,
+      "latest_value": 18.2416
+    },
+    "fcf_margin": {
+      "3yr_cagr_pct": 11.24,
+      "latest_yoy_pp": 0.54,
+      "latest_value_pct": 6.84
+    },
+    "roic": {
+      "3yr_cagr_pct": 2.34,
+      "latest_yoy_pct": -3.9,
+      "latest_value_pct": 25.96
+    }
+  },
+  "optional": {
+    "operating_margin_pct": 3.77,
+    "operating_margin_yoy_pp": 0.12,
+    "gross_margin_pct": 12.84,
+    "net_income_yoy_pct": 9.94,
+    "net_income_3yr_cagr_pct": 11.49,
+    "fcf_dollar_3yr_cagr_pct": 18.62,
+    "fcf_dollar_yoy_pct": 17.35,
+    "roe_pct": 27.77
+  },
+  "suggested_grade": "B",
+  "rule_of_40": {
+    "score": 11.9,
+    "tier": "Weak"
+  },
+  "revenue_trajectory": "Decelerating"
+}

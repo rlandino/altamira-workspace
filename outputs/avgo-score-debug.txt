@@ -1,0 +1,80 @@
+﻿
+================================================================================
+DEBUGGING SCORE CALCULATIONS FOR AVGO
+================================================================================
+
+Fetching data from FMP API...
+
+================================================================================
+RAW METRICS FROM FMP API
+================================================================================
+
+### Ratios (Latest Year):
+  ROE: 0.2844806377011268
+  ROA: 0.13516704463095877
+  Net Profit Margin: 0.3619828760154648
+  ROIC: N/A
+  Debt/Equity: 0.8012596565467697
+  P/E: 73.87077747989277
+  P/B: 21.01480588495793
+  P/S: 26.73995648567001
+  Current Ratio: 1.7053581073782003
+  Interest Coverage: 7.938940809968847
+  Dividend Yield: 0.006522137687700238
+
+### Key Metrics (Latest Year):
+  FCF Yield: 0.01575451568181334
+  FCF Per Share: 5.711799660441426
+
+### Growth Metrics:
+  Revenue Growth: 0.23874432853763525
+  Net Income Growth: 2.922985581000848
+  Latest Revenue: N/A
+  Previous Revenue: N/A
+
+================================================================================
+QUALITY SCORE CALCULATION
+================================================================================
+ROE: Raw=0.2845, Converted=28.45%, ROE: 28.4481 -> normalized to 56.90 (range: 0.00-50.00, invert=False)
+ROA: Raw=0.1352, Converted=13.52%, ROA: 13.5167 -> normalized to 54.07 (range: 0.00-25.00, invert=False)
+Net Margin: Raw=0.3620, Converted=36.20%, Net Margin: 36.1983 -> normalized to 100.00 (range: -10.00-30.00, invert=False)
+Debt/Equity: Raw=0.8013, Debt/Equity (inverted): 0.8013 -> normalized to 19.87 (range: 0.00-1.00, invert=True)
+
+Weighted Calculation:
+  roe: 56.90 ├ù 0.25 = 14.22
+  roa: 54.07 ├ù 0.20 = 10.81
+  margin: 100.00 ├ù 0.20 = 20.00
+  debtCapital: 19.87 ├ù 0.15 = 2.98
+Total: 48.02 / Weight Sum: 0.80 = 60.02
+
+FINAL QUALITY SCORE: 60.02
+
+================================================================================
+VALUE SCORE CALCULATION
+================================================================================
+P/E: Raw=73.87, P/E (inverted): 73.8708 -> normalized to 0.00 (range: 5.00-50.00, invert=True)
+P/B: Raw=21.01, P/B (inverted): 21.0148 -> normalized to 0.00 (range: 0.50-10.00, invert=True)
+P/S: Raw=26.74, P/S (inverted): 26.7400 -> normalized to 0.00 (range: 0.50-15.00, invert=True)
+FCF Yield: Raw=0.0158, Converted=1.58%, FCF Yield: 1.5755 -> normalized to 10.50 (range: 0.00-15.00, invert=False)
+Margin of Safety: Raw=-322.12%, Margin of Safety: -322.1187 -> normalized to 0.00 (range: -50.00-50.00, invert=False)
+
+Weighted Calculation:
+  pe: 0.00 ├ù 0.25 = 0.00
+  pb: 0.00 ├ù 0.20 = 0.00
+  ps: 0.00 ├ù 0.15 = 0.00
+  fcf: 10.50 ├ù 0.15 = 1.58
+  marginOfSafety: 0.00 ├ù 0.25 = 0.00
+Total: 1.58 / Weight Sum: 1.00 = 1.58
+
+FINAL VALUE SCORE: 1.58
+
+================================================================================
+SUMMARY
+================================================================================
+Quality Score:    60.02
+Growth Score:     38.69
+Value Score:      1.58
+Health Score:     55.78
+Shareholder Score: 27.96
+Composite Score:  36.81
+================================================================================

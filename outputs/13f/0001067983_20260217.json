@@ -1,0 +1,1004 @@
+{
+  "filer": {
+    "cik": "0001067983",
+    "name": "BERKSHIRE HATHAWAY INC"
+  },
+  "periodEnd": "2026-02-17",
+  "filingDate": "2026-02-17",
+  "form": "13F-HR",
+  "accessionNumber": "0001193125-26-054580",
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526054580/50240.xml",
+  "holdingsCount": 110,
+  "holdings": [
+    {
+      "nameOfIssuer": "ALLY FINL INC",
+      "titleOfClass": "COM",
+      "cusip": "02005N100",
+      "value": 576074081,
+      "valueUsd": 576074081000,
+      "shrsOrPrnAmt": 12719675,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALLY FINL INC",
+      "titleOfClass": "COM",
+      "cusip": "02005N100",
+      "value": 126987499,
+      "valueUsd": 126987499000,
+      "shrsOrPrnAmt": 2803875,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALLY FINL INC",
+      "titleOfClass": "COM",
+      "cusip": "02005N100",
+      "value": 191495178,
+      "valueUsd": 191495178000,
+      "shrsOrPrnAmt": 4228200,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALLY FINL INC",
+      "titleOfClass": "COM",
+      "cusip": "02005N100",
+      "value": 142074730,
+      "valueUsd": 142074730000,
+      "shrsOrPrnAmt": 3137000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALLY FINL INC",
+      "titleOfClass": "COM",
+      "cusip": "02005N100",
+      "value": 219033763,
+      "valueUsd": 219033763000,
+      "shrsOrPrnAmt": 4836250,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALLY FINL INC",
+      "titleOfClass": "COM",
+      "cusip": "02005N100",
+      "value": 57744750,
+      "valueUsd": 57744750000,
+      "shrsOrPrnAmt": 1275000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALPHABET INC",
+      "titleOfClass": "CAP STK CL A",
+      "cusip": "02079K305",
+      "value": 5585842446,
+      "valueUsd": 5585842446000,
+      "shrsOrPrnAmt": 17846142,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "AMAZON COM INC",
+      "titleOfClass": "COM",
+      "cusip": "023135106",
+      "value": 525346320,
+      "valueUsd": 525346320000,
+      "shrsOrPrnAmt": 2276000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "AMERICAN EXPRESS CO",
+      "titleOfClass": "COM",
+      "cusip": "025816109",
+      "value": 425421043,
+      "valueUsd": 425421043000,
+      "shrsOrPrnAmt": 1149942,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "AMERICAN EXPRESS CO",
+      "titleOfClass": "COM",
+      "cusip": "025816109",
+      "value": 55145133598,
+      "valueUsd": 55145133598000,
+      "shrsOrPrnAmt": 149061045,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "AMERICAN EXPRESS CO",
+      "titleOfClass": "COM",
+      "cusip": "025816109",
+      "value": 517823824,
+      "valueUsd": 517823824000,
+      "shrsOrPrnAmt": 1399713,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 188127120,
+      "valueUsd": 188127120000,
+      "shrsOrPrnAmt": 692000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 1043942400,
+      "valueUsd": 1043942400000,
+      "shrsOrPrnAmt": 3840000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 9243240,
+      "valueUsd": 9243240000,
+      "shrsOrPrnAmt": 34000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 9440066640,
+      "valueUsd": 9440066640000,
+      "shrsOrPrnAmt": 34724000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 740546640,
+      "valueUsd": 740546640000,
+      "shrsOrPrnAmt": 2724000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 4222529520,
+      "valueUsd": 4222529520000,
+      "shrsOrPrnAmt": 15532000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 16731076718,
+      "valueUsd": 16731076718000,
+      "shrsOrPrnAmt": 61542988,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 1958479440,
+      "valueUsd": 1958479440000,
+      "shrsOrPrnAmt": 7204000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 3934357920,
+      "valueUsd": 3934357920000,
+      "shrsOrPrnAmt": 14472000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 21929537965,
+      "valueUsd": 21929537965000,
+      "shrsOrPrnAmt": 80664820,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 737284320,
+      "valueUsd": 737284320000,
+      "shrsOrPrnAmt": 2712000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "APPLE INC",
+      "titleOfClass": "COM",
+      "cusip": "037833100",
+      "value": 1026543360,
+      "valueUsd": 1026543360000,
+      "shrsOrPrnAmt": 3776000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ATLANTA BRAVES HLDGS INC",
+      "titleOfClass": "COM SER C",
+      "cusip": "047726302",
+      "value": 3821403,
+      "valueUsd": 3821403000,
+      "shrsOrPrnAmt": 96867,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ATLANTA BRAVES HLDGS INC",
+      "titleOfClass": "COM SER C",
+      "cusip": "047726302",
+      "value": 588949,
+      "valueUsd": 588949000,
+      "shrsOrPrnAmt": 14929,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ATLANTA BRAVES HLDGS INC",
+      "titleOfClass": "COM SER C",
+      "cusip": "047726302",
+      "value": 143282,
+      "valueUsd": 143282000,
+      "shrsOrPrnAmt": 3632,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "BANK AMERICA CORP",
+      "titleOfClass": "COM",
+      "cusip": "060505104",
+      "value": 215600000,
+      "valueUsd": 215600000000,
+      "shrsOrPrnAmt": 3920000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "BANK AMERICA CORP",
+      "titleOfClass": "COM",
+      "cusip": "060505104",
+      "value": 654500000,
+      "valueUsd": 654500000000,
+      "shrsOrPrnAmt": 11900000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "BANK AMERICA CORP",
+      "titleOfClass": "COM",
+      "cusip": "060505104",
+      "value": 8002500,
+      "valueUsd": 8002500000,
+      "shrsOrPrnAmt": 145500,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "BANK AMERICA CORP",
+      "titleOfClass": "COM",
+      "cusip": "060505104",
+      "value": 1755073870,
+      "valueUsd": 1755073870000,
+      "shrsOrPrnAmt": 31910434,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "BANK AMERICA CORP",
+      "titleOfClass": "COM",
+      "cusip": "060505104",
+      "value": 115500000,
+      "valueUsd": 115500000000,
+      "shrsOrPrnAmt": 2100000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "BANK AMERICA CORP",
+      "titleOfClass": "COM",
+      "cusip": "060505104",
+      "value": 1155000000,
+      "valueUsd": 1155000000000,
+      "shrsOrPrnAmt": 21000000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "BANK AMERICA CORP",
+      "titleOfClass": "COM",
+      "cusip": "060505104",
+      "value": 17094000000,
+      "valueUsd": 17094000000000,
+      "shrsOrPrnAmt": 310800000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "BANK AMERICA CORP",
+      "titleOfClass": "COM",
+      "cusip": "060505104",
+      "value": 6914600000,
+      "valueUsd": 6914600000000,
+      "shrsOrPrnAmt": 125720000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "BANK AMERICA CORP",
+      "titleOfClass": "COM",
+      "cusip": "060505104",
+      "value": 539000000,
+      "valueUsd": 539000000000,
+      "shrsOrPrnAmt": 9800000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CAPITAL ONE FINL CORP",
+      "titleOfClass": "COM",
+      "cusip": "14040H105",
+      "value": 469987663,
+      "valueUsd": 469987663000,
+      "shrsOrPrnAmt": 1939213,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CAPITAL ONE FINL CORP",
+      "titleOfClass": "COM",
+      "cusip": "14040H105",
+      "value": 744963017,
+      "valueUsd": 744963017000,
+      "shrsOrPrnAmt": 3073787,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CAPITAL ONE FINL CORP",
+      "titleOfClass": "COM",
+      "cusip": "14040H105",
+      "value": 517923320,
+      "valueUsd": 517923320000,
+      "shrsOrPrnAmt": 2137000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CHARTER COMMUNICATIONS INC N",
+      "titleOfClass": "CL A",
+      "cusip": "16119P108",
+      "value": 221459118,
+      "valueUsd": 221459118000,
+      "shrsOrPrnAmt": 1060882,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CHEVRON CORP NEW",
+      "titleOfClass": "COM",
+      "cusip": "166764100",
+      "value": 1759699645,
+      "valueUsd": 1759699645000,
+      "shrsOrPrnAmt": 11545828,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CHEVRON CORP NEW",
+      "titleOfClass": "COM",
+      "cusip": "166764100",
+      "value": 2676929392,
+      "valueUsd": 2676929392000,
+      "shrsOrPrnAmt": 17564001,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CHEVRON CORP NEW",
+      "titleOfClass": "COM",
+      "cusip": "166764100",
+      "value": 9357974,
+      "valueUsd": 9357974000,
+      "shrsOrPrnAmt": 61400,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CHEVRON CORP NEW",
+      "titleOfClass": "COM",
+      "cusip": "166764100",
+      "value": 318841720,
+      "valueUsd": 318841720000,
+      "shrsOrPrnAmt": 2092000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CHEVRON CORP NEW",
+      "titleOfClass": "COM",
+      "cusip": "166764100",
+      "value": 4955947671,
+      "valueUsd": 4955947671000,
+      "shrsOrPrnAmt": 32517208,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CHEVRON CORP NEW",
+      "titleOfClass": "COM",
+      "cusip": "166764100",
+      "value": 435648744,
+      "valueUsd": 435648744000,
+      "shrsOrPrnAmt": 2858400,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CHEVRON CORP NEW",
+      "titleOfClass": "COM",
+      "cusip": "166764100",
+      "value": 9385335405,
+      "valueUsd": 9385335405000,
+      "shrsOrPrnAmt": 61579525,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CHEVRON CORP NEW",
+      "titleOfClass": "COM",
+      "cusip": "166764100",
+      "value": 295370580,
+      "valueUsd": 295370580000,
+      "shrsOrPrnAmt": 1938000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "COCA COLA CO",
+      "titleOfClass": "COM",
+      "cusip": "191216100",
+      "value": 55928000,
+      "valueUsd": 55928000000,
+      "shrsOrPrnAmt": 800000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "COCA COLA CO",
+      "titleOfClass": "COM",
+      "cusip": "191216100",
+      "value": 25969538,
+      "valueUsd": 25969538000,
+      "shrsOrPrnAmt": 371471,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "COCA COLA CO",
+      "titleOfClass": "COM",
+      "cusip": "191216100",
+      "value": 5942350,
+      "valueUsd": 5942350000,
+      "shrsOrPrnAmt": 85000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "COCA COLA CO",
+      "titleOfClass": "COM",
+      "cusip": "191216100",
+      "value": 5612598512,
+      "valueUsd": 5612598512000,
+      "shrsOrPrnAmt": 80283200,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "COCA COLA CO",
+      "titleOfClass": "COM",
+      "cusip": "191216100",
+      "value": 127515840,
+      "valueUsd": 127515840000,
+      "shrsOrPrnAmt": 1824000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "COCA COLA CO",
+      "titleOfClass": "COM",
+      "cusip": "191216100",
+      "value": 1007486992,
+      "valueUsd": 1007486992000,
+      "shrsOrPrnAmt": 14411200,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "COCA COLA CO",
+      "titleOfClass": "COM",
+      "cusip": "191216100",
+      "value": 1047978864,
+      "valueUsd": 1047978864000,
+      "shrsOrPrnAmt": 14990400,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "COCA COLA CO",
+      "titleOfClass": "COM",
+      "cusip": "191216100",
+      "value": 19765145984,
+      "valueUsd": 19765145984000,
+      "shrsOrPrnAmt": 282722729,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "COCA COLA CO",
+      "titleOfClass": "COM",
+      "cusip": "191216100",
+      "value": 248320320,
+      "valueUsd": 248320320000,
+      "shrsOrPrnAmt": 3552000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "COCA COLA CO",
+      "titleOfClass": "COM",
+      "cusip": "191216100",
+      "value": 67113600,
+      "valueUsd": 67113600000,
+      "shrsOrPrnAmt": 960000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CONSTELLATION BRANDS INC",
+      "titleOfClass": "CL A",
+      "cusip": "21036P108",
+      "value": 1793480000,
+      "valueUsd": 1793480000000,
+      "shrsOrPrnAmt": 13000000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "DAVITA INC",
+      "titleOfClass": "COM",
+      "cusip": "23918K108",
+      "value": 1889571518,
+      "valueUsd": 1889571518000,
+      "shrsOrPrnAmt": 16632088,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "DAVITA INC",
+      "titleOfClass": "COM",
+      "cusip": "23918K108",
+      "value": 1718575857,
+      "valueUsd": 1718575857000,
+      "shrsOrPrnAmt": 15126977,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "DIAGEO PLC",
+      "titleOfClass": "SPON ADR NEW",
+      "cusip": "25243Q205",
+      "value": 19647993,
+      "valueUsd": 19647993000,
+      "shrsOrPrnAmt": 227750,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "DOMINOS PIZZA INC",
+      "titleOfClass": "COM",
+      "cusip": "25754A201",
+      "value": 1396347000,
+      "valueUsd": 1396347000000,
+      "shrsOrPrnAmt": 3350000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "HEICO CORP NEW",
+      "titleOfClass": "CL A",
+      "cusip": "422806208",
+      "value": 326798907,
+      "valueUsd": 326798907000,
+      "shrsOrPrnAmt": 1294612,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "JEFFERIES FINL GROUP INC",
+      "titleOfClass": "COM",
+      "cusip": "47233W109",
+      "value": 26867589,
+      "valueUsd": 26867589000,
+      "shrsOrPrnAmt": 433558,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "KRAFT HEINZ CO",
+      "titleOfClass": "COM",
+      "cusip": "500754106",
+      "value": 7896644337,
+      "valueUsd": 7896644337000,
+      "shrsOrPrnAmt": 325634818,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "KROGER CO",
+      "titleOfClass": "COM",
+      "cusip": "501044101",
+      "value": 1037610983,
+      "valueUsd": 1037610983000,
+      "shrsOrPrnAmt": 16607090,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "KROGER CO",
+      "titleOfClass": "COM",
+      "cusip": "501044101",
+      "value": 48017817,
+      "valueUsd": 48017817000,
+      "shrsOrPrnAmt": 768531,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "KROGER CO",
+      "titleOfClass": "COM",
+      "cusip": "501044101",
+      "value": 335337595,
+      "valueUsd": 335337595000,
+      "shrsOrPrnAmt": 5367119,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "KROGER CO",
+      "titleOfClass": "COM",
+      "cusip": "501044101",
+      "value": 1703033605,
+      "valueUsd": 1703033605000,
+      "shrsOrPrnAmt": 27257260,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LAMAR ADVERTISING CO NEW",
+      "titleOfClass": "CL A",
+      "cusip": "512816109",
+      "value": 152201058,
+      "valueUsd": 152201058000,
+      "shrsOrPrnAmt": 1202410,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LENNAR CORP",
+      "titleOfClass": "CL A",
+      "cusip": "526057104",
+      "value": 724837660,
+      "valueUsd": 724837660000,
+      "shrsOrPrnAmt": 7050950,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LENNAR CORP",
+      "titleOfClass": "CL B",
+      "cusip": "526057302",
+      "value": 17214818,
+      "valueUsd": 17214818000,
+      "shrsOrPrnAmt": 180980,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LIVE HOLDINGS INC",
+      "titleOfClass": "COM SER A",
+      "cusip": "530909100",
+      "value": 82453387,
+      "valueUsd": 82453387000,
+      "shrsOrPrnAmt": 1011698,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LIVE HOLDINGS INC",
+      "titleOfClass": "COM SER A",
+      "cusip": "530909100",
+      "value": 267709163,
+      "valueUsd": 267709163000,
+      "shrsOrPrnAmt": 3284775,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LIVE HOLDINGS INC",
+      "titleOfClass": "COM SER A",
+      "cusip": "530909100",
+      "value": 19017781,
+      "valueUsd": 19017781000,
+      "shrsOrPrnAmt": 233347,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LIVE HOLDINGS INC",
+      "titleOfClass": "COM SER A",
+      "cusip": "530909100",
+      "value": 37226592,
+      "valueUsd": 37226592000,
+      "shrsOrPrnAmt": 456768,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LIVE HOLDINGS INC",
+      "titleOfClass": "COM SHS SER C",
+      "cusip": "530909308",
+      "value": 302667639,
+      "valueUsd": 302667639000,
+      "shrsOrPrnAmt": 3639582,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LIVE HOLDINGS INC",
+      "titleOfClass": "COM SHS SER C",
+      "cusip": "530909308",
+      "value": 11904936,
+      "valueUsd": 11904936000,
+      "shrsOrPrnAmt": 143157,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LIVE HOLDINGS INC",
+      "titleOfClass": "COM SHS SER C",
+      "cusip": "530909308",
+      "value": 459845361,
+      "valueUsd": 459845361000,
+      "shrsOrPrnAmt": 5529646,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LIVE HOLDINGS INC",
+      "titleOfClass": "COM SHS SER C",
+      "cusip": "530909308",
+      "value": 13523479,
+      "valueUsd": 13523479000,
+      "shrsOrPrnAmt": 162620,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LIVE HOLDINGS INC",
+      "titleOfClass": "COM SHS SER C",
+      "cusip": "530909308",
+      "value": 119971273,
+      "valueUsd": 119971273000,
+      "shrsOrPrnAmt": 1442656,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY MEDIA CORP DEL",
+      "titleOfClass": "COM LBTY ONE S C",
+      "cusip": "531229755",
+      "value": 285002729,
+      "valueUsd": 285002729000,
+      "shrsOrPrnAmt": 2893135,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY MEDIA CORP DEL",
+      "titleOfClass": "COM LBTY ONE S C",
+      "cusip": "531229755",
+      "value": 12355124,
+      "valueUsd": 12355124000,
+      "shrsOrPrnAmt": 125420,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LOUISIANA PAC CORP",
+      "titleOfClass": "COM",
+      "cusip": "546347105",
+      "value": 106593832,
+      "valueUsd": 106593832000,
+      "shrsOrPrnAmt": 1319884,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LOUISIANA PAC CORP",
+      "titleOfClass": "COM",
+      "cusip": "546347105",
+      "value": 350894851,
+      "valueUsd": 350894851000,
+      "shrsOrPrnAmt": 4344909,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "MASTERCARD INCORPORATED",
+      "titleOfClass": "CL A",
+      "cusip": "57636Q104",
+      "value": 2275897610,
+      "valueUsd": 2275897610000,
+      "shrsOrPrnAmt": 3986648,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "MOODYS CORP",
+      "titleOfClass": "COM",
+      "cusip": "615369105",
+      "value": 36832285,
+      "valueUsd": 36832285000,
+      "shrsOrPrnAmt": 72100,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "MOODYS CORP",
+      "titleOfClass": "COM",
+      "cusip": "615369105",
+      "value": 6116881119,
+      "valueUsd": 6116881119000,
+      "shrsOrPrnAmt": 11973928,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "MOODYS CORP",
+      "titleOfClass": "COM",
+      "cusip": "615369105",
+      "value": 6448842688,
+      "valueUsd": 6448842688000,
+      "shrsOrPrnAmt": 12623750,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "NVR INC",
+      "titleOfClass": "COM",
+      "cusip": "62944T105",
+      "value": 81037260,
+      "valueUsd": 81037260000,
+      "shrsOrPrnAmt": 11112,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "NEW YORK TIMES CO",
+      "titleOfClass": "CL A",
+      "cusip": "650111107",
+      "value": 97188000,
+      "valueUsd": 97188000000,
+      "shrsOrPrnAmt": 1400000,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "NEW YORK TIMES CO",
+      "titleOfClass": "CL A",
+      "cusip": "650111107",
+      "value": 254475948,
+      "valueUsd": 254475948000,
+      "shrsOrPrnAmt": 3665744,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "NUCOR CORP",
+      "titleOfClass": "COM",
+      "cusip": "670346105",
+      "value": 1045167939,
+      "valueUsd": 1045167939000,
+      "shrsOrPrnAmt": 6407749,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "OCCIDENTAL PETE CORP",
+      "titleOfClass": "COM",
+      "cusip": "674599105",
+      "value": 10894391643,
+      "valueUsd": 10894391643000,
+      "shrsOrPrnAmt": 264941431,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "POOL CORP",
+      "titleOfClass": "COM",
+      "cusip": "73278L105",
+      "value": 702007444,
+      "valueUsd": 702007444000,
+      "shrsOrPrnAmt": 3068885,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "SIRIUS XM HOLDINGS INC",
+      "titleOfClass": "COMMON STOCK",
+      "cusip": "829933100",
+      "value": 319617876,
+      "valueUsd": 319617876000,
+      "shrsOrPrnAmt": 15984890,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "SIRIUS XM HOLDINGS INC",
+      "titleOfClass": "COMMON STOCK",
+      "cusip": "829933100",
+      "value": 2175900429,
+      "valueUsd": 2175900429000,
+      "shrsOrPrnAmt": 108822227,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "UNITEDHEALTH GROUP INC",
+      "titleOfClass": "COM",
+      "cusip": "91324P102",
+      "value": 645332039,
+      "valueUsd": 645332039000,
+      "shrsOrPrnAmt": 1954900,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "UNITEDHEALTH GROUP INC",
+      "titleOfClass": "COM",
+      "cusip": "91324P102",
+      "value": 1018278433,
+      "valueUsd": 1018278433000,
+      "shrsOrPrnAmt": 3084664,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "VERISIGN INC",
+      "titleOfClass": "COM",
+      "cusip": "92343E102",
+      "value": 236377474,
+      "valueUsd": 236377474000,
+      "shrsOrPrnAmt": 972947,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "VERISIGN INC",
+      "titleOfClass": "COM",
+      "cusip": "92343E102",
+      "value": 1947713872,
+      "valueUsd": 1947713872000,
+      "shrsOrPrnAmt": 8016933,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "VISA INC",
+      "titleOfClass": "COM CL A",
+      "cusip": "92826C839",
+      "value": 2910002197,
+      "valueUsd": 2910002197000,
+      "shrsOrPrnAmt": 8297460,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "ALLEGION PLC",
+      "titleOfClass": "ORD SHS",
+      "cusip": "G0176J109",
+      "value": 124212776,
+      "valueUsd": 124212776000,
+      "shrsOrPrnAmt": 780133,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "AON PLC",
+      "titleOfClass": "SHS CL A",
+      "cusip": "G0403H108",
+      "value": 637652396,
+      "valueUsd": 637652396000,
+      "shrsOrPrnAmt": 1806995,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "AON PLC",
+      "titleOfClass": "SHS CL A",
+      "cusip": "G0403H108",
+      "value": 15458261,
+      "valueUsd": 15458261000,
+      "shrsOrPrnAmt": 43806,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "AON PLC",
+      "titleOfClass": "SHS CL A",
+      "cusip": "G0403H108",
+      "value": 618314219,
+      "valueUsd": 618314219000,
+      "shrsOrPrnAmt": 1752194,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LATIN AMERICA LTD",
+      "titleOfClass": "COM CL A",
+      "cusip": "G9001E102",
+      "value": 5701237,
+      "valueUsd": 5701237000,
+      "shrsOrPrnAmt": 771480,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LATIN AMERICA LTD",
+      "titleOfClass": "COM CL A",
+      "cusip": "G9001E102",
+      "value": 12010117,
+      "valueUsd": 12010117000,
+      "shrsOrPrnAmt": 1625185,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "LIBERTY LATIN AMERICA LTD",
+      "titleOfClass": "COM CL C",
+      "cusip": "G9001E128",
+      "value": 9578789,
+      "valueUsd": 9578789000,
+      "shrsOrPrnAmt": 1284020,
+      "investmentDiscretion": "DFND"
+    },
+    {
+      "nameOfIssuer": "CHUBB LIMITED",
+      "titleOfClass": "COM",
+      "cusip": "H1467J104",
+      "value": 10689854998,
+      "valueUsd": 10689854998000,
+      "shrsOrPrnAmt": 34249183,
+      "investmentDiscretion": "DFND"
+    }
+  ]
+}

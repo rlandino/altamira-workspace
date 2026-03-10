@@ -1,0 +1,15 @@
+{
+  "date": "2026-02-18",
+  "portfolioValue": 102500.50,
+  "dailyPnL": 150.25,
+  "dailyPnLPercent": 0.15,
+  "cumulativePnL": 2500.50,
+  "cumulativePnLPercent": 2.5,
+  "netDelta": 12.5,
+  "dailyTheta": 45.00,
+  "openCSPCount": 2,
+  "openEquityCount": 3,
+  "cashPercent": 22.5,
+  "vixClose": 14.2,
+  "spyClose": 502.75
+}

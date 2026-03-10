@@ -1,0 +1,11 @@
+Project,Task ID,Title,Column,Priority,Labels,Description,Created
+Automated 13F Holdings Diff & Copycat Portfolio Service,rgCEa9zGFZSqXeYhir2B6,13F Backtester,done,medium,13f,Status sync: implemented.,
+Automated 13F Holdings Diff & Copycat Portfolio Service,lTqa_eOXnqn32lCKN5DJt,13F Copycat Portfolio,done,medium,13f,Status sync: implemented.,
+Automated 13F Holdings Diff & Copycat Portfolio Service,p_OuGPTl_ehKBrMmYepUd,13F Data Pipeline & API,done,medium,13f,Status sync: implemented.,
+Automated 13F Holdings Diff & Copycat Portfolio Service,m-c7nrF14X_U37FktfLba,13F Fund Performance (metrics),done,medium,13f,Status sync: implemented.,
+Automated 13F Holdings Diff & Copycat Portfolio Service,n0xRVZhdFrTuaZm5r-QcF,13F Heat Map export,done,medium,13f,Status sync: implemented.,
+Automated 13F Holdings Diff & Copycat Portfolio Service,QkwhoEVRE-4mvwyTIV8TZ,13F Holdings Diff (period-over-period),done,medium,13f,Status sync: implemented.,
+Automated 13F Holdings Diff & Copycat Portfolio Service,N2bcUekxl0ahwAEG-zKWk,13F Stock Screener,done,medium,13f,Status sync: implemented.,
+Automated 13F Holdings Diff & Copycat Portfolio Service,UJ9odRoybUf7kXH6egdde,Combined Holdings (overlap / consensus),done,medium,13f,Status sync: implemented.,
+Automated 13F Holdings Diff & Copycat Portfolio Service,psLJ9C8IoWoDUj8iIt_4E,Dashboard integration (Option B: API),done,medium,13f,Status sync: implemented.,
+Automated 13F Holdings Diff & Copycat Portfolio Service,8giGJnJk9BM6Z1D3KK19D,Epic: 13F Holdings Diff & Copycat Portfolio Service,done,medium,13f,Status sync: implemented.,

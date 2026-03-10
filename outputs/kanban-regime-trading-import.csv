@@ -1,0 +1,11 @@
+Project,Task ID,Title,Column,Priority,Labels,Description,Created
+"Regime Trading Dashboard","rt-01","Condition breakdown (current bar)","done","high","feature; regime","Expander: 8 confirmations with value, threshold, pass/fail for current bar. Why LONG/FLAT.","2026-02-24T12:00:00.000Z"
+"Regime Trading Dashboard","rt-02","Regime summary table (7 states)","done","high","feature; regime","Table: Regime ID, Label (Bull/Bear/Neutral), Mean Return, Volatility, Count. Sorted by Mean Return.","2026-02-24T12:00:00.000Z"
+"Regime Trading Dashboard","rt-03","Data freshness + Refresh button","done","medium","feature; regime","Data through timestamp + Refresh data button to clear cache and reload.","2026-02-24T12:00:00.000Z"
+"Regime Trading Dashboard","rt-04","Regime over time chart","done","high","feature; regime","Line chart of Regime (0-6) over last 500 hours.","2026-02-24T12:00:00.000Z"
+"Regime Trading Dashboard","rt-05","Equity curve vs Buy & Hold","done","high","feature; regime","Plotly chart: strategy equity vs buy & hold over time ($10k start).","2026-02-24T12:00:00.000Z"
+"Regime Trading Dashboard","rt-06","Drawdown over time","done","medium","feature; regime","Plot drawdown % (equity vs running max) over time.","2026-02-24T12:00:00.000Z"
+"Regime Trading Dashboard","rt-07","HMM transition matrix","done","medium","feature; regime","Heatmap of model.transmat_: P(next state | current state). From/To states.","2026-02-24T12:00:00.000Z"
+"Regime Trading Dashboard","rt-08","Trade log: regime at entry/exit + hold duration","done","medium","feature; regime","Trade log columns: Regime at entry, Regime at exit, Hold (hours).","2026-02-24T12:00:00.000Z"
+"Regime Trading Dashboard","rt-09","Cooldown / position state","done","medium","feature; regime","Show simulation state (LONG/FLAT) and cooldown remaining bars after exit.","2026-02-24T12:00:00.000Z"
+"Regime Trading Dashboard","rt-10","Indicator subplots (RSI MACD ADX EMAs)","done","medium","feature; regime","Tabs: RSI (70/30 lines), MACD+Signal, ADX (25 line), Price vs EMA50/200.","2026-02-24T12:00:00.000Z"

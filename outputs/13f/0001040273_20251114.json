@@ -1,0 +1,428 @@
+{
+  "filer": {
+    "cik": "0001040273",
+    "name": "Third Point LLC"
+  },
+  "periodEnd": "2025-11-14",
+  "filingDate": "2025-11-14",
+  "form": "13F-HR",
+  "accessionNumber": "0001040273-25-000003",
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1040273/000104027325000003/infotable.xml",
+  "holdingsCount": 46,
+  "holdings": [
+    {
+      "nameOfIssuer": "AMAZON COM INC",
+      "titleOfClass": "COM",
+      "cusip": "023135106",
+      "value": 616991700,
+      "valueUsd": 616991700000,
+      "shrsOrPrnAmt": 2810000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "APOLLO GLOBAL MGMT INC",
+      "titleOfClass": "COM",
+      "cusip": "03769M106",
+      "value": 86625500,
+      "valueUsd": 86625500000,
+      "shrsOrPrnAmt": 650000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "APOLLO GLOBAL MGMT INC",
+      "titleOfClass": "SER A MAND CNV",
+      "cusip": "03769M304",
+      "value": 63252000,
+      "valueUsd": 63252000000,
+      "shrsOrPrnAmt": 900000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "AURORA INNOVATION INC",
+      "titleOfClass": "*W EXP 11/03/202",
+      "cusip": "051774115",
+      "value": 877000,
+      "valueUsd": 877000000,
+      "shrsOrPrnAmt": 1835000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "AURORA INNOVATION INC",
+      "titleOfClass": "CLASS A COM",
+      "cusip": "051774107",
+      "value": 2173719,
+      "valueUsd": 2173719000,
+      "shrsOrPrnAmt": 1032463,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "BAUSCH HEALTH COS INC",
+      "titleOfClass": "COM",
+      "cusip": "071734107",
+      "value": 645000,
+      "valueUsd": 645000000,
+      "shrsOrPrnAmt": 100000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "BROOKFIELD CORP",
+      "titleOfClass": "CL A LTD VT SH",
+      "cusip": "11271J107",
+      "value": 320611500,
+      "valueUsd": 320611500000,
+      "shrsOrPrnAmt": 4675000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "CAPITAL ONE FINL CORP",
+      "titleOfClass": "COM",
+      "cusip": "14040H105",
+      "value": 294423300,
+      "valueUsd": 294423300000,
+      "shrsOrPrnAmt": 1385000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "CARPENTER TECHNOLOGY CORP",
+      "titleOfClass": "COM",
+      "cusip": "144285103",
+      "value": 208709000,
+      "valueUsd": 208709000000,
+      "shrsOrPrnAmt": 850000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "CASEYS GEN STORES INC",
+      "titleOfClass": "COM",
+      "cusip": "147528103",
+      "value": 282660000,
+      "valueUsd": 282660000000,
+      "shrsOrPrnAmt": 500000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "COMFORT SYS USA INC",
+      "titleOfClass": "COM",
+      "cusip": "199908104",
+      "value": 165036000,
+      "valueUsd": 165036000000,
+      "shrsOrPrnAmt": 200000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "COMMUNITY HEALTH SYS INC NEW",
+      "titleOfClass": "COM",
+      "cusip": "203668108",
+      "value": 481500,
+      "valueUsd": 481500000,
+      "shrsOrPrnAmt": 150000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "CORE SCIENTIFIC INC NEW",
+      "titleOfClass": "COM",
+      "cusip": "21874A106",
+      "value": 53820000,
+      "valueUsd": 53820000000,
+      "shrsOrPrnAmt": 3000000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "COSTAR GROUP INC",
+      "titleOfClass": "COM",
+      "cusip": "22160N109",
+      "value": 254544290,
+      "valueUsd": 254544290000,
+      "shrsOrPrnAmt": 3017000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "CRH PLC",
+      "titleOfClass": "ORD",
+      "cusip": "G25508105",
+      "value": 259583500,
+      "valueUsd": 259583500000,
+      "shrsOrPrnAmt": 2165000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "DANAHER CORPORATION",
+      "titleOfClass": "COM",
+      "cusip": "235851102",
+      "value": 9913000,
+      "valueUsd": 9913000000,
+      "shrsOrPrnAmt": 50000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "FLOOR & DECOR HLDGS INC",
+      "titleOfClass": "CL A",
+      "cusip": "339750101",
+      "value": 98021000,
+      "valueUsd": 98021000000,
+      "shrsOrPrnAmt": 1330000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "FLUTTER ENTMT PLC",
+      "titleOfClass": "SHS",
+      "cusip": "G3643J108",
+      "value": 284480000,
+      "valueUsd": 284480000000,
+      "shrsOrPrnAmt": 1120000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "FLYEXCLUSIVE INC",
+      "titleOfClass": "*W EXP 99/99/999",
+      "cusip": "343928115",
+      "value": 116681,
+      "valueUsd": 116681000,
+      "shrsOrPrnAmt": 367499,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "FLYEXCLUSIVE INC",
+      "titleOfClass": "COM CL A",
+      "cusip": "343928107",
+      "value": 5048680,
+      "valueUsd": 5048680000,
+      "shrsOrPrnAmt": 1022000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "HERTZ GLOBAL HLDGS INC",
+      "titleOfClass": "*W EXP 06/30/205",
+      "cusip": "42806J148",
+      "value": 14768400,
+      "valueUsd": 14768400000,
+      "shrsOrPrnAmt": 3970000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "JACOBS SOLUTIONS INC",
+      "titleOfClass": "COM",
+      "cusip": "46982L108",
+      "value": 137121900,
+      "valueUsd": 137121900000,
+      "shrsOrPrnAmt": 915000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "KENVUE INC",
+      "titleOfClass": "COM",
+      "cusip": "49177J102",
+      "value": 146070000,
+      "valueUsd": 146070000000,
+      "shrsOrPrnAmt": 9000000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "KENVUE INC",
+      "titleOfClass": "COM",
+      "cusip": "49177J102",
+      "value": 24345000,
+      "valueUsd": 24345000000,
+      "shrsOrPrnAmt": 1500000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "LIVE NATION ENTERTAINMENT IN",
+      "titleOfClass": "COM",
+      "cusip": "538034109",
+      "value": 220590000,
+      "valueUsd": 220590000000,
+      "shrsOrPrnAmt": 1350000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "LPL FINL HLDGS INC",
+      "titleOfClass": "COM",
+      "cusip": "50212V100",
+      "value": 197665435,
+      "valueUsd": 197665435000,
+      "shrsOrPrnAmt": 594143,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "MASTEC INC",
+      "titleOfClass": "COM",
+      "cusip": "576323109",
+      "value": 154287250,
+      "valueUsd": 154287250000,
+      "shrsOrPrnAmt": 725000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "META PLATFORMS INC",
+      "titleOfClass": "CL A",
+      "cusip": "30303M102",
+      "value": 161563600,
+      "valueUsd": 161563600000,
+      "shrsOrPrnAmt": 220000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "MICROSOFT CORP",
+      "titleOfClass": "COM",
+      "cusip": "594918104",
+      "value": 569745000,
+      "valueUsd": 569745000000,
+      "shrsOrPrnAmt": 1100000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "MR COOPER GROUP INC",
+      "titleOfClass": "COM",
+      "cusip": "62482R107",
+      "value": 194980750,
+      "valueUsd": 194980750000,
+      "shrsOrPrnAmt": 925000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "NORFOLK SOUTHN CORP",
+      "titleOfClass": "COM",
+      "cusip": "655844108",
+      "value": 495676500,
+      "valueUsd": 495676500000,
+      "shrsOrPrnAmt": 1650000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "NVIDIA CORPORATION",
+      "titleOfClass": "COM",
+      "cusip": "67066G104",
+      "value": 531753000,
+      "valueUsd": 531753000000,
+      "shrsOrPrnAmt": 2850000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "PG&E CORP",
+      "titleOfClass": "COM",
+      "cusip": "69331C108",
+      "value": 755508000,
+      "valueUsd": 755508000000,
+      "shrsOrPrnAmt": 50100000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "PG&E CORP",
+      "titleOfClass": "NOTE 4.250%12/0",
+      "cusip": "69331CAL2",
+      "value": 10112827,
+      "valueUsd": 10112827000,
+      "shrsOrPrnAmt": 10000000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "PG&E CORP",
+      "titleOfClass": "PFD CONV SER A",
+      "cusip": "69331C306",
+      "value": 5513200,
+      "valueUsd": 5513200000,
+      "shrsOrPrnAmt": 140000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "PRIMO BRANDS CORPORATION",
+      "titleOfClass": "CLASS A COM SHS",
+      "cusip": "741623102",
+      "value": 127627500,
+      "valueUsd": 127627500000,
+      "shrsOrPrnAmt": 5775000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "ROCKET COS INC",
+      "titleOfClass": "COM CL A",
+      "cusip": "77311W101",
+      "value": 77520000,
+      "valueUsd": 77520000000,
+      "shrsOrPrnAmt": 4000000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "SHARKNINJA INC",
+      "titleOfClass": "COM SHS",
+      "cusip": "G8068L108",
+      "value": 185670000,
+      "valueUsd": 185670000000,
+      "shrsOrPrnAmt": 1800000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "SOMNIGROUP INTERNATIONAL INC",
+      "titleOfClass": "COM",
+      "cusip": "88023U101",
+      "value": 252990000,
+      "valueUsd": 252990000000,
+      "shrsOrPrnAmt": 3000000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "SPDR S&P 500 ETF TR",
+      "titleOfClass": "TR UNIT",
+      "cusip": "78462F103",
+      "value": 582907500,
+      "valueUsd": 582907500000,
+      "shrsOrPrnAmt": 875000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "STRATA CRITICAL MEDICAL INC",
+      "titleOfClass": "CL A COM",
+      "cusip": "092667104",
+      "value": 25300000,
+      "valueUsd": 25300000000,
+      "shrsOrPrnAmt": 5000000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "TAIWAN SEMICONDUCTOR MFG LTD",
+      "titleOfClass": "SPONSORED ADS",
+      "cusip": "874039100",
+      "value": 307219000,
+      "valueUsd": 307219000000,
+      "shrsOrPrnAmt": 1100000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "TALEN ENERGY CORP",
+      "titleOfClass": "COM",
+      "cusip": "87422Q109",
+      "value": 148883000,
+      "valueUsd": 148883000000,
+      "shrsOrPrnAmt": 350000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "TELEPHONE & DATA SYS INC",
+      "titleOfClass": "COM NEW",
+      "cusip": "879433829",
+      "value": 263193432,
+      "valueUsd": 263193432000,
+      "shrsOrPrnAmt": 6707274,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "UNION PAC CORP",
+      "titleOfClass": "COM",
+      "cusip": "907818108",
+      "value": 206823750,
+      "valueUsd": 206823750000,
+      "shrsOrPrnAmt": 875000,
+      "investmentDiscretion": "SOLE"
+    },
+    {
+      "nameOfIssuer": "VISTRA CORP",
+      "titleOfClass": "COM",
+      "cusip": "92840M102",
+      "value": 183185200,
+      "valueUsd": 183185200000,
+      "shrsOrPrnAmt": 935000,
+      "investmentDiscretion": "SOLE"
+    }
+  ]
+}

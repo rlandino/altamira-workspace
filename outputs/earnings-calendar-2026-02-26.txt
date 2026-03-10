@@ -1,0 +1,57 @@
+﻿| Ticker | Company | Date | Time | Quarter Ending | Market Cap |
+|--------|---------|------|------|----------------|------------|
+| AALBF | Aalberts N.V. | 02/26 | bmo | Dec/2025 | 4.35B |
+| AAOI | Applied Optoelectronics, Inc. | 02/26 | amc | Dec/2025 | 3.75B |
+| ABNAF | Aben Gold Corp. | 02/26 | bmo | Dec/2025 | 4.22M |
+| ABTC | American Bitcoin Corp | 02/26 | bmo | Dec/2025 | 943.75M |
+| ACA | Arcosa, Inc. | 02/26 | amc | Dec/2025 | 6.17B |
+| ACGYF | Subsea 7 S.A. | 02/26 | bmo | Dec/2025 | 7.52B |
+| ACITF | Asian Citrus Holdings Limited | 02/26 | bmo | Dec/2025 | 2.98M |
+| ACIW | ACI Worldwide, Inc. | 02/26 | bmo | Dec/2025 | 4.08B |
+| ACLLF | ATCO Ltd. | 02/26 | bmo | Dec/2025 | 5.40B |
+| ACLX | Arcellx, Inc. | 02/26 | bmo | Dec/2025 | 6.58B |
+| ACMR | ACM Research, Inc. | 02/26 | bmo | Dec/2025 | 3.66B |
+| ACRS | Aclaris Therapeutics, Inc. | 02/26 | bmo | Dec/2025 | 332.62M |
+| ACU | Acme United Corporation | 02/26 | bmo | Dec/2025 | 172.41M |
+| ACXIF | Acciona, S.A. | 02/26 | bmo | Dec/2025 | 13.35B |
+| ADOOY | PT Alamtri Resources Indonesia Tbk | 02/26 | bmo | Dec/2025 | 4.14B |
+| ADSK | Autodesk, Inc. | 02/26 | amc | Jan/2026 | 48.99B |
+| ADT | ADT Inc. | 02/26 | bmo | Dec/2025 | 6.12B |
+| AECLY | AECI Ltd | 02/26 | bmo | Dec/2025 | 536.15M |
+| AELTF | Adacel Technologies Limited | 02/26 | bmo | Dec/2025 | 7594 |
+| AES | The AES Corporation | 02/26 | amc | Dec/2025 | 11.45B |
+| AEVA | Aeva Technologies, Inc. | 02/26 | amc | Dec/2025 | 799.36M |
+| AEVAW | Aeva Technologies, Inc. | 02/26 | bmo | Dec/2025 | 2.50M |
+| AGO | Assured Guaranty Ltd. | 02/26 | amc | Dec/2025 | 3.98B |
+| AGRDF | Minnova Corp. | 02/26 | bmo | Dec/2025 | 34.57M |
+| AGS | PlayAGS, Inc. | 02/26 | bmo | Dec/2025 | 518.40M |
+| AGSVF | Argentum Silver Corp. | 02/26 | bmo | Dec/2025 | 7.44M |
+| AGYTF | Allergy Therapeutics plc | 02/26 | bmo | Dec/2025 | 504.57M |
+| AHL | ASPEN INSURANCE HOLDINGS LTD | 02/26 | bmo | Dec/2025 | 3.44B |
+| AHR | American Healthcare REIT, Inc. | 02/26 | amc | Dec/2025 | 9.85B |
+| AIABF | Capital A Berhad | 02/26 | bmo | Dec/2025 | 580.26M |
+| AIRG | Airgain, Inc. | 02/26 | amc | Dec/2025 | 56.92M |
+| AIXXF | Aixtron Se | 02/26 | bmo | Dec/2025 | 3.36B |
+| AKBA | Akebia Therapeutics, Inc. | 02/26 | bmo | Dec/2025 | 341.26M |
+| ALBKF | Alpha Services and Holdings S.A. | 02/26 | bmo | Dec/2025 | 8.32B |
+| ALEX | Alexander & Baldwin, Inc. | 02/26 | bmo | Dec/2025 | 1.52B |
+| ALHC | Alignment Healthcare, Inc. | 02/26 | amc | Dec/2025 | 4.11B |
+| ALIZF | Allianz SE | 02/26 | bmo | Dec/2025 | 173.13B |
+| ALIZY | Allianz SE | 02/26 | bmo | Dec/2025 | 172.29B |
+| ALT | Altimmune, Inc. | 02/26 | bmo | Dec/2025 | 390.10M |
+| ALTG | Alta Equipment Group Inc. | 02/26 | amc | Dec/2025 | 208.86M |
+| ALVLF | Big Ridge Gold Corp. | 02/26 | bmo | Dec/2025 | 61.39M |
+| AMBA | Ambarella, Inc. | 02/26 | amc | Jan/2026 | 3.01B |
+| AMBP | Ardagh Metal Packaging S.A. | 02/26 | bmo | Dec/2025 | 2.78B |
+| AMIVF | Atrium Mortgage Investment Corporation | 02/26 | bmo | Dec/2025 | 415.96M |
+| AMOSF | Atomos Limited | 02/26 | bmo | Dec/2025 | 120948 |
+| AMPH | Amphastar Pharmaceuticals, Inc. | 02/26 | amc | Dec/2025 | 1.23B |
+| AMWD | American Woodmark Corporation | 02/26 | bmo | Jan/2026 | 726.56M |
+| ANAB | AnaptysBio, Inc. | 02/26 | bmo | Dec/2025 | 1.51B |
+| ANIK | Anika Therapeutics, Inc. | 02/26 | bmo | Dec/2025 | 179.73M |
+| AOCIF | AutoCanada Inc. | 02/26 | bmo | Dec/2025 | 472.83M |
+| AOTUF | Precinct Properties New Zealand Limited | 02/26 | bmo | Dec/2025 | 1.10B |
+| APMCF | Morien Resources Corp. | 02/26 | bmo | Dec/2025 | 7.00M |
+| APTTF | Asian Pay Television Trust | 02/26 | bmo | Dec/2025 | 69.36M |
+| AQMS | Aqua Metals, Inc. | 02/26 | amc | Dec/2025 | 15.03M |
+| ARBE | Arbe Robotics Ltd. | 02/26 | bmo | Dec/2025 | 102.11M |
