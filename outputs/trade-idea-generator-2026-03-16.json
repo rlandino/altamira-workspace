@@ -1,0 +1,58 @@
+{
+  "date": "2026-03-16",
+  "generated_at_utc": "2026-03-16 10:12 UTC",
+  "portfolio_count": 20,
+  "watchlist_count": 26,
+  "universe_count": 46,
+  "vix": 26.32,
+  "regime": "ELEVATED",
+  "portfolio_ideas": [
+    {
+      "ticker": "AMAT",
+      "price": 341.53,
+      "day_change_pct": 1.26308,
+      "weight": 12.6,
+      "call_strike": 375
+    },
+    {
+      "ticker": "NFLX",
+      "price": 95.31,
+      "day_change_pct": 1.06033,
+      "weight": 0.0,
+      "call_strike": 105
+    },
+    {
+      "ticker": "SPGI",
+      "price": 422.49,
+      "day_change_pct": 0.66476,
+      "weight": 0.5,
+      "call_strike": 465
+    }
+  ],
+  "watchlist_ideas": [
+    {
+      "ticker": "LRCX",
+      "score": 67.4,
+      "price": 212.2,
+      "day_change_pct": 1.29362,
+      "put_strike": 185,
+      "credit_target": 2.25
+    },
+    {
+      "ticker": "NVDA",
+      "score": 66.2,
+      "price": 180.25,
+      "day_change_pct": -1.58877,
+      "put_strike": 155,
+      "credit_target": 1.91
+    },
+    {
+      "ticker": "TSM",
+      "score": 61.8,
+      "price": 338.31,
+      "day_change_pct": 0.47519,
+      "put_strike": 295,
+      "credit_target": 3.59
+    }
+  ]
+}
