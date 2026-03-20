@@ -1,0 +1,58 @@
+{
+  "date": "2026-03-20",
+  "generated_at_utc": "2026-03-20 10:05 UTC",
+  "portfolio_count": 20,
+  "watchlist_count": 25,
+  "universe_count": 45,
+  "vix": 24.95,
+  "regime": "NORMAL",
+  "portfolio_ideas": [
+    {
+      "ticker": "SPY",
+      "price": 659.8,
+      "day_change_pct": -0.24644,
+      "weight": 17.1,
+      "call_strike": 730
+    },
+    {
+      "ticker": "AVGO",
+      "price": 319.84,
+      "day_change_pct": 1.23762,
+      "weight": 16.7,
+      "call_strike": 355
+    },
+    {
+      "ticker": "GOOGL",
+      "price": 307.13,
+      "day_change_pct": -0.182,
+      "weight": 13.8,
+      "call_strike": 340
+    }
+  ],
+  "watchlist_ideas": [
+    {
+      "ticker": "LRCX",
+      "score": 67.4,
+      "price": 233.99,
+      "day_change_pct": 4.12977,
+      "put_strike": 200,
+      "credit_target": 2.48
+    },
+    {
+      "ticker": "NVDA",
+      "score": 66.2,
+      "price": 178.56,
+      "day_change_pct": -1.01996,
+      "put_strike": 155,
+      "credit_target": 1.89
+    },
+    {
+      "ticker": "TSM",
+      "score": 61.8,
+      "price": 338.79,
+      "day_change_pct": -0.2297,
+      "put_strike": 290,
+      "credit_target": 3.59
+    }
+  ]
+}
