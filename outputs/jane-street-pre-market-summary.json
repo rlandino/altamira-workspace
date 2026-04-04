@@ -1,0 +1,23 @@
+{
+  "date": "2026-04-04",
+  "source_trading_day": "2026-04-02",
+  "out_path": "/workspace/outputs/Jane-Street-pre-market-edge-analyzer-2026-04-04.md",
+  "gap_pts": 5.9,
+  "gap_pct": 0.09,
+  "gap_view": "Hold",
+  "vix_now": 23.87,
+  "vix_prev": 24.54,
+  "calendar_load": "Light",
+  "main_event_count": 0,
+  "strategy": "0DTE SPX iron condor",
+  "supports": [
+    6577,
+    6478,
+    6428
+  ],
+  "resistances": [
+    6577,
+    6676,
+    6725
+  ]
+}
