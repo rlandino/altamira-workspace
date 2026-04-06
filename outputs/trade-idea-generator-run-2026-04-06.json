@@ -1,0 +1,38 @@
+{
+  "generated_at_utc": "2026-04-06T14:09:21.456223Z",
+  "chat_id": "7830722515",
+  "vix": 24.59,
+  "regime": "NORMAL",
+  "portfolio_ideas": [],
+  "watchlist_ideas": [
+    [
+      "ADBE",
+      "Momentum Watch",
+      "Strength day; watch for pullback-to-support entry",
+      245.65,
+      1.12383
+    ]
+  ],
+  "message": "\ud83d\udcc8 Altamira Trade Ideas | 2026-04-06 14:09 UTC\nVIX: 24.59 (NORMAL)\n\nPortfolio Ideas:\n- No high-conviction premium-selling setups from today's move filter.\n\nWatchlist Signals:\n- ADBE: Momentum Watch | Px 245.65 (+1.12%)\n  Strength day; watch for pullback-to-support entry\n\nRisk: Max 5% per idea, avoid earnings-week entries, prefer spreads when VIX elevated.",
+  "telegram_status_code": 200,
+  "telegram_response": {
+    "ok": true,
+    "result": {
+      "message_id": 518,
+      "from": {
+        "id": 7836764131,
+        "is_bot": true,
+        "first_name": "Voice_bot",
+        "username": "ElVoWfl_bot"
+      },
+      "chat": {
+        "id": 7830722515,
+        "first_name": "Ricardo",
+        "last_name": "Landino",
+        "type": "private"
+      },
+      "date": 1775484561,
+      "text": "\ud83d\udcc8 Altamira Trade Ideas | 2026-04-06 14:09 UTC\nVIX: 24.59 (NORMAL)\n\nPortfolio Ideas:\n- No high-conviction premium-selling setups from today's move filter.\n\nWatchlist Signals:\n- ADBE: Momentum Watch | Px 245.65 (+1.12%)\n  Strength day; watch for pullback-to-support entry\n\nRisk: Max 5% per idea, avoid earnings-week entries, prefer spreads when VIX elevated."
+    }
+  }
+}
