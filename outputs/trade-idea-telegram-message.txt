@@ -1,0 +1,24 @@
+📌 *Trade Idea Generator*
+Portfolio + Watchlist (repo context)
+
+1) *Covered Calls*
+• AVGO, JPM, WM
+• 30–45 DTE, 0.20–0.30Δ calls
+
+2) *Cash-Secured Puts (Top Watchlist)*
+• LRCX, NVDA, TSM, KLAC, ADBE
+• 30–45 DTE, ~0.20Δ puts
+
+3) *Staged Entries (Consider)*
+• ASML, LLY, ACN
+• Tranches: 40% / 30% / 30%
+
+4) *Concentration Guardrail*
+• Largest weights: SPY, AVGO, GOOGL
+• Add only if funded by trims/premium
+
+5) *Downside Hedge*
+• SPY 45–60 DTE put spread
+• Risk budget: 1–2% portfolio
+
+⚠️ Educational ideas only, not investment advice.
