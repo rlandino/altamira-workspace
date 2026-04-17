@@ -1,0 +1,260 @@
+{
+  "generated_at_utc": "2026-04-17T14:08:47.939607Z",
+  "vix": 17.6,
+  "regime": "NORMAL (17.60)",
+  "portfolio_count": 19,
+  "watchlist_count": 26,
+  "universe_count": 45,
+  "top_ideas": [
+    {
+      "ticker": "ASML",
+      "price": 1466.04,
+      "chg": 3.9133,
+      "score": 5.2,
+      "action": "CONSIDER ENTRY",
+      "rsi": 63.4,
+      "p10": 11.8,
+      "p20": 10.7,
+      "reasons": [
+        "strong day move +3.91%",
+        "20d momentum +10.7%",
+        "above 200d trend",
+        "near 52w high (chase risk)"
+      ],
+      "universe": "WATCHLIST"
+    },
+    {
+      "ticker": "TSM",
+      "price": 372.29001,
+      "chg": 2.46044,
+      "score": 5.2,
+      "action": "CONSIDER ENTRY",
+      "rsi": 71.3,
+      "p10": 8.9,
+      "p20": 13.0,
+      "reasons": [
+        "strong day move +2.46%",
+        "20d momentum +13.0%",
+        "above 200d trend",
+        "near 52w high (chase risk)"
+      ],
+      "universe": "WATCHLIST"
+    },
+    {
+      "ticker": "AAPL",
+      "price": 268.91,
+      "chg": 2.09188,
+      "score": 5.0,
+      "action": "CONSIDER ENTRY",
+      "rsi": 72.6,
+      "p10": 3.9,
+      "p20": 8.5,
+      "reasons": [
+        "strong day move +2.09%",
+        "20d momentum +8.5%",
+        "above 200d trend",
+        "RSI 72.6 (overbought)"
+      ],
+      "universe": "PORTFOLIO"
+    },
+    {
+      "ticker": "LRCX",
+      "price": 266.34,
+      "chg": 2.06162,
+      "score": 4.4,
+      "action": "CONSIDER ENTRY",
+      "rsi": 74.9,
+      "p10": 19.7,
+      "p20": 15.6,
+      "reasons": [
+        "strong day move +2.06%",
+        "20d momentum +15.6%",
+        "above 200d trend",
+        "near 52w high (chase risk)"
+      ],
+      "universe": "WATCHLIST"
+    },
+    {
+      "ticker": "TMO",
+      "price": 525.48,
+      "chg": 1.83721,
+      "score": 4.0,
+      "action": "CONSIDER ENTRY",
+      "rsi": 73.4,
+      "p10": 7.5,
+      "p20": 10.6,
+      "reasons": [
+        "positive day move +1.84%",
+        "20d momentum +10.6%",
+        "above 200d trend",
+        "RSI 73.4 (overbought)"
+      ],
+      "universe": "WATCHLIST"
+    },
+    {
+      "ticker": "META",
+      "price": 684.52,
+      "chg": 1.1302,
+      "score": 4.0,
+      "action": "CONSIDER ENTRY",
+      "rsi": 96.4,
+      "p10": 19.5,
+      "p20": 15.3,
+      "reasons": [
+        "positive day move +1.13%",
+        "20d momentum +15.3%",
+        "above 200d trend",
+        "RSI 96.4 (overbought)"
+      ],
+      "universe": "WATCHLIST"
+    },
+    {
+      "ticker": "MRVL",
+      "price": 135.9017,
+      "chg": 1.89825,
+      "score": 3.4,
+      "action": "WATCHLIST",
+      "rsi": 85.3,
+      "p10": 23.6,
+      "p20": 54.0,
+      "reasons": [
+        "positive day move +1.90%",
+        "20d momentum +54.0%",
+        "above 200d trend",
+        "near 52w high (chase risk)"
+      ],
+      "universe": "WATCHLIST"
+    },
+    {
+      "ticker": "KLAC",
+      "price": 1767.78,
+      "chg": 1.89815,
+      "score": 3.4,
+      "action": "WATCHLIST",
+      "rsi": 77.8,
+      "p10": 13.9,
+      "p20": 17.1,
+      "reasons": [
+        "positive day move +1.90%",
+        "20d momentum +17.1%",
+        "above 200d trend",
+        "near 52w high (chase risk)"
+      ],
+      "universe": "WATCHLIST"
+    },
+    {
+      "ticker": "AMZN",
+      "price": 253.8,
+      "chg": 1.64197,
+      "score": 3.4,
+      "action": "WATCHLIST",
+      "rsi": 97.7,
+      "p10": 19.3,
+      "p20": 23.7,
+      "reasons": [
+        "positive day move +1.64%",
+        "20d momentum +23.7%",
+        "above 200d trend",
+        "near 52w high (chase risk)"
+      ],
+      "universe": "PORTFOLIO"
+    },
+    {
+      "ticker": "AVGO",
+      "price": 404.96,
+      "chg": 1.62873,
+      "score": 3.4,
+      "action": "WATCHLIST",
+      "rsi": 93.7,
+      "p10": 28.3,
+      "p20": 29.9,
+      "reasons": [
+        "positive day move +1.63%",
+        "20d momentum +29.9%",
+        "above 200d trend",
+        "near 52w high (chase risk)"
+      ],
+      "universe": "PORTFOLIO"
+    }
+  ],
+  "earnings_next_7d": [
+    {
+      "date": "2026-04-21",
+      "symbol": "ISRG",
+      "eps": null,
+      "epsEstimated": 2.08,
+      "time": "amc",
+      "revenue": null,
+      "revenueEstimated": 2618749000,
+      "fiscalDateEnding": "2026-03-31",
+      "updatedFromDate": "2026-04-17"
+    },
+    {
+      "date": "2026-04-21",
+      "symbol": "MSCI",
+      "eps": null,
+      "epsEstimated": 4.37,
+      "time": "bmo",
+      "revenue": null,
+      "revenueEstimated": 836252900,
+      "fiscalDateEnding": "2026-03-31",
+      "updatedFromDate": "2026-04-17"
+    },
+    {
+      "date": "2026-04-22",
+      "symbol": "KMI",
+      "eps": null,
+      "epsEstimated": 0.38,
+      "time": "amc",
+      "revenue": null,
+      "revenueEstimated": 4627001000,
+      "fiscalDateEnding": "2026-03-31",
+      "updatedFromDate": "2026-04-17"
+    },
+    {
+      "date": "2026-04-22",
+      "symbol": "NOW",
+      "eps": null,
+      "epsEstimated": 0.95,
+      "time": "amc",
+      "revenue": null,
+      "revenueEstimated": 3745620000,
+      "fiscalDateEnding": "2026-03-31",
+      "updatedFromDate": "2026-04-17"
+    },
+    {
+      "date": "2026-04-22",
+      "symbol": "LRCX",
+      "eps": null,
+      "epsEstimated": 1.36,
+      "time": "amc",
+      "revenue": null,
+      "revenueEstimated": 5729681000,
+      "fiscalDateEnding": "2026-03-26",
+      "updatedFromDate": "2026-04-17"
+    },
+    {
+      "date": "2026-04-22",
+      "symbol": "TSLA",
+      "eps": null,
+      "epsEstimated": 0.36,
+      "time": "amc",
+      "revenue": null,
+      "revenueEstimated": 22316350000,
+      "fiscalDateEnding": "2026-03-31",
+      "updatedFromDate": "2026-04-17"
+    },
+    {
+      "date": "2026-04-23",
+      "symbol": "TMO",
+      "eps": null,
+      "epsEstimated": 5.21,
+      "time": "bmo",
+      "revenue": null,
+      "revenueEstimated": 10862610000,
+      "fiscalDateEnding": "2026-03-31",
+      "updatedFromDate": "2026-04-17"
+    }
+  ],
+  "telegram_message": "TRADE IDEA GENERATOR | 2026-04-17 10:08 ET\nUniverse: 45 tickers (19 portfolio, 26 watchlist)\nVIX Regime: NORMAL (17.60)\n\nTop Ideas:\n1. ASML [WATCHLIST] | Score 5.20 | CONSIDER ENTRY\n   Px $1466.04 (+3.91% d), 20d +10.7%, RSI 63.4\n   Why: strong day move +3.91%; 20d momentum +10.7%\n2. TSM [WATCHLIST] | Score 5.20 | CONSIDER ENTRY\n   Px $372.29 (+2.46% d), 20d +13.0%, RSI 71.3\n   Why: strong day move +2.46%; 20d momentum +13.0%\n3. AAPL [PORTFOLIO] | Score 5.00 | CONSIDER ENTRY\n   Px $268.91 (+2.09% d), 20d +8.5%, RSI 72.6\n   Why: strong day move +2.09%; 20d momentum +8.5%\n4. LRCX [WATCHLIST] | Score 4.40 | CONSIDER ENTRY\n   Px $266.34 (+2.06% d), 20d +15.6%, RSI 74.9\n   Why: strong day move +2.06%; 20d momentum +15.6%\n5. TMO [WATCHLIST] | Score 4.00 | CONSIDER ENTRY\n   Px $525.48 (+1.84% d), 20d +10.6%, RSI 73.4\n   Why: positive day move +1.84%; 20d momentum +10.6%\n6. META [WATCHLIST] | Score 4.00 | CONSIDER ENTRY\n   Px $684.52 (+1.13% d), 20d +15.3%, RSI 96.4\n   Why: positive day move +1.13%; 20d momentum +15.3%\n7. MRVL [WATCHLIST] | Score 3.40 | WATCHLIST\n   Px $135.90 (+1.90% d), 20d +54.0%, RSI 85.3\n   Why: positive day move +1.90%; 20d momentum +54.0%\n8. KLAC [WATCHLIST] | Score 3.40 | WATCHLIST\n   Px $1767.78 (+1.90% d), 20d +17.1%, RSI 77.8\n   Why: positive day move +1.90%; 20d momentum +17.1%\n9. AMZN [PORTFOLIO] | Score 3.40 | WATCHLIST\n   Px $253.80 (+1.64% d), 20d +23.7%, RSI 97.7\n   Why: positive day move +1.64%; 20d momentum +23.7%\n10. AVGO [PORTFOLIO] | Score 3.40 | WATCHLIST\n   Px $404.96 (+1.63% d), 20d +29.9%, RSI 93.7\n   Why: positive day move +1.63%; 20d momentum +29.9%\n\nEarnings (next 7d, in universe):\n- ISRG: 2026-04-21 amc\n- MSCI: 2026-04-21 bmo\n- KMI: 2026-04-22 amc\n- NOW: 2026-04-22 amc\n- LRCX: 2026-04-22 amc\n- TSLA: 2026-04-22 amc\n- TMO: 2026-04-23 bmo\n\nRisk note: Educational trade ideas only, not investment advice."
+}
