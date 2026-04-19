@@ -1,0 +1,110 @@
+{
+  "portfolio_core": [
+    "SPY",
+    "AVGO",
+    "GOOGL",
+    "AMAT",
+    "MSFT",
+    "AMZN",
+    "AAPL",
+    "CRWD"
+  ],
+  "watchlist_core": [
+    "LRCX",
+    "NVDA",
+    "TSM",
+    "KLAC",
+    "ADBE"
+  ],
+  "selected": [
+    {
+      "ticker": "SPY",
+      "price": 710.14,
+      "chg": 1.20856,
+      "sma20": 666.617,
+      "strategy": "Covered Call / Call Credit",
+      "note": "Trend above 20D SMA; near 20D high (0.0% below high).",
+      "action": "Sell 30-45D call around +5% strike (delta ~0.25).",
+      "score": 74.0,
+      "bucket": "Portfolio"
+    },
+    {
+      "ticker": "AVGO",
+      "price": 406.54,
+      "chg": 2.02525,
+      "sma20": 339.9465,
+      "strategy": "Covered Call / Call Credit",
+      "note": "Trend above 20D SMA; near 20D high (0.0% below high).",
+      "action": "Sell 30-45D call around +5% strike (delta ~0.25).",
+      "score": 74.0,
+      "bucket": "Portfolio"
+    },
+    {
+      "ticker": "GOOGL",
+      "price": 341.68,
+      "chg": 1.68442,
+      "sma20": 306.0725,
+      "strategy": "Covered Call / Call Credit",
+      "note": "Trend above 20D SMA; near 20D high (0.0% below high).",
+      "action": "Sell 30-45D call around +5% strike (delta ~0.25).",
+      "score": 74.0,
+      "bucket": "Portfolio"
+    },
+    {
+      "ticker": "MSFT",
+      "price": 422.79,
+      "chg": 0.60201,
+      "sma20": 379.927,
+      "strategy": "Covered Call / Call Credit",
+      "note": "Trend above 20D SMA; near 20D high (0.0% below high).",
+      "action": "Sell 30-45D call around +5% strike (delta ~0.25).",
+      "score": 74.0,
+      "bucket": "Portfolio"
+    },
+    {
+      "ticker": "AMZN",
+      "price": 250.56,
+      "chg": 0.34441,
+      "sma20": 221.4205,
+      "strategy": "Covered Call / Call Credit",
+      "note": "Trend above 20D SMA; near 20D high (0.0% below high).",
+      "action": "Sell 30-45D call around +5% strike (delta ~0.25).",
+      "score": 74.0,
+      "bucket": "Portfolio"
+    },
+    {
+      "ticker": "AAPL",
+      "price": 270.23,
+      "chg": 2.59301,
+      "sma20": 256.386,
+      "strategy": "Covered Call / Call Credit",
+      "note": "Trend above 20D SMA; near 20D high (0.0% below high).",
+      "action": "Sell 30-45D call around +5% strike (delta ~0.25).",
+      "score": 74.0,
+      "bucket": "Portfolio"
+    },
+    {
+      "ticker": "NVDA",
+      "price": 201.68,
+      "chg": 1.67885,
+      "sma20": 181.4385,
+      "strategy": "Covered Call / Call Credit",
+      "note": "Trend above 20D SMA; near 20D high (0.0% below high).",
+      "action": "Sell 30-45D call around +5% strike (delta ~0.25).",
+      "score": 74.0,
+      "bucket": "Watchlist"
+    },
+    {
+      "ticker": "KLAC",
+      "price": 1791.44,
+      "chg": 3.26195,
+      "sma20": 1598.55,
+      "strategy": "Covered Call / Call Credit",
+      "note": "Trend above 20D SMA; near 20D high (0.2% below high).",
+      "action": "Sell 30-45D call around +5% strike (delta ~0.25).",
+      "score": 73.8,
+      "bucket": "Watchlist"
+    }
+  ],
+  "message": "Altamira Trade Idea Generator (2026-04-19 14:06 UTC)\nUniverse: 8 portfolio + 5 watchlist tickers\n\n1) SPY [Portfolio] | Score 74.0/100 | Px $710.14 (+1.21%)\n   Strategy: Covered Call / Call Credit\n   Setup: Trend above 20D SMA; near 20D high (0.0% below high).\n   Action: Sell 30-45D call around +5% strike (delta ~0.25).\n\n2) AVGO [Portfolio] | Score 74.0/100 | Px $406.54 (+2.03%)\n   Strategy: Covered Call / Call Credit\n   Setup: Trend above 20D SMA; near 20D high (0.0% below high).\n   Action: Sell 30-45D call around +5% strike (delta ~0.25).\n\n3) GOOGL [Portfolio] | Score 74.0/100 | Px $341.68 (+1.68%)\n   Strategy: Covered Call / Call Credit\n   Setup: Trend above 20D SMA; near 20D high (0.0% below high).\n   Action: Sell 30-45D call around +5% strike (delta ~0.25).\n\n4) MSFT [Portfolio] | Score 74.0/100 | Px $422.79 (+0.60%)\n   Strategy: Covered Call / Call Credit\n   Setup: Trend above 20D SMA; near 20D high (0.0% below high).\n   Action: Sell 30-45D call around +5% strike (delta ~0.25).\n\n5) AMZN [Portfolio] | Score 74.0/100 | Px $250.56 (+0.34%)\n   Strategy: Covered Call / Call Credit\n   Setup: Trend above 20D SMA; near 20D high (0.0% below high).\n   Action: Sell 30-45D call around +5% strike (delta ~0.25).\n\n6) AAPL [Portfolio] | Score 74.0/100 | Px $270.23 (+2.59%)\n   Strategy: Covered Call / Call Credit\n   Setup: Trend above 20D SMA; near 20D high (0.0% below high).\n   Action: Sell 30-45D call around +5% strike (delta ~0.25).\n\n7) NVDA [Watchlist] | Score 74.0/100 | Px $201.68 (+1.68%)\n   Strategy: Covered Call / Call Credit\n   Setup: Trend above 20D SMA; near 20D high (0.0% below high).\n   Action: Sell 30-45D call around +5% strike (delta ~0.25).\n\n8) KLAC [Watchlist] | Score 73.8/100 | Px $1791.44 (+3.26%)\n   Strategy: Covered Call / Call Credit\n   Setup: Trend above 20D SMA; near 20D high (0.2% below high).\n   Action: Sell 30-45D call around +5% strike (delta ~0.25).\n\nRisk: For planning only (not investment advice). Use position/risk limits before entry."
+}
