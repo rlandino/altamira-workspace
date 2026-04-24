@@ -1,0 +1,169 @@
+{
+  "date": "2026-04-24",
+  "generated_at_utc": "2026-04-24 10:05 UTC",
+  "universe_count": 46,
+  "portfolio_count": 20,
+  "watchlist_count": 26,
+  "qualifying_count": 45,
+  "portfolio_ideas_top5": [
+    {
+      "ticker": "AMAT",
+      "spot": 403.91,
+      "strike": 390.0,
+      "exp": "2026-05-15",
+      "dte": 21,
+      "delta": -0.35,
+      "mid": 19.5,
+      "breakeven": 370.5,
+      "ann": 86.9,
+      "oi": 459,
+      "vol": 4
+    },
+    {
+      "ticker": "CRWD",
+      "spot": 445.39,
+      "strike": 430.0,
+      "exp": "2026-05-15",
+      "dte": 21,
+      "delta": -0.36,
+      "mid": 15.35,
+      "breakeven": 414.65,
+      "ann": 62.0,
+      "oi": 364,
+      "vol": 65
+    },
+    {
+      "ticker": "AVGO",
+      "spot": 419.94,
+      "strike": 410.0,
+      "exp": "2026-05-15",
+      "dte": 21,
+      "delta": -0.39,
+      "mid": 14.1,
+      "breakeven": 395.9,
+      "ann": 59.8,
+      "oi": 571,
+      "vol": 190
+    },
+    {
+      "ticker": "AMZN",
+      "spot": 255.08,
+      "strike": 250.0,
+      "exp": "2026-05-15",
+      "dte": 21,
+      "delta": -0.39,
+      "mid": 8.6,
+      "breakeven": 241.4,
+      "ann": 59.8,
+      "oi": 8202,
+      "vol": 811
+    },
+    {
+      "ticker": "NOW",
+      "spot": 84.78,
+      "strike": 80.0,
+      "exp": "2026-05-15",
+      "dte": 21,
+      "delta": -0.29,
+      "mid": 2.75,
+      "breakeven": 77.25,
+      "ann": 59.7,
+      "oi": 4416,
+      "vol": 5187
+    }
+  ],
+  "watchlist_ideas_top5": [
+    {
+      "ticker": "FICO",
+      "spot": 980.07,
+      "strike": 950.0,
+      "exp": "2026-05-15",
+      "dte": 21,
+      "delta": -0.39,
+      "mid": 59.6,
+      "breakeven": 890.4,
+      "ann": 109.0,
+      "oi": 143,
+      "vol": 6
+    },
+    {
+      "ticker": "MRVL",
+      "spot": 165.56,
+      "strike": 160.0,
+      "exp": "2026-05-15",
+      "dte": 21,
+      "delta": -0.33,
+      "mid": 8.93,
+      "breakeven": 151.07,
+      "ann": 97.0,
+      "oi": 168,
+      "vol": 356
+    },
+    {
+      "ticker": "PLTR",
+      "spot": 141.57,
+      "strike": 138.0,
+      "exp": "2026-05-15",
+      "dte": 21,
+      "delta": -0.39,
+      "mid": 7.55,
+      "breakeven": 130.45,
+      "ann": 95.1,
+      "oi": 395,
+      "vol": 32
+    },
+    {
+      "ticker": "ANET",
+      "spot": 172.55,
+      "strike": 165.0,
+      "exp": "2026-05-15",
+      "dte": 21,
+      "delta": -0.34,
+      "mid": 8.57,
+      "breakeven": 156.43,
+      "ann": 90.3,
+      "oi": 101,
+      "vol": 43
+    },
+    {
+      "ticker": "LRCX",
+      "spot": 258.56,
+      "strike": 250.0,
+      "exp": "2026-05-15",
+      "dte": 21,
+      "delta": -0.36,
+      "mid": 11.98,
+      "breakeven": 238.03,
+      "ann": 83.3,
+      "oi": 1103,
+      "vol": 259
+    }
+  ],
+  "failures": [
+    {
+      "ticker": "FFOLX",
+      "error": "no qualifying contracts"
+    }
+  ],
+  "telegram_chat_id": "7830722515",
+  "telegram_result": {
+    "ok": true,
+    "result": {
+      "message_id": 832,
+      "from": {
+        "id": 7836764131,
+        "is_bot": true,
+        "first_name": "Voice_bot",
+        "username": "ElVoWfl_bot"
+      },
+      "chat": {
+        "id": 7830722515,
+        "first_name": "Ricardo",
+        "last_name": "Landino",
+        "type": "private"
+      },
+      "date": 1777025107,
+      "text": "TRADE IDEA GENERATOR -- Portfolio + Watchlist\nDate: 2026-04-24\n\nPortfolio: $1,207,271 | 5% max $60,364 | starter 2% $24,145\nConcentration top4: 60.2%\n\nTop Portfolio CSP ideas:\n1) AMAT 390P 2026-05-15 (21d) d=-0.35 credit~19.50 ann~86.9%\n2) CRWD 430P 2026-05-15 (21d) d=-0.36 credit~15.35 ann~62.0%\n3) AVGO 410P 2026-05-15 (21d) d=-0.39 credit~14.10 ann~59.8%\n\nTop Watchlist CSP ideas:\n1) FICO 950P 2026-05-15 (21d) d=-0.39 credit~59.60 ann~109.0%\n2) MRVL 160P 2026-05-15 (21d) d=-0.33 credit~8.93 ann~97.0%\n3) PLTR 138P 2026-05-15 (21d) d=-0.39 credit~7.55 ann~95.1%\n\nDisclaimer: Educational ideas only, not investment advice."
+    }
+  }
+}
