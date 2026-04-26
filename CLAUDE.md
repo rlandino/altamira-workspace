@@ -61,6 +61,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── compounder-screen.md # /compounder-screen — compounder quality screen (7-point checklist) for watchlist candidates
 │   │   ├── DE-shaw-iron-condor-income-machine.md # /DE-shaw-iron-condor-income-machine — systematic iron condor (SPX/SPY/QQQ/IWM), sizing, adjustments, income
 │   │   ├── watchlist-refresh.md # /watchlist-refresh — refresh and score watchlist
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — portfolio/watchlist trade ideas + Telegram delivery
 │   │   ├── wolverine-trading-risk-management-system.md # /wolverine-trading-risk-management-system — theta risk manual, limits, roll/close, daily checklist
 │   │   ├── 13f-diff.md        # /13f-diff — 13F holdings diff
 │   │   ├── copycat-13f.md     # /copycat-13f — 13F copycat portfolio
@@ -345,6 +346,14 @@ Example: `/compounder-screen COST` or `/compounder-screen COST MSFT AVGO`
 
 Runs `scripts/stock-scorer.py` for portfolio/watchlist tickers; consolidates scores and optionally updates `context/watchlist.md` with grades and notes. Flags low scores and high-score candidates.
 
+### /trade-idea-generator [--send-telegram]
+
+**Purpose:** Generate daily trade ideas from `context/portfolio-details.md`, `context/watchlist.md`, and `context/options-positions.md`, then optionally send a concise summary to Telegram.
+
+Runs `python3 scripts/trade_idea_generator.py`, pulling live FMP quotes and Massive.com option snapshots when available. Writes `outputs/trade-idea-generator-{DATE}.md` plus a Telegram preview text file. Use `--send-telegram` to deliver through `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (or the repository fallback chat id used by the CSP workflow).
+
+Example: `/trade-idea-generator --send-telegram`
+
 ### /wireframe [ARTIFACT]
 
 **Purpose:** Three-step flow: (1) Generate — output only an ASCII wireframe of the artifact using box-drawing characters and arrows, no code. (2) Iterate — apply 1–2 specific changes and redraw the wireframe only. (3) Build — implement the artifact from the pasted wireframe and stack/requirements, matching the wireframe exactly. Artifacts: Dashboard, slides, workflows, schemas, landing pages (or short description).
@@ -587,6 +596,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | Script | Purpose | Usage |
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
+| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist trade ideas, write markdown + Telegram preview, optionally send Telegram | `python scripts/trade_idea_generator.py --send-telegram` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |

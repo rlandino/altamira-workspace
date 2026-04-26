@@ -1,0 +1,13 @@
+*Altamira Trade Ideas* - 2026-04-26
+Repo snapshot: `2026-02-18`
+SPY: $713.94 (+0.77%)
+VIX: 18.71 (NORMAL)
+
+1. *Sell covered call SPY* - 2026-05-22 727 @ $6.57 (conf. 82/100)
+2. *Sell covered call AVGO* - 2026-05-22 450 @ $10.30 (conf. 82/100)
+3. *Sell covered call GOOGL* - 2026-05-22 365 @ $6.40 (conf. 82/100)
+4. *Sell covered call AMAT* - 2026-05-22 455 @ $13.30 (conf. 82/100)
+5. *Sell cash-secured put LRCX* - 2026-05-22 250 @ $10.75 (conf. 81/100)
+
+Risk: verify live chain, earnings, BP, and 5%/30% limits before orders.
+Report: `outputs/trade-idea-generator-2026-04-26.md`
