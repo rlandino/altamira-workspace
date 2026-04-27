@@ -356,10 +356,18 @@ def build_report(send_requested: bool = False) -> tuple[str, str, Path]:
             covered_call_candidates.append({"holding": holding, "tech": tech, "extension": extension, "score": score})
     covered_call_candidates.sort(key=lambda item: item["score"], reverse=True)
 
+    today = date.today()
     option_actions: list[str] = []
     for pos in options:
         ratio = pos.current / pos.credit if pos.credit else 0
-        if pos.current <= pos.credit * 0.5:
+        try:
+            expiration_date = datetime.strptime(pos.expiration, "%Y-%m-%d").date()
+        except ValueError:
+            expiration_date = None
+        if expiration_date and expiration_date < today:
+            action = "Reconcile expired position"
+            reason = "expiration is before today's date in the repository context"
+        elif pos.current <= pos.credit * 0.5:
             action = "Close/harvest"
             reason = "at or beyond 50% profit target"
         elif pos.current >= pos.credit * 2:
@@ -373,15 +381,15 @@ def build_report(send_requested: bool = False) -> tuple[str, str, Path]:
             f"(credit ${pos.credit:.2f}, current ${pos.current:.2f}, {ratio:.1f}x) - {reason}."
         )
 
-    today = date.today().isoformat()
-    report_path = OUTPUTS / f"trade-idea-generator-{today}.md"
+    today_str = today.isoformat()
+    report_path = OUTPUTS / f"trade-idea-generator-{today_str}.md"
     disclosure = (
         "Educational trade-planning output only; not investment advice. Verify live option chains, "
         "earnings dates, liquidity, and account risk before placing any order."
     )
 
     lines: list[str] = [
-        f"# Trade Idea Generator - {today}",
+        f"# Trade Idea Generator - {today_str}",
         "",
         f"**Universe:** current portfolio ({len(holdings)} holdings) + watchlist ({len(watchlist)} names).",
         f"**VIX regime:** {fmt_num(vix, 1)} ({vix_regime}); suggested premium-selling size factor: {sizing}.",
@@ -396,7 +404,7 @@ def build_report(send_requested: bool = False) -> tuple[str, str, Path]:
         "|------|--------|-----------------|-------|-----|------------|-----------------|---------|",
     ]
     telegram_lines = [
-        f"TRADE IDEA GENERATOR - {today}",
+        f"TRADE IDEA GENERATOR - {today_str}",
         f"VIX: {fmt_num(vix, 1)} ({vix_regime}) | Size factor: {sizing}",
         "",
         "Top CSP / put-spread ideas:",
@@ -511,18 +519,20 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate Altamira trade ideas from repo context.")
     parser.add_argument("--send-telegram", action="store_true", help="Send concise summary to Telegram.")
     parser.add_argument("--telegram-chat-id", default=os.environ.get("TELEGRAM_CHAT_ID") or os.environ.get("TELEGRAM_CHANNEL_ID"))
+    parser.add_argument("--telegram-channel", default=os.environ.get("TELEGRAM_CHANNEL") or os.environ.get("TELEGRAM_CHANNEL_USERNAME"))
     args = parser.parse_args()
 
     report, telegram_message, report_path = build_report(send_requested=args.send_telegram)
     print(f"Wrote {report_path}")
 
     if args.send_telegram:
-        if not args.telegram_chat_id:
+        chat_id = args.telegram_chat_id or args.telegram_channel
+        if not chat_id:
             payload_path = OUTPUTS / f"trade-idea-generator-telegram-{date.today().isoformat()}.txt"
             payload_path.write_text(telegram_message, encoding="utf-8")
             print(f"Telegram chat id missing. Saved message payload to {payload_path}", file=sys.stderr)
             return 2
-        result = send_telegram(telegram_message, args.telegram_chat_id)
+        result = send_telegram(telegram_message, chat_id)
         message_id = (result.get("result") or {}).get("message_id")
         print(f"Sent Telegram message_id={message_id}")
 
