@@ -1,0 +1,19 @@
+TRADE IDEA GENERATOR - 2026-04-27
+VIX: 18.9 (NORMAL) | Size factor: 100%
+
+Top CSP / put-spread ideas:
+1. LRCX (B, score 67.4) - CSP, 30-45 DTE, target 0.20-0.30 delta.
+2. NVDA (B, score 66.2) - CSP, 30-45 DTE, target 0.20-0.30 delta.
+3. ADBE (B-, score 60.1) - CSP, 30-45 DTE, target 0.20-0.30 delta.
+
+Covered call / risk-control ideas:
+1. AVGO (16.7% weight) - consider 0.20-0.30 delta covered call or trim review.
+2. SPY (17.1% weight) - consider 0.20-0.30 delta covered call or trim review.
+3. GOOGL (13.8% weight) - consider 0.20-0.30 delta covered call or trim review.
+
+Manage open puts:
+- Reconcile expired position: MSFT 430 Put 2026-03-20 (credit $8.70, current $22.40, 2.6x) - expiration is before today's date in the repository context.
+- Hold/monitor: MSFT 380 Put 2026-05-15 (credit $10.12, current $11.80, 1.2x) - inside normal management band.
+- Reconcile expired position: AVGO 310 Put 2026-03-20 (credit $12.60, current $5.00, 0.4x) - expiration is before today's date in the repository context.
+
+Verify live chains/earnings before entry. Educational only.
