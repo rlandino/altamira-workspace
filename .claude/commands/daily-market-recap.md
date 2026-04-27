@@ -7,7 +7,7 @@ Generate a daily market recap markdown report and send both a short summary and 
 Run from the workspace root:
 
 ```bash
-python scripts/daily_market_recap.py --send-telegram
+python3 scripts/daily_market_recap.py --send-telegram
 ```
 
 Optional arguments:

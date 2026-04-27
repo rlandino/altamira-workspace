@@ -593,7 +593,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | Script | Purpose | Usage |
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
-| `scripts/daily_market_recap.py` | Generate daily market recap markdown and optionally send summary/document to Telegram | `python scripts/daily_market_recap.py --send-telegram --telegram-chat-id CHAT_ID` |
+| `scripts/daily_market_recap.py` | Generate daily market recap markdown and optionally send summary/document to Telegram | `python3 scripts/daily_market_recap.py --send-telegram --telegram-chat-id CHAT_ID` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
