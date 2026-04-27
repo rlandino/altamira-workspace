@@ -32,8 +32,10 @@ HIGH_IMPACT_KEYWORDS = (
     "cpi",
     "pce",
     "fomc",
-    "fed",
     "powell",
+    "federal reserve",
+    "interest rate",
+    "rate decision",
     "nonfarm",
     "payroll",
     "nfp",
@@ -180,6 +182,24 @@ def nearest_round_level(value: float, direction: str) -> int:
     return int(math.floor(value / 50) * 50)
 
 
+def is_high_impact_event(name: str) -> bool:
+    """Identify macro events that should alter index option risk-taking."""
+    lower = name.lower()
+    regional_fed_markers = (
+        "dallas fed",
+        "richmond fed",
+        "kansas city fed",
+        "chicago fed",
+        "philadelphia fed",
+        "empire state",
+    )
+    if any(marker in lower for marker in regional_fed_markers):
+        return False
+    if "fed" in lower:
+        return any(marker in lower for marker in ("fomc", "powell", "federal reserve", "fed chair", "fed speaker"))
+    return any(keyword in lower for keyword in HIGH_IMPACT_KEYWORDS)
+
+
 def high_impact_events(events: list[dict[str, Any]], user_text: str) -> list[str]:
     """Return high-impact event descriptions from FMP and user input."""
     descriptions: list[str] = []
@@ -188,19 +208,48 @@ def high_impact_events(events: list[dict[str, Any]], user_text: str) -> list[str
         country = str(event.get("country") or "").upper()
         if country and country not in {"US", "USA", "UNITED STATES"}:
             continue
-        event_l = name.lower()
-        if any(keyword in event_l for keyword in HIGH_IMPACT_KEYWORDS):
+        if is_high_impact_event(name):
             event_time = str(event.get("date") or event.get("time") or "time n/a")
             descriptions.append(f"{event_time}: {name}")
-    if user_text and any(keyword in user_text.lower() for keyword in HIGH_IMPACT_KEYWORDS):
+    if user_text and is_high_impact_event(user_text):
         descriptions.insert(0, f"User-supplied: {user_text}")
     return descriptions
+
+
+def calendar_lines(events: list[dict[str, Any]], user_text: str) -> list[str]:
+    """Build economic calendar lines, prioritizing U.S. and high-impact events."""
+    prioritized: list[tuple[int, str]] = []
+    for event in events:
+        name = str(event.get("event") or event.get("name") or "Economic event")
+        country = str(event.get("country") or "")
+        country_code = country.upper()
+        is_us = country_code in {"US", "USA", "UNITED STATES"}
+        is_high = is_high_impact_event(name)
+        if not is_us and not is_high:
+            continue
+
+        event_time = str(event.get("date") or event.get("time") or "time n/a")
+        impact = (
+            event_impact_note(name)
+            if is_high
+            else "routine U.S. calendar item; low expected index impact unless surprise is large."
+        )
+        priority = 0 if is_us and is_high else (1 if is_us else 2)
+        prioritized.append((priority, f"- {event_time} {country_code} - {name}: {impact}"))
+
+    prioritized.sort(key=lambda item: item[0])
+    lines = [line for _, line in prioritized[:12]]
+    if user_text:
+        lines.insert(0, f"- User-supplied event note: {user_text}")
+    if not lines:
+        lines = ["- No U.S. or high-impact FMP economic calendar items returned for today; confirm broker calendar before the open."]
+    return lines
 
 
 def event_impact_note(name: str) -> str:
     """Map an event name to a concise historical range-impact note."""
     lower = name.lower()
-    if any(word in lower for word in ("cpi", "fomc", "fed", "powell", "pce")):
+    if any(word in lower for word in ("cpi", "fomc", "powell", "pce", "federal reserve")):
         return "historically can expand SPX intraday range 1.5-2.0x; avoid selling tight premium into the release."
     if any(word in lower for word in ("nfp", "payroll", "jobless", "claims")):
         return "labor data can reset rate expectations and widen the opening range."
@@ -211,20 +260,23 @@ def event_impact_note(name: str) -> str:
 
 def earnings_exposure(rows: list[dict[str, Any]]) -> list[str]:
     """Build a concise list of major earnings that can move index beta."""
-    exposures: list[str] = []
+    prioritized: list[tuple[int, str]] = []
     for row in rows:
         symbol = str(row.get("symbol") or "").upper()
         if not symbol:
             continue
+        # Skip most non-U.S. exchange suffixes unless the ticker is explicitly index-heavy.
+        if "." in symbol and symbol not in INDEX_HEAVY_TICKERS:
+            continue
         time = str(row.get("time") or row.get("hour") or "time n/a").upper()
         company = row.get("company") or row.get("name") or symbol
         is_major = symbol in INDEX_HEAVY_TICKERS
-        if is_major or len(exposures) < 8:
-            potential = "High" if is_major else "Low/Medium"
-            exposures.append(f"{symbol} ({company}, {time}) - market-moving potential: {potential}")
-        if len(exposures) >= 10:
-            break
-    return exposures
+        potential = "High" if is_major else "Low/Medium"
+        priority = 0 if is_major else 1
+        prioritized.append((priority, f"{symbol} ({company}, {time}) - market-moving potential: {potential}"))
+
+    prioritized.sort(key=lambda item: item[0])
+    return [line for _, line in prioritized[:10]]
 
 
 def unique_levels(levels: list[tuple[float, str]], current: float, side: str) -> list[tuple[float, str]]:
@@ -416,17 +468,7 @@ def build_report(raw_args: str = "") -> tuple[Path, str, str]:
     else:
         iv_sentence = "VIX prior-close comparison was unavailable from FMP; use broker IV screens to confirm pre-market option richness."
 
-    econ_lines = []
-    for event in econ_rows[:12]:
-        name = str(event.get("event") or event.get("name") or "Economic event")
-        event_time = str(event.get("date") or event.get("time") or "time n/a")
-        country = str(event.get("country") or "")
-        impact = event_impact_note(name) if any(k in name.lower() for k in HIGH_IMPACT_KEYWORDS) else "routine calendar item; low expected index impact unless surprise is large."
-        econ_lines.append(f"- {event_time} {country} - {name}: {impact}")
-    if not econ_lines:
-        econ_lines = ["- No FMP economic calendar items returned for today; confirm broker calendar before the open."]
-    if parsed.events_text:
-        econ_lines.insert(0, f"- User-supplied event note: {parsed.events_text}")
+    econ_lines = calendar_lines(econ_rows, parsed.events_text)
 
     support_lines = [f"- Support {idx}: {fmt_price(level, 0)} - {reason}" for idx, (level, reason) in enumerate(supports, 1)]
     resistance_lines = [f"- Resistance {idx}: {fmt_price(level, 0)} - {reason}" for idx, (level, reason) in enumerate(resistances, 1)]
