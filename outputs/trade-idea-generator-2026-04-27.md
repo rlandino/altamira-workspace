@@ -6,7 +6,7 @@
 
 - **Universe:** 45 portfolio/watchlist tickers
 - **Portfolio value used for sizing:** $1,207,271
-- **VIX:** 19.05 (NORMAL)
+- **VIX:** 19.04 (NORMAL)
 - **Sizing multiplier:** 100%
 - **Max per idea:** 5.0% of portfolio collateral before VIX adjustment
 
@@ -14,9 +14,9 @@
 
 | Rank | Ticker | Source | Trade | Credit | Delta | DTE | Ann. Return | Breakeven | Contracts | Premium | Collateral | Score |
 |------|--------|--------|-------|--------|-------|-----|-------------|-----------|-----------|---------|------------|-------|
-| 1 | TSM | Watchlist | 380P 2026-05-29 | $12.10 | -0.272 | 32 | 36.3% | $367.90 | 1 | $1,210 | $38,000 | 92.3 |
-| 2 | LRCX | Watchlist | 240P 2026-05-29 | $8.35 | -0.249 | 32 | 39.7% | $231.65 | 2 | $1,670 | $48,000 | 83.9 |
-| 3 | ISRG | Watchlist | 450P 2026-05-29 | $5.40 | -0.223 | 32 | 13.7% | $444.60 | 1 | $540 | $45,000 | 33.7 |
+| 1 | TSM | Watchlist | 380P 2026-05-29 | $12.10 | -0.273 | 32 | 36.3% | $367.90 | 1 | $1,210 | $38,000 | 92.3 |
+| 2 | LRCX | Watchlist | 240P 2026-05-29 | $8.35 | -0.248 | 32 | 39.7% | $231.65 | 2 | $1,670 | $48,000 | 83.9 |
+| 3 | ISRG | Watchlist | 450P 2026-05-29 | $5.40 | -0.225 | 32 | 13.7% | $444.60 | 1 | $540 | $45,000 | 33.5 |
 | 4 | JPM | Portfolio | 295P 2026-05-29 | $3.50 | -0.265 | 32 | 13.5% | $291.50 | 2 | $700 | $59,000 | 32.2 |
 
 ### Management Rules
