@@ -201,6 +201,14 @@ Collects trade details (ticker, strategy, strike, delta, thesis, edge), runs the
 
 Example: `/paper-trade AAPL CSP STO 225 strike 2026-04-17 exp -0.22 delta $3.20 credit`
 
+### /trade-idea-generator [--send-telegram]
+
+**Purpose:** Generate daily trade ideas from the current portfolio and watchlist, focused on 30-45 DTE cash-secured put candidates and momentum checks.
+
+Runs `scripts/trade_idea_generator.py`, using `context/portfolio-details.md` and `context/watchlist.md` as the universe, FMP for quotes/earnings, and Massive.com for options snapshots. Writes `outputs/trade-idea-generator-{DATE}.md` and `outputs/trade-idea-generator-telegram-{DATE}.txt`. Add `--send-telegram` with `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (or `--telegram-chat-id`) to send the compact output to Telegram.
+
+Example: `/trade-idea-generator` or `/trade-idea-generator --send-telegram`
+
 ### /client-report [type]
 
 **Purpose:** Generate a professional, client-facing portfolio performance report.
@@ -588,6 +596,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
+| `scripts/trade_idea_generator.py` | Generate daily CSP trade ideas and momentum checks from current portfolio/watchlist; optionally send Telegram summary | `python scripts/trade_idea_generator.py [--send-telegram --telegram-chat-id CHAT_ID]` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |

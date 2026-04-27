@@ -1,0 +1,14 @@
+TRADE IDEA GENERATOR - 2026-04-27
+VIX: 19.1 (NORMAL) | Sizing: 100%
+
+#1 TSM 380P 2026-05-29 - credit $12.10, delta -0.27, DTE 32, ann 36.3%, score 92.3
+  BE $367.90 | contracts 1 | premium $1,210 | collateral $38,000
+#2 LRCX 240P 2026-05-29 - credit $8.35, delta -0.25, DTE 32, ann 39.7%, score 83.9
+  BE $231.65 | contracts 2 | premium $1,670 | collateral $48,000
+#3 ISRG 450P 2026-05-29 - credit $5.40, delta -0.22, DTE 32, ann 13.7%, score 33.7
+  BE $444.60 | contracts 1 | premium $540 | collateral $45,000
+#4 JPM 295P 2026-05-29 - credit $3.50, delta -0.27, DTE 32, ann 13.5%, score 32.2
+  BE $291.50 | contracts 2 | premium $700 | collateral $59,000
+
+Validate earnings/liquidity before trading.
+Report: trade-idea-generator-2026-04-27.md
