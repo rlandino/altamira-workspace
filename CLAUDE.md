@@ -581,6 +581,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |---------|-----|-------------|---------------|
 | Altamira Dashboard | http://localhost:3001 | Docker (MongoDB) + `next dev -p 3001` | `reference/altamira-dashboard-restart-guide.md` |
 | Kanban Board | http://localhost:3004 | `npm run dev:all` | `reference/kanban-dashboard.md` |
+| TradingView Webhook Bridge | http://localhost:8002 | `uvicorn scripts.tradingview_webhook_api:app --host 0.0.0.0 --port 8002` | `reference/tradingview-integration.md` |
 
 ## Scripts
 
@@ -599,6 +600,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | `scripts/13f-backtest.py` | Backtest copycat/13F strategy (FMP prices) | `python scripts/13f-backtest.py --portfolio copycat.json --from YYYY-MM-DD --to YYYY-MM-DD` or `--cik CIK` |
 | **13F API (Option B)** | FastAPI bridge for dashboard (run scripts, return JSON, 5 min cache) | `pip install fastapi uvicorn` then `uvicorn scripts.13f_api:app --host 0.0.0.0 --port 8000` — base URL `http://localhost:8000/api/13f/` |
 | **Market Data API** | FastAPI bridge to FMP for dashboard (quotes, indices, earnings) | `uvicorn scripts.market_data_api:app --host 0.0.0.0 --port 8001` — base URL `http://localhost:8001/api/market/` (alt-dash-06) |
+| **TradingView Webhook Bridge** | Receives TradingView desktop-app alert webhooks; exposes them to dashboard. POST `/api/tradingview/webhook`, GET `/api/tradingview/alerts`. | `uvicorn scripts.tradingview_webhook_api:app --host 0.0.0.0 --port 8002` — base URL `http://localhost:8002/api/tradingview/`. Optional `TRADINGVIEW_WEBHOOK_SECRET`. See `reference/tradingview-integration.md`. |
 | `scripts/streamlit_13f.py` | Streamlit 13F section for dashboard (copy or import into app; calls 13F API) | `streamlit run scripts/streamlit_13f.py` for standalone preview; see `reference/13f-dashboard-integration.md` |
 | `scripts/build-holding-monthly-snapshots.py` | Build monthly snapshot per holding for Holding Snapshot dashboard | `python scripts/build-holding-monthly-snapshots.py --sheets` or `--file context/position-history-export.csv`; writes `context/holding-monthly-snapshots.json` |
 | `scripts/streamlit_holding_snapshot.py` | Streamlit Holding Snapshot section for page /a (copy or import into app) | `streamlit run scripts/streamlit_holding_snapshot.py` for standalone preview; see `reference/holding-snapshot-dashboard.md` |
