@@ -441,6 +441,12 @@ Uses Market Data API (port 8001) or FMP for indices and VIX; presents levels and
 
 Uses FMP API (v3 + stable) for quotes, gainers/losers, sector snapshot, earnings calendar, and historical EOD. Computes 5D/20D averages, support/resistance, and trend (Bullish/Bearish/Mixed). Writes `outputs/briefing-{DATE}.md` and optionally runs `scripts/briefing_chart.py` for `outputs/briefing-chart-{DATE}.png`. To hear the summary as audio after a briefing, run `/speak briefing`.
 
+### /daily-market-recap [optional YYYY-MM-DD]
+
+**Purpose:** Generate the end-of-day market recap and deliver it to Telegram. Uses FMP quotes, sector snapshot, gainers/losers, broad headlines, earnings calendar, and S&P 500 technical context. Writes `outputs/daily-market-recap-{DATE}.md`, sends a concise Telegram summary, and uploads the markdown file via the Telegram Bot API.
+
+Runs `python3 scripts/daily_market_recap.py` by default. Requires `TELEGRAM_BOT_TOKEN`; uses `TELEGRAM_CHAT_ID`, `TELEGRAM_CHANNEL_ID`, `MARKET_COMMENTER_TELEGRAM_CHAT_ID`, or `ALTAMIRA_TELEGRAM_CHAT_ID` when set, with the existing Market Commenter chat id fallback.
+
 ### /speak [text | file path | briefing]
 
 **Purpose:** Run TTS to speak text aloud or save to MP3. Use with inline text, a file path (e.g. `outputs/briefing-voice-2025-02-23.txt`), or the shortcut `briefing` to speak the last briefing’s Voice script. Combines with `/briefing`, `/market-brief`, or any command whose output you want as audio.
