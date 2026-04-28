@@ -605,6 +605,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | `scripts/build-holding-monthly-snapshots.py` | Build monthly snapshot per holding for Holding Snapshot dashboard | `python scripts/build-holding-monthly-snapshots.py --sheets` or `--file context/position-history-export.csv`; writes `context/holding-monthly-snapshots.json` |
 | `scripts/streamlit_holding_snapshot.py` | Streamlit Holding Snapshot section for page /a (copy or import into app) | `streamlit run scripts/streamlit_holding_snapshot.py` for standalone preview; see `reference/holding-snapshot-dashboard.md` |
 | `scripts/deploy-holding-snapshot-to-app.py` | Deploy Holding Snapshot to Streamlit app (copy fragment + JSON, inject into page /a) | `python scripts/deploy-holding-snapshot-to-app.py --app-dir "X:\path\to\streamlit-app"`; use `--snippet-only` to print paste snippet |
+| `scripts/sync_obsidian_vault.py` | Bidirectional sync of the Obsidian vault between NAS and local workspace; newer-mtime wins, same-mtime conflicts are parked as `.conflict-<utc>` siblings, lock file prevents concurrent runs | `OBSIDIAN_NAS_PATH=... python scripts/sync_obsidian_vault.py [--mode pull\|push\|both] [--dry-run] [--delete]` |
 
 **13F hardening:** CUSIP→ticker in `reference/cusip-to-ticker.json`; loader `scripts/cusip_loader.py`. Curated filers: `context/13f-filers.txt` (use with `ingest-13f.py --cik-list`). SEC ingest retries once on 403.
 

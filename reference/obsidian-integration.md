@@ -76,3 +76,43 @@ The workspace includes a minimal **`.obsidian`** folder so Obsidian recognizes i
 - [ ] (Optional) Set default location for new notes and install Dataview or Templater.
 
 You’re integrated: the vault is the workspace, and Claude/Cursor and Obsidian work on the same files.
+
+---
+
+## 8. Syncing the vault between NAS and a local clone
+
+If you keep the canonical vault on the **Landino NAS** but also work against a
+local clone on a laptop or in a dev container, use `scripts/sync_obsidian_vault.py`
+to mirror the two. It is bidirectional: newer-mtime wins; if both sides changed
+within ~2.5 seconds it parks the older copy as `note.md.conflict-<utc>` next to
+the file rather than overwriting silently.
+
+```bash
+# point the script at the NAS once, then forget about it
+export OBSIDIAN_NAS_PATH="//Landino-NAS/AI Automation/Claude/altamira-workspace"
+# Windows alternatives:
+#   set OBSIDIAN_NAS_PATH=Z:\Claude\altamira-workspace
+#   set OBSIDIAN_NAS_PATH=\\Landino-NAS\AI Automation\Claude\altamira-workspace
+
+# preview what would change
+python scripts/sync_obsidian_vault.py --dry-run
+
+# run the actual sync (both directions)
+python scripts/sync_obsidian_vault.py
+
+# pull the NAS over my local (one-way, useful after editing on another machine)
+python scripts/sync_obsidian_vault.py --mode pull
+
+# push my local up to the NAS, removing files there that I deleted locally
+python scripts/sync_obsidian_vault.py --mode push --delete
+```
+
+Defaults are tuned for the Obsidian vault: it includes `*.md`, `.obsidian/**`,
+and the workspace's content directories (`context/`, `outputs/`, `plans/`,
+`reference/`, `.claude/`), and excludes `.git/`, `node_modules/`,
+`__pycache__/`, the runtime TradingView alerts log, and any
+`*.conflict-*` files. Pass `--include` / `--exclude` for project-specific
+overrides.
+
+Each run takes a `.sync.lock` in the local root for the duration; if a previous
+run was killed, delete `.sync.lock` to recover.
