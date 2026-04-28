@@ -134,14 +134,25 @@ def sector_name(row: dict[str, Any]) -> str:
 
 
 def sector_change(row: dict[str, Any]) -> float:
-    for key in ("changesPercentage", "changePercentage", "performance", "change", "1D"):
+    for key in (
+        "changesPercentage",
+        "changePercentage",
+        "averageChange",
+        "performance",
+        "change",
+        "1D",
+    ):
         if key in row:
             return as_float(row.get(key))
     return 0.0
 
 
 def summarize_trend(spx: dict[str, Any], history: list[dict[str, Any]]) -> dict[str, Any]:
-    closes = [as_float(row.get("close")) for row in history if row.get("close") is not None]
+    closes = [
+        as_float(row.get("close") if row.get("close") is not None else row.get("price"))
+        for row in history
+        if row.get("close") is not None or row.get("price") is not None
+    ]
     closes = [close for close in closes if close > 0]
     current = as_float(spx.get("price") or spx.get("previousClose"))
     if not closes or current <= 0:
