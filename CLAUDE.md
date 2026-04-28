@@ -66,6 +66,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── copycat-13f.md     # /copycat-13f — 13F copycat portfolio
 │   │   ├── context-refresh.md # /context-refresh — refresh context files
 │   │   ├── kanban-sync.md     # /kanban-sync — kanban export and sync
+│   │   ├── sync-second-brain.md # /sync-second-brain — sync Obsidian second-brain repo (NAS ⇄ local)
 │   │   ├── insider.md         # /insider — insider transaction summary
 │   │   ├── imc-trading-earnings-theta-crusher.md # /imc-trading-earnings-theta-crusher — earnings IV crush plan, entry timing, strategy, exit protocol
 │   │   ├── Jane-Street-pre-market-edge-analyzer.md # /Jane-Street-pre-market-edge-analyzer — 8 AM pre-market theta plan, gap/IV/calendar, S/R, scenario playbook
@@ -382,6 +383,14 @@ Runs `scripts/build-holding-monthly-snapshots.py`; exports kanban to `context/ka
 **Purpose:** Export kanban board to CSV and/or surface sync instructions for completed tasks.
 
 Exports board to `context/kanban-export.csv` via API, or points to `outputs/kanban-q1-sync-instructions.md` for moving completed Q1 tasks to Done in the UI (no API task-update).
+
+### /sync-second-brain [pull | push | both] [dry-run] [delete]
+
+**Purpose:** Bidirectional sync of the **Obsidian second-brain repository** between the NAS and the local machine. Pulls newer files from the NAS, pushes newer files from local, and parks the older copy of any same-time conflict as a `.conflict-<utc>` sibling so nothing is lost silently.
+
+Targets local `C:\Users\rland\OneDrive\Desktop\second-brain` and NAS `\\Landino-NAS\AI Automation\second-brain`. Wraps `scripts/sync_obsidian_vault.py` with those paths baked in. Modes: `both` (default), `pull` (NAS → local), `push` (local → NAS). Add `dry-run` to preview, or `delete` (one-way modes only) to mirror deletions to the target. Prompts for confirmation before any `delete` run.
+
+Examples: `/sync-second-brain` (default both) · `/sync-second-brain pull` · `/sync-second-brain dry-run` · `/sync-second-brain push delete` (asks first).
 
 ### /insider [TICKER]
 
