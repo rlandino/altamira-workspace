@@ -13,6 +13,7 @@ import argparse
 import html
 import json
 import os
+import re
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
@@ -106,7 +107,7 @@ def sector_snapshot(api_key: str, report_date: date) -> list[dict[str, Any]]:
 
 
 def sector_change(row: dict[str, Any]) -> float | None:
-    for key in ("changesPercentage", "changePercentage", "performance", "change", "1D"):
+    for key in ("changesPercentage", "changePercentage", "averageChange", "performance", "change", "1D"):
         value = row.get(key)
         if value is None:
             continue
@@ -129,7 +130,28 @@ def earnings_calendar(api_key: str, report_date: date) -> list[dict[str, Any]]:
         api_key,
         {"from": report_date.isoformat(), "to": to_date.isoformat()},
     )
-    return data if isinstance(data, list) else []
+    rows = data if isinstance(data, list) else []
+    return filter_us_earnings(rows)
+
+
+def filter_us_earnings(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep a concise US-listed earnings view and remove duplicate API rows."""
+    ticker_pattern = re.compile(r"^[A-Z][A-Z0-9-]{0,5}$")
+    filtered: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        symbol = str(row.get("symbol") or "").strip().upper()
+        event_date = str(row.get("date") or "")
+        if not ticker_pattern.match(symbol):
+            continue
+        key = (event_date, symbol)
+        if key in seen:
+            continue
+        seen.add(key)
+        filtered.append(row)
+    return filtered
 
 
 def historical_prices(api_key: str, report_date: date) -> list[dict[str, Any]]:
