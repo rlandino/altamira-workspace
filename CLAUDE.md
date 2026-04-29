@@ -209,6 +209,14 @@ Types: `monthly` (default), `quarterly`, `annual`. Produces a polished, narrativ
 
 Example: `/client-report quarterly`
 
+### /daily-market-recap [optional date] [--send-telegram]
+
+**Purpose:** Generate the daily market recap and optionally send it to Telegram.
+
+Uses FMP for indices, SPY/QQQ, VIX, sector snapshot, gainers/losers, earnings calendar, recent headlines, and S&P 500 historical context. Writes `outputs/daily-market-recap-{DATE}.md`; with Telegram enabled, sends a concise summary plus the markdown file using `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` or the configured channel fallback.
+
+Example: `/daily-market-recap` or `python scripts/daily_market_recap.py --send-telegram`
+
 ### /thesis [TICKER]
 
 **Purpose:** Generate a comprehensive investment thesis with DCF valuation, comps analysis, and buy/hold/avoid recommendation.
@@ -435,6 +443,14 @@ Example: `/macro-tail-head-wind-scanner COST`
 
 Uses Market Data API (port 8001) or FMP for indices and VIX; presents levels and day change; writes a brief narrative. Fallback when Market Commenter workflow has not run.
 
+### /daily-market-recap [optional date]
+
+**Purpose:** Generate an end-of-day daily market recap and optionally send both the summary and markdown report to Telegram.
+
+Runs `scripts/daily_market_recap.py` to fetch FMP index, ETF, VIX, sector, mover, earnings, headline, and historical S&P 500 data. Writes `outputs/daily-market-recap-{DATE}.md`; use `--send-telegram` with `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (or the workspace fallback chat ID) to deliver the summary and file.
+
+Example: `/daily-market-recap` or `python scripts/daily_market_recap.py --send-telegram`
+
 ### /briefing
 
 **Purpose:** Daily market briefing (Market Commenter style): indices, hot stock/biggest loser, sectors, SPY/QQQ/VIX, earnings calendar, index vs 5D/20D, support/resistance, trend, commentary, index chart.
@@ -589,6 +605,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
+| `scripts/daily_market_recap.py` | Generate end-of-day market recap markdown and optionally send summary + file to Telegram | `python scripts/daily_market_recap.py --send-telegram` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
 | `scripts/13f-holdings-diff.py` | Compare 13F holdings between two periods (new buys, sells, increased/decreased) | `python scripts/13f-holdings-diff.py --cik CIK --prior YYYY-MM-DD --current YYYY-MM-DD` (optional `--out report.md`, `--json-out diff.json`) |
