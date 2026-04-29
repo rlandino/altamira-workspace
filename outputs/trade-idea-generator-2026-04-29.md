@@ -4,7 +4,7 @@
 
 ## Market Regime
 
-- VIX: 18.13
+- VIX: 18.15
 - Regime: NORMAL
 - Sizing guide: 100% of standard premium-selling size
 - Note: Standard CSP/spread sizing is acceptable.
@@ -13,25 +13,25 @@
 
 ### 1. LRCX - CSP / starter entry
 
-- Price: $249.54
+- Price: $249.69
 - Score: 100.0
-- Setup: Sell 30-45D 0.20-0.30 delta put or start 1/3 equity tranche near $249.54.
-- Rationale: B watchlist candidate (Top Candidate); above 50D $236.12, above 200D $171.93; day change -0.7%.
+- Setup: Sell 30-45D 0.20-0.30 delta put or start 1/3 equity tranche near $249.69.
+- Rationale: B watchlist candidate (Top Candidate); above 50D $236.12, above 200D $171.93; day change -0.6%.
 - Risk: Respect 5% max position; NORMAL VIX regime sizing. Avoid if earnings date appears before expiration.
 - Source: watchlist
 
 ### 2. TSM - CSP / starter entry
 
-- Price: $389.35
+- Price: $389.39
 - Score: 100.0
-- Setup: Sell 30-45D 0.20-0.30 delta put or start 1/3 equity tranche near $389.35.
+- Setup: Sell 30-45D 0.20-0.30 delta put or start 1/3 equity tranche near $389.39.
 - Rationale: B- watchlist candidate (Top Candidate); above 50D $358.26, above 200D $303.05; day change -0.7%.
 - Risk: Respect 5% max position; NORMAL VIX regime sizing. Avoid if earnings date appears before expiration.
 - Source: watchlist
 
 ### 3. AVGO - Trim / covered call
 
-- Price: $399.22
+- Price: $399.04
 - Score: 97.7
 - Setup: Consider 30-45D covered call at ~0.20 delta against part of existing 16.7% weight.
 - Rationale: Large portfolio weight with positive trend (above 50D $344.59, above 200D $338.05); harvest premium without adding exposure. Earnings 2026-06-03 inside 45D window.
@@ -40,7 +40,7 @@
 
 ### 4. SPY - Trim / covered call
 
-- Price: $710.60
+- Price: $710.61
 - Score: 94.9
 - Setup: Consider 30-45D covered call at ~0.20 delta against part of existing 17.1% weight.
 - Rationale: Large portfolio weight with positive trend (above 50D $678.27, above 200D $669.54); harvest premium without adding exposure.
@@ -49,9 +49,9 @@
 
 ### 5. JPM - Add-on candidate
 
-- Price: $310.20
-- Score: 91.6
-- Setup: Add on pullback toward 50D SMA or use defined-risk put spread around current $310.20.
+- Price: $310.45
+- Score: 91.7
+- Setup: Add on pullback toward 50D SMA or use defined-risk put spread around current $310.45.
 - Rationale: Existing small position, constructive technicals (above 50D $299.31, above 200D $304.49), and manageable portfolio weight 2.1%.
 - Risk: Keep aggregate sector concentration within portfolio limits.
 - Source: portfolio
