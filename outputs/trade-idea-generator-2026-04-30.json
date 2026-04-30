@@ -3,8 +3,8 @@
   "market": {
     "spy_price": 711.58,
     "spy_change_pct": -0.01545617,
-    "vix": 18.33,
-    "vix_change_pct": -2.55183,
+    "vix": 18.34,
+    "vix_change_pct": -2.49867,
     "regime": "YELLOW: normal vol"
   },
   "ideas": [
@@ -145,7 +145,7 @@
       "risk": "Use paper-trade workflow; skip if bid/ask spread is wide or earnings date moves inside DTE."
     }
   ],
-  "telegram_text": "ALTAMIRA TRADE IDEAS - 2026-04-30\nSPY $711.58 (-0.0%) | VIX 18.33\nRegime: YELLOW: normal vol\n\n1) AVGO - POSITION MANAGEMENT / covered-call or trim review\nScore 108.9 | Px $405.45 | current weight 16.7%, unrealized P/L +175.4%\nEarnings: none in next 21d\n\n2) KLAC - WATCHLIST CSP / starter add\nScore 96.2 | Px $1,816.21 | not held\nEvaluate: starter buy near $1,725.40 or CSP around 1671P\nEarnings: none in next 21d\n\n3) GOOGL - POSITION MANAGEMENT / covered-call or trim review\nScore 93.3 | Px $349.94 | current weight 13.8%, unrealized P/L +74.0%\nEarnings: none in next 21d\n\n4) LRCX - WATCHLIST CSP / starter add\nScore 92.6 | Px $248.75 | not held\nEvaluate: starter buy near $236.31 or CSP around 229P\nEarnings: none in next 21d\n\n5) TSM - WATCHLIST CSP / starter add\nScore 91.5 | Px $393.83 | not held\nEvaluate: starter buy near $374.14 or CSP around 362P\nEarnings: none in next 21d\n\nResearch only. Verify liquidity, earnings, and Altamira risk limits before any trade.",
+  "telegram_text": "ALTAMIRA TRADE IDEAS - 2026-04-30\nSPY $711.58 (-0.0%) | VIX 18.34\nRegime: YELLOW: normal vol\n\n1) AVGO - POSITION MANAGEMENT / covered-call or trim review\nScore 108.9 | Px $405.45 | current weight 16.7%, unrealized P/L +175.4%\nEarnings: none in next 21d\n\n2) KLAC - WATCHLIST CSP / starter add\nScore 96.2 | Px $1,816.21 | not held\nEvaluate: starter buy near $1,725.40 or CSP around 1671P\nEarnings: none in next 21d\n\n3) GOOGL - POSITION MANAGEMENT / covered-call or trim review\nScore 93.3 | Px $349.94 | current weight 13.8%, unrealized P/L +74.0%\nEarnings: none in next 21d\n\n4) LRCX - WATCHLIST CSP / starter add\nScore 92.6 | Px $248.75 | not held\nEvaluate: starter buy near $236.31 or CSP around 229P\nEarnings: none in next 21d\n\n5) TSM - WATCHLIST CSP / starter add\nScore 91.5 | Px $393.83 | not held\nEvaluate: starter buy near $374.14 or CSP around 362P\nEarnings: none in next 21d\n\nResearch only. Verify liquidity, earnings, and Altamira risk limits before any trade.",
   "source_files": [
     "context/portfolio-details.md",
     "context/watchlist.md"

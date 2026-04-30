@@ -5,7 +5,7 @@
 ## Market Snapshot
 
 - SPY: $711.58 (-0.0% today)
-- VIX: 18.33 (-2.6% today)
+- VIX: 18.34 (-2.5% today)
 - Regime: YELLOW: normal vol
 
 ## Top Ideas
