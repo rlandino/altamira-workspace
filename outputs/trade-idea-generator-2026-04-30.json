@@ -1,0 +1,153 @@
+{
+  "date": "2026-04-30",
+  "market": {
+    "spy_price": 711.58,
+    "spy_change_pct": -0.01545617,
+    "vix": 18.33,
+    "vix_change_pct": -2.55183,
+    "regime": "YELLOW: normal vol"
+  },
+  "ideas": [
+    {
+      "ticker": "AVGO",
+      "company": "AVGO",
+      "idea_type": "POSITION MANAGEMENT / covered-call or trim review",
+      "score": 108.9,
+      "current_price": 405.45,
+      "target_entry": null,
+      "suggested_put_strike": null,
+      "position_context": "current weight 16.7%, unrealized P/L +175.4%",
+      "earnings": "none in next 21d",
+      "rationale": [
+        "large concentration or extended winner",
+        "price +17.2% vs 50-day average",
+        "consider 20-30 delta covered call only if comfortable selling upside"
+      ],
+      "risk": "Do not cap core compounder upside unless allocation/risk budget requires it."
+    },
+    {
+      "ticker": "KLAC",
+      "company": "KLA Corporation",
+      "idea_type": "WATCHLIST CSP / starter add",
+      "score": 96.2,
+      "current_price": 1816.21,
+      "target_entry": 1725.4,
+      "suggested_put_strike": 1671,
+      "position_context": "not held",
+      "earnings": "none in next 21d",
+      "rationale": [
+        "Top Candidate with score 61.3",
+        "price +14.9% vs 50-day average",
+        "no earnings conflict inside 21-day scan"
+      ],
+      "risk": "Use paper-trade workflow; skip if bid/ask spread is wide or earnings date moves inside DTE."
+    },
+    {
+      "ticker": "GOOGL",
+      "company": "GOOGL",
+      "idea_type": "POSITION MANAGEMENT / covered-call or trim review",
+      "score": 93.3,
+      "current_price": 349.94,
+      "target_entry": null,
+      "suggested_put_strike": null,
+      "position_context": "current weight 13.8%, unrealized P/L +74.0%",
+      "earnings": "none in next 21d",
+      "rationale": [
+        "large concentration or extended winner",
+        "price +12.1% vs 50-day average",
+        "consider 20-30 delta covered call only if comfortable selling upside"
+      ],
+      "risk": "Do not cap core compounder upside unless allocation/risk budget requires it."
+    },
+    {
+      "ticker": "LRCX",
+      "company": "Lam Research Corporation",
+      "idea_type": "WATCHLIST CSP / starter add",
+      "score": 92.6,
+      "current_price": 248.75,
+      "target_entry": 236.31,
+      "suggested_put_strike": 229,
+      "position_context": "not held",
+      "earnings": "none in next 21d",
+      "rationale": [
+        "Top Candidate with score 67.4",
+        "price +5.2% vs 50-day average",
+        "no earnings conflict inside 21-day scan"
+      ],
+      "risk": "Use paper-trade workflow; skip if bid/ask spread is wide or earnings date moves inside DTE."
+    },
+    {
+      "ticker": "TSM",
+      "company": "Taiwan Semiconductor Manufacturing Company",
+      "idea_type": "WATCHLIST CSP / starter add",
+      "score": 91.5,
+      "current_price": 393.83,
+      "target_entry": 374.14,
+      "suggested_put_strike": 362,
+      "position_context": "not held",
+      "earnings": "none in next 21d",
+      "rationale": [
+        "Top Candidate with score 61.8",
+        "price +9.7% vs 50-day average",
+        "no earnings conflict inside 21-day scan"
+      ],
+      "risk": "Use paper-trade workflow; skip if bid/ask spread is wide or earnings date moves inside DTE."
+    },
+    {
+      "ticker": "AMZN",
+      "company": "AMZN",
+      "idea_type": "POSITION MANAGEMENT / covered-call or trim review",
+      "score": 91.3,
+      "current_price": 263.04,
+      "target_entry": null,
+      "suggested_put_strike": null,
+      "position_context": "current weight 4.9%, unrealized P/L +80.7%",
+      "earnings": "none in next 21d",
+      "rationale": [
+        "large concentration or extended winner",
+        "price +18.3% vs 50-day average",
+        "consider 20-30 delta covered call only if comfortable selling upside"
+      ],
+      "risk": "Do not cap core compounder upside unless allocation/risk budget requires it."
+    },
+    {
+      "ticker": "AMAT",
+      "company": "AMAT",
+      "idea_type": "POSITION MANAGEMENT / covered-call or trim review",
+      "score": 86.5,
+      "current_price": 382.59,
+      "target_entry": null,
+      "suggested_put_strike": null,
+      "position_context": "current weight 12.6%, unrealized P/L +100.5%",
+      "earnings": "2026-05-14",
+      "rationale": [
+        "large concentration or extended winner",
+        "price +3.8% vs 50-day average",
+        "consider 20-30 delta covered call only if comfortable selling upside"
+      ],
+      "risk": "Do not cap core compounder upside unless allocation/risk budget requires it."
+    },
+    {
+      "ticker": "NVDA",
+      "company": "NVIDIA Corporation",
+      "idea_type": "WATCHLIST CSP / starter add",
+      "score": 80.3,
+      "current_price": 209.25,
+      "target_entry": 198.79,
+      "suggested_put_strike": 193,
+      "position_context": "not held",
+      "earnings": "2026-05-20",
+      "rationale": [
+        "Top Candidate with score 66.2",
+        "price +12.1% vs 50-day average",
+        "earnings on 2026-05-20: wait until event passes"
+      ],
+      "risk": "Use paper-trade workflow; skip if bid/ask spread is wide or earnings date moves inside DTE."
+    }
+  ],
+  "telegram_text": "ALTAMIRA TRADE IDEAS - 2026-04-30\nSPY $711.58 (-0.0%) | VIX 18.33\nRegime: YELLOW: normal vol\n\n1) AVGO - POSITION MANAGEMENT / covered-call or trim review\nScore 108.9 | Px $405.45 | current weight 16.7%, unrealized P/L +175.4%\nEarnings: none in next 21d\n\n2) KLAC - WATCHLIST CSP / starter add\nScore 96.2 | Px $1,816.21 | not held\nEvaluate: starter buy near $1,725.40 or CSP around 1671P\nEarnings: none in next 21d\n\n3) GOOGL - POSITION MANAGEMENT / covered-call or trim review\nScore 93.3 | Px $349.94 | current weight 13.8%, unrealized P/L +74.0%\nEarnings: none in next 21d\n\n4) LRCX - WATCHLIST CSP / starter add\nScore 92.6 | Px $248.75 | not held\nEvaluate: starter buy near $236.31 or CSP around 229P\nEarnings: none in next 21d\n\n5) TSM - WATCHLIST CSP / starter add\nScore 91.5 | Px $393.83 | not held\nEvaluate: starter buy near $374.14 or CSP around 362P\nEarnings: none in next 21d\n\nResearch only. Verify liquidity, earnings, and Altamira risk limits before any trade.",
+  "source_files": [
+    "context/portfolio-details.md",
+    "context/watchlist.md"
+  ]
+}

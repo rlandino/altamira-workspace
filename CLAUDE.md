@@ -38,6 +38,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── analyze-ticker.md  # /analyze-ticker — financial ratio analysis
 │   │   ├── options-scan.md    # /options-scan — options chain scanning
 │   │   ├── portfolio-report.md # /portfolio-report — portfolio reports
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — portfolio/watchlist trade ideas + optional Telegram alert
 │   │   ├── paper-trade.md     # /paper-trade — log paper trades
 │   │   ├── client-report.md   # /client-report — client-facing portfolio reports
 │   │   ├── thesis.md          # /thesis — investment thesis generator
@@ -192,6 +193,14 @@ Example: `/DE-shaw-iron-condor-income-machine SPY 500000 weekly` or `/DE-shaw-ir
 Types: `daily` (default), `weekly`, `monthly`, `holdings`. Covers market summary, watchlist performance, sector exposure, options landscape, risk dashboard, and action items. Outputs to `outputs/`.
 
 Example: `/portfolio-report weekly`
+
+### /trade-idea-generator [--send-telegram]
+
+**Purpose:** Generate daily trade ideas from the current portfolio and watchlist, write Markdown/JSON reports, and optionally send the concise summary to Telegram.
+
+Runs `scripts/trade_idea_generator.py`, reading `context/portfolio-details.md` and `context/watchlist.md`, using FMP quotes/history/earnings for market context, and writing `outputs/trade-idea-generator-{DATE}.md` plus `.json`.
+
+Example: `/trade-idea-generator --send-telegram`
 
 ### /paper-trade [details]
 
@@ -588,6 +597,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
+| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist trade ideas, write report files, and optionally send Telegram summary | `python scripts/trade_idea_generator.py --send-telegram --telegram-chat-id <CHAT_ID>` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
