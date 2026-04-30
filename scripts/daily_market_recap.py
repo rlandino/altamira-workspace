@@ -165,6 +165,7 @@ def sector_snapshot(api_key: str, run_date: date) -> tuple[dict[str, Any] | None
             row.get("changesPercentage")
             or row.get("changePercentage")
             or row.get("performance")
+            or row.get("averageChange")
             or row.get("1D")
         ) or 0.0
 
@@ -188,6 +189,7 @@ def sector_performance(row: dict[str, Any] | None) -> float | None:
         row.get("changesPercentage")
         or row.get("changePercentage")
         or row.get("performance")
+        or row.get("averageChange")
         or row.get("1D")
     )
 
@@ -206,7 +208,16 @@ def historical_closes(api_key: str, symbol: str, run_date: date) -> list[dict[st
     )
     if not isinstance(data, list):
         return []
-    rows = [row for row in data if isinstance(row, dict) and as_float(row.get("close")) is not None]
+    rows = []
+    for row in data:
+        if not isinstance(row, dict):
+            continue
+        close = as_float(row.get("close") if row.get("close") is not None else row.get("price"))
+        if close is None:
+            continue
+        normalized = dict(row)
+        normalized["close"] = close
+        rows.append(normalized)
     return sorted(rows, key=lambda row: str(row.get("date", "")))
 
 
@@ -229,7 +240,15 @@ def earnings_calendar(api_key: str, run_date: date) -> list[dict[str, Any]]:
     )
     if not isinstance(data, list):
         return []
-    rows = [row for row in data if isinstance(row, dict)]
+    rows = []
+    for row in data:
+        if not isinstance(row, dict):
+            continue
+        symbol = str(row.get("symbol", ""))
+        # Keep the recap focused on US-listed names; FMP's global calendar is very noisy.
+        if "." in symbol or not symbol.isascii() or not symbol.replace("-", "").isalpha():
+            continue
+        rows.append(row)
     return sorted(rows, key=lambda row: (str(row.get("date", "")), str(row.get("symbol", ""))))[:20]
 
 
