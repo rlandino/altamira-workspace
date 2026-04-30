@@ -73,6 +73,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── macro-tail-head-wind-scanner.md # /macro-tail-head-wind-scanner — macro tailwind/headwind by factor, net score, positioning
 │   │   ├── management-quality-evaluator.md # /management-quality-evaluator — management quality (capital allocation, compensation, insider, communication, strategy)
 │   │   ├── market-brief.md    # /market-brief — short market snapshot
+│   │   ├── daily-market-recap.md # /daily-market-recap — market recap markdown + Telegram delivery
 │   │   ├── briefing.md        # /briefing — daily market briefing (Market Commenter style)
 │   │   ├── speak.md          # /speak — TTS: speak text or briefing aloud / save MP3
 │   │   ├── sig-daily-theta-decay-calculator.md # /sig-daily-theta-decay-calculator — theta dashboard (position/portfolio theta, hourly decay, compounding)
@@ -192,6 +193,14 @@ Example: `/DE-shaw-iron-condor-income-machine SPY 500000 weekly` or `/DE-shaw-ir
 Types: `daily` (default), `weekly`, `monthly`, `holdings`. Covers market summary, watchlist performance, sector exposure, options landscape, risk dashboard, and action items. Outputs to `outputs/`.
 
 Example: `/portfolio-report weekly`
+
+### /daily-market-recap [optional date]
+
+**Purpose:** Generate the daily market recap markdown report and deliver both the summary and markdown file to the Telegram market channel.
+
+Runs `scripts/daily_market_recap.py`, pulling FMP quotes, market movers, sector performance, S&P 500 technicals, earnings, and broad market headlines. Writes `outputs/daily-market-recap-{DATE}.md`; use `--send-telegram` to send the concise summary and markdown document through the Telegram Bot API. Defaults to `TELEGRAM_CHAT_ID` or the documented Market Commenter chat ID.
+
+Example: `/daily-market-recap` or `python scripts/daily_market_recap.py --send-telegram`
 
 ### /paper-trade [details]
 
@@ -586,6 +595,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
+| `scripts/daily_market_recap.py` | Generate daily market recap markdown and send summary/file to Telegram | `python scripts/daily_market_recap.py --send-telegram` |
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
