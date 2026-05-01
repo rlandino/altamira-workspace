@@ -9,7 +9,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -141,7 +141,11 @@ def fetch_historical_closes(symbol: str, fmp_key: str, as_of: date) -> list[dict
     )
     if not isinstance(data, list):
         return []
-    rows = [row for row in data if row.get("date") and as_float(row.get("close")) is not None]
+    rows = []
+    for row in data:
+        close = as_float(row.get("close") or row.get("price") or row.get("adjClose"))
+        if row.get("date") and close is not None:
+            rows.append({**row, "close": close})
     return sorted(rows, key=lambda row: row["date"])
 
 
@@ -150,7 +154,10 @@ def fetch_earnings(fmp_key: str, as_of: date) -> list[dict[str, Any]]:
         f"{FMP_V3}/earning_calendar",
         {"from": as_of.isoformat(), "to": (as_of + timedelta(days=7)).isoformat(), "apikey": fmp_key},
     )
-    return data if isinstance(data, list) else []
+    if not isinstance(data, list):
+        return []
+    # Keep the recap focused on US-listed tickers; FMP's global calendar can be noisy.
+    return [item for item in data if re.fullmatch(r"[A-Z][A-Z0-9]{0,4}", str(item.get("symbol", "")))]
 
 
 def fetch_movers(fmp_key: str, endpoint: str) -> dict[str, Any] | None:
@@ -275,7 +282,7 @@ def build_recap(as_of: date, fmp_key: str) -> tuple[str, str]:
 
     markdown = f"""# Daily Market Recap — {as_of.isoformat()}
 
-Generated: {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}
+Generated: {datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")}
 
 ## Executive Summary
 

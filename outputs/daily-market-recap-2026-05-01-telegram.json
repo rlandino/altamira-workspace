@@ -1,0 +1,48 @@
+{
+  "message": {
+    "ok": true,
+    "result": {
+      "message_id": 901,
+      "from": {
+        "id": 7836764131,
+        "is_bot": true,
+        "first_name": "Voice_bot",
+        "username": "ElVoWfl_bot"
+      },
+      "chat": {
+        "id": 7830722515,
+        "first_name": "John",
+        "last_name": "Smith",
+        "type": "private"
+      },
+      "date": 1777640630,
+      "text": "Daily Market Recap (2026-05-01): S&P 500 +1.02% at 7,209.01, Nasdaq +0.89%, Dow +1.62%. VIX is normal at 16.89; S&P trend: Unknown. Best sector: Industrials (XLI +2.74%); worst sector: Technology (XLK +0.25%). Hot stock: HCAI (+100.18%); biggest loser: RDAC (-48.03%)."
+    }
+  },
+  "document": {
+    "ok": true,
+    "result": {
+      "message_id": 902,
+      "from": {
+        "id": 7836764131,
+        "is_bot": true,
+        "first_name": "Voice_bot",
+        "username": "ElVoWfl_bot"
+      },
+      "chat": {
+        "id": 7830722515,
+        "first_name": "John",
+        "last_name": "Smith",
+        "type": "private"
+      },
+      "date": 1777640631,
+      "document": {
+        "file_name": "daily-market-recap-2026-05-01.md",
+        "file_id": "BQACAgEAAxkDAAIDhmn0pLeFprhEZx-9kRptMBF6XsXGAAIxBwACxsCpRwHPlZEeMgJIOwQ",
+        "file_unique_id": "AgADMQcAAsbAqUc",
+        "file_size": 2490
+      },
+      "caption": "Daily market recap markdown \u2014 2026-05-01"
+    }
+  }
+}
