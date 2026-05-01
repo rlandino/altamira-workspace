@@ -20,6 +20,19 @@ from typing import Any
 FMP_V3_BASE = "https://financialmodelingprep.com/api/v3"
 FMP_STABLE_BASE = "https://financialmodelingprep.com/stable"
 TELEGRAM_API_BASE = "https://api.telegram.org"
+SECTOR_ETFS = {
+    "XLC": "Communication Services",
+    "XLY": "Consumer Discretionary",
+    "XLP": "Consumer Staples",
+    "XLE": "Energy",
+    "XLF": "Financials",
+    "XLV": "Health Care",
+    "XLI": "Industrials",
+    "XLB": "Materials",
+    "XLRE": "Real Estate",
+    "XLK": "Technology",
+    "XLU": "Utilities",
+}
 
 
 class RecapError(RuntimeError):
@@ -214,6 +227,26 @@ def fetch_sectors(api_key: str, recap_date: date) -> tuple[dict[str, Any] | None
                 item.get("changesPercentage") or item.get("changePercentage") or item.get("performance")
             ) or 0.0
             return max(parsed, key=key), min(parsed, key=key)
+
+    # Fallback: use liquid sector SPDR ETFs when the sector snapshot endpoint is empty.
+    raw_etfs = http_json(fmp_url(FMP_V3_BASE, f"/quote/{','.join(SECTOR_ETFS)}", api_key))
+    parsed_etfs = []
+    if isinstance(raw_etfs, list):
+        for item in raw_etfs:
+            if not isinstance(item, dict):
+                continue
+            symbol = str(item.get("symbol", ""))
+            change = as_float(item.get("changesPercentage") or item.get("changePercentage"))
+            if symbol in SECTOR_ETFS and change is not None:
+                parsed_etfs.append(
+                    {
+                        "sector": f"{SECTOR_ETFS[symbol]} ({symbol})",
+                        "changesPercentage": change,
+                    }
+                )
+    if parsed_etfs:
+        key = lambda item: as_float(item.get("changesPercentage")) or 0.0
+        return max(parsed_etfs, key=key), min(parsed_etfs, key=key)
     return None, None
 
 
@@ -267,10 +300,10 @@ def trend_metrics(history: list[dict[str, Any]], current: float | None) -> dict[
     """Calculate moving averages, support/resistance, and trend label."""
 
     rows = sorted(
-        [row for row in history if as_float(row.get("close")) is not None],
+        [row for row in history if as_float(row.get("close") or row.get("price")) is not None],
         key=lambda row: str(row.get("date", "")),
     )
-    closes = [as_float(row.get("close")) for row in rows]
+    closes = [as_float(row.get("close") or row.get("price")) for row in rows]
     close_values = [value for value in closes if value is not None]
     last_20 = close_values[-20:]
     five_day = average(close_values[-5:])
