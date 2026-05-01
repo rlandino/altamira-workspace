@@ -217,8 +217,8 @@ def fetch_fmp_quotes(symbols: Iterable[str]) -> dict[str, float]:
     return quotes
 
 
-def fetch_quotes(symbols: Iterable[str]) -> dict[str, float]:
-    quotes = fetch_yahoo_quotes(symbols)
+def fetch_quotes(symbols: Iterable[str], skip_yahoo: bool = False) -> dict[str, float]:
+    quotes = {} if skip_yahoo else fetch_yahoo_quotes(symbols)
     missing = [symbol for symbol in symbols if symbol.upper() not in quotes]
     if missing:
         quotes.update(fetch_fmp_quotes(missing))
@@ -455,7 +455,7 @@ def build_report(ideas: list[TradeIdea], positions: list[Position], watchlist: l
         f"- Portfolio market value from repository context: **${total:,.0f}**",
         f"- Current holdings parsed: **{len(positions)}**",
         f"- Watchlist names parsed: **{len(watchlist)}**",
-        "- Live quote source: Yahoo Finance quote endpoint when available; otherwise repository snapshot prices.",
+        "- Live quote source: Yahoo Finance quote endpoint, then FMP fallback, then repository snapshot prices.",
         "- Options premiums are not estimated without a live chain; confirm bid/ask before entry.",
         "",
         "## Top Portfolio Exposures",
@@ -488,7 +488,7 @@ def build_report(ideas: list[TradeIdea], positions: list[Position], watchlist: l
     return "\n".join(lines) + "\n"
 
 
-def run(send: bool) -> Path:
+def run(send: bool, skip_yahoo: bool = False) -> Path:
     as_of = datetime.now(timezone.utc).date()
     positions = load_positions()
     watchlist = load_watchlist()
@@ -496,7 +496,7 @@ def run(send: bool) -> Path:
         raise RuntimeError(f"No positions parsed from {PORTFOLIO_PATH}")
     expiration = next_weekly_expiration(as_of)
     quote_symbols = [item.ticker for item in watchlist] + [position.symbol for position in positions]
-    quotes = fetch_quotes(quote_symbols)
+    quotes = fetch_quotes(quote_symbols, skip_yahoo=skip_yahoo)
     for position in positions:
         if position.symbol in quotes:
             position.current = quotes[position.symbol]
@@ -523,9 +523,14 @@ def run(send: bool) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--send-telegram", action="store_true", help="Send the summary to Telegram")
+    parser.add_argument(
+        "--skip-yahoo",
+        action="store_true",
+        help="Skip Yahoo Finance and use FMP/repository prices directly",
+    )
     args = parser.parse_args()
     try:
-        run(send=args.send_telegram)
+        run(send=args.send_telegram, skip_yahoo=args.skip_yahoo)
     except Exception as exc:  # noqa: BLE001 - CLI should return a concise failure.
         print(f"Error: {exc}", file=sys.stderr)
         return 1

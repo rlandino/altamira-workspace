@@ -173,7 +173,7 @@ Example: `/options-scan AAPL`
 
 **Purpose:** Generate a concise trade idea digest from the current repository portfolio and watchlist, write `outputs/trade-idea-generator-{DATE}.md`, and optionally send the summary to Telegram.
 
-Runs `scripts/trade_idea_generator.py`, using `context/portfolio-details.md` and `context/watchlist.md`. With `--send-telegram`, requires `TELEGRAM_BOT_TOKEN`; `TELEGRAM_CHAT_ID` can come from the environment or the configured CSP workflow fallback.
+Runs `scripts/trade_idea_generator.py`, using `context/portfolio-details.md` and `context/watchlist.md`. With `--send-telegram`, requires `TELEGRAM_BOT_TOKEN`; `TELEGRAM_CHAT_ID` can come from the environment or the configured CSP workflow fallback. Supports `--skip-yahoo` to use FMP/repository data directly.
 
 Example: `/trade-idea-generator --send-telegram`
 
@@ -596,7 +596,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
-| `scripts/trade_idea_generator.py` | Generate ranked trade ideas from current portfolio/watchlist context and optionally send the summary to Telegram | `python3 scripts/trade_idea_generator.py --send-telegram` |
+| `scripts/trade_idea_generator.py` | Generate ranked trade ideas from current portfolio/watchlist context and optionally send the summary to Telegram | `python3 scripts/trade_idea_generator.py --skip-yahoo --send-telegram` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |

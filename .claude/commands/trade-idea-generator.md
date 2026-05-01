@@ -5,14 +5,14 @@ Generate trade ideas from the current repository portfolio and watchlist, write 
 ## Usage
 
 ```bash
-python3 scripts/trade_idea_generator.py --send-telegram
+python3 scripts/trade_idea_generator.py --skip-yahoo --send-telegram
 ```
 
 ## Inputs
 
 - `context/portfolio-details.md` for current holdings, weights, prices, and P&L.
 - `context/watchlist.md` for watchlist scores, grades, and candidate status.
-- Yahoo Finance quote endpoint for current prices when available; repository snapshot prices remain the fallback.
+- Yahoo Finance quote endpoint for current prices when available, then FMP if configured in the workspace; repository snapshot prices remain the fallback.
 - `TELEGRAM_BOT_TOKEN` for delivery.
 - `TELEGRAM_CHAT_ID` when set; otherwise the script reuses the Telegram chat ID configured in `outputs/csp-daily-scan-fixed.json`.
 
