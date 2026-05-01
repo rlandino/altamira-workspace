@@ -23,6 +23,10 @@ PORTFOLIO_PATH = ROOT / "context" / "portfolio-details.md"
 WATCHLIST_PATH = ROOT / "context" / "watchlist.md"
 OUTPUT_DIR = ROOT / "outputs"
 TELEGRAM_FALLBACK_WORKFLOW = ROOT / "outputs" / "csp-daily-scan-fixed.json"
+FMP_KEY_SOURCES = [
+    ROOT / "scripts" / "market_data_api.py",
+    ROOT / ".claude" / "commands" / "options-scan.md",
+]
 
 
 @dataclass
@@ -162,6 +166,62 @@ def fetch_yahoo_quotes(symbols: Iterable[str]) -> dict[str, float]:
             price = quote.get("regularMarketPrice") or quote.get("postMarketPrice")
             if symbol and isinstance(price, (int, float)):
                 quotes[symbol] = float(price)
+    return quotes
+
+
+def load_fmp_key() -> str | None:
+    env_key = os.environ.get("FMP_API_KEY")
+    if env_key:
+        return env_key
+    patterns = [
+        re.compile(r'DEFAULT_KEY\s*=\s*os\.environ\.get\("FMP_API_KEY",\s*"([^"]+)"\)'),
+        re.compile(r"FMP API.*?key:\s*`([^`]+)`", re.IGNORECASE),
+    ]
+    for source in FMP_KEY_SOURCES:
+        if not source.exists():
+            continue
+        text = source.read_text(encoding="utf-8", errors="ignore")
+        for pattern in patterns:
+            match = pattern.search(text)
+            if match:
+                return match.group(1)
+    return None
+
+
+def fetch_fmp_quotes(symbols: Iterable[str]) -> dict[str, float]:
+    key = load_fmp_key()
+    if not key:
+        return {}
+    unique_symbols = sorted({symbol.upper() for symbol in symbols if symbol})
+    quotes: dict[str, float] = {}
+    for i in range(0, len(unique_symbols), 50):
+        chunk = unique_symbols[i : i + 50]
+        url = (
+            "https://financialmodelingprep.com/api/v3/quote/"
+            f"{urllib.parse.quote(','.join(chunk))}?apikey={urllib.parse.quote(key)}"
+        )
+        req = urllib.request.Request(url, headers={"User-Agent": "trade-idea-generator/1.0"})
+        try:
+            with urllib.request.urlopen(req, timeout=12) as response:
+                data = json.loads(response.read().decode("utf-8"))
+        except Exception as exc:  # noqa: BLE001 - keep report generation resilient.
+            print(f"Warning: FMP quote lookup failed for {','.join(chunk)}: {exc}", file=sys.stderr)
+            continue
+        if not isinstance(data, list):
+            continue
+        for quote in data:
+            symbol = str(quote.get("symbol", "")).upper()
+            price = quote.get("price")
+            if symbol and isinstance(price, (int, float)):
+                quotes[symbol] = float(price)
+    return quotes
+
+
+def fetch_quotes(symbols: Iterable[str]) -> dict[str, float]:
+    quotes = fetch_yahoo_quotes(symbols)
+    missing = [symbol for symbol in symbols if symbol.upper() not in quotes]
+    if missing:
+        quotes.update(fetch_fmp_quotes(missing))
     return quotes
 
 
@@ -436,7 +496,7 @@ def run(send: bool) -> Path:
         raise RuntimeError(f"No positions parsed from {PORTFOLIO_PATH}")
     expiration = next_weekly_expiration(as_of)
     quote_symbols = [item.ticker for item in watchlist] + [position.symbol for position in positions]
-    quotes = fetch_yahoo_quotes(quote_symbols)
+    quotes = fetch_quotes(quote_symbols)
     for position in positions:
         if position.symbol in quotes:
             position.current = quotes[position.symbol]
