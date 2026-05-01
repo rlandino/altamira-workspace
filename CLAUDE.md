@@ -435,6 +435,12 @@ Example: `/macro-tail-head-wind-scanner COST`
 
 Uses Market Data API (port 8001) or FMP for indices and VIX; presents levels and day change; writes a brief narrative. Fallback when Market Commenter workflow has not run.
 
+### /daily-market-recap [optional date]
+
+**Purpose:** Generate a daily market recap markdown file and optionally deliver it to Telegram.
+
+Runs `scripts/daily_market_recap.py` using FMP quotes, movers, sector ETFs, S&P historical context, and the earnings calendar. Writes `outputs/daily-market-recap-{DATE}.md`; with `--send-telegram`, sends the summary plus markdown document using `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (or the configured workflow fallback chat).
+
 ### /briefing
 
 **Purpose:** Daily market briefing (Market Commenter style): indices, hot stock/biggest loser, sectors, SPY/QQQ/VIX, earnings calendar, index vs 5D/20D, support/resistance, trend, commentary, index chart.
@@ -606,6 +612,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 
 **13F hardening:** CUSIP→ticker in `reference/cusip-to-ticker.json`; loader `scripts/cusip_loader.py`. Curated filers: `context/13f-filers.txt` (use with `ingest-13f.py --cik-list`). SEC ingest retries once on 403.
 
+| `scripts/daily_market_recap.py` | Generate a daily market recap markdown file and optionally send summary plus markdown to Telegram | `python scripts/daily_market_recap.py --send-telegram` |
 | `scripts/kanban-import-13f.py` | Import 13F project + 10 tasks to kanban board (POST to localhost:3005) | `python scripts/kanban-import-13f.py` (kanban app must be running) |
 | `scripts/kanban-update-13f-status.py` | Report which 13F tasks should be Done; write sync instructions (API has no task-update endpoint) | `python scripts/kanban-update-13f-status.py` then move tasks to Done in UI at http://localhost:3004 |
 
