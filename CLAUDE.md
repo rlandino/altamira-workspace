@@ -39,6 +39,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── options-scan.md    # /options-scan — options chain scanning
 │   │   ├── portfolio-report.md # /portfolio-report — portfolio reports
 │   │   ├── paper-trade.md     # /paper-trade — log paper trades
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — portfolio/watchlist trade ideas + Telegram
 │   │   ├── client-report.md   # /client-report — client-facing portfolio reports
 │   │   ├── thesis.md          # /thesis — investment thesis generator
 │   │   ├── moat.md            # /moat — economic moat analysis (Morningstar-style)
@@ -200,6 +201,14 @@ Example: `/portfolio-report weekly`
 Collects trade details (ticker, strategy, strike, delta, thesis, edge), runs the 6-point pre-trade checklist, validates against risk limits, and logs to the Trade Entry Logger webhook or outputs Google Sheets row data for manual entry.
 
 Example: `/paper-trade AAPL CSP STO 225 strike 2026-04-17 exp -0.22 delta $3.20 credit`
+
+### /trade-idea-generator
+
+**Purpose:** Generate concise trade ideas from the current repository portfolio and watchlist, write a dated report, and send the concise summary to Telegram when requested.
+
+Runs `python3 scripts/trade_idea_generator.py --send-telegram`, reading `context/portfolio-details.md` and `context/watchlist.md`. Writes `outputs/trade-idea-generator-{DATE}.md` and `outputs/trade-idea-generator-telegram-{DATE}.txt`.
+
+Example: `/trade-idea-generator`
 
 ### /client-report [type]
 
@@ -586,6 +595,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
+| `scripts/trade_idea_generator.py` | Generate covered-call and CSP trade ideas from current portfolio/watchlist and optionally send Telegram output | `python3 scripts/trade_idea_generator.py --send-telegram` |
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
