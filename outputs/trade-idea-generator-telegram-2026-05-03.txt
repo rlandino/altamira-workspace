@@ -1,0 +1,15 @@
+Altamira Trade Ideas - 2026-05-03
+
+Covered calls:
+1. AVGO: Sell up to 6 call contract(s), around $360 strike (2026-06-19)
+2. AMAT: Sell up to 4 call contract(s), around $405 strike (2026-06-19)
+3. GOOGL: Sell up to 5 call contract(s), around $330 strike (2026-06-19)
+
+CSP watchlist:
+1. LRCX: Price live chain manually; target 0.20-0.30 delta put 10-15% OTM (2026-06-19)
+2. NVDA: Price live chain manually; target 0.20-0.30 delta put 10-15% OTM (2026-06-19)
+3. TSM: Price live chain manually; target 0.20-0.30 delta put 10-15% OTM (2026-06-19)
+
+Risk: Concentration watch: SPY 17.1%, AVGO 16.7%, GOOGL 13.8%, AMAT 12.6%. Prefer premium that reduces or hedges exposure.
+
+Verify live chain liquidity/earnings before entry. Educational only.
