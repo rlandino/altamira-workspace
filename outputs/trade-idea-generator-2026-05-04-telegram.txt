@@ -1,0 +1,28 @@
+Altamira Trade Ideas - 2026-05-04
+
+Generated from the repository portfolio and watchlist context.
+
+1. SPY - COVERED CALL / TRIM WATCH (92/100)
+   holding is extended by RSI; consider harvesting premium or trimming
+   weight 17.1%, price $720.65, day +0.3%, RSI +79.1, 20d +9.9%
+2. GOOGL - COVERED CALL / TRIM WATCH (92/100)
+   holding is extended by RSI; consider harvesting premium or trimming
+   weight 13.8%, price $385.69, day +0.2%, RSI +86.9, 20d +30.4%
+3. TSM - CONSIDER STARTER / CSP (91/100)
+   quality watchlist name with constructive trend
+   B- score 61.8, price $397.67, RSI +63.4, 20d +17.3%
+4. NVDA - CONSIDER STARTER / CSP (91/100)
+   quality watchlist name with constructive trend
+   B score 66.2, price $198.45, RSI +58.1, 20d +11.9%
+5. AMAT - RISK REVIEW (90/100)
+   large holding is below 20-day trend support
+   weight 12.6%, price $389.08, day -1.4%, RSI +46.6, 20d +11.7%
+6. AVGO - RISK TRIM / COVERED CALL WATCH (86/100)
+   single-name concentration above 12% of portfolio
+   weight 16.7%, price $421.28, day +0.9%, RSI +69.5, 20d +33.9%
+
+Data notes:
+- MSFT 430P expired 2026-03-20; options context appears stale and was excluded from active ideas.
+- AVGO 310P expired 2026-03-20; options context appears stale and was excluded from active ideas.
+
+Not financial advice. Verify quotes, option chains, earnings, and account risk limits before trading.
