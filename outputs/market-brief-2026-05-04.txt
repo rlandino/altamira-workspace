@@ -1,0 +1,25 @@
+## Market Brief — Monday, May 4, 2026 (9:02 AM ET)
+
+### 📊 Market Snapshot
+
+**Indices:**
+- **S&P 500**: 7,230.12 (+0.29% | +21.11 points)
+- **Dow Jones**: 49,499.27 (-0.31% | -152.88 points)
+- **Nasdaq Composite**: 25,114.44 (+0.89% | +222.13 points)
+- **VIX**: 17.47 (+2.83% | +0.48) — Normal range
+
+### Why the Market is Moving
+
+**Mixed performance today with tech outperformance and geopolitical concerns:**
+- **Nasdaq strength**: Tech rally lifting broad market indices higher, particularly benefiting growth-heavy segments
+- **Dow weakness**: Divergence suggests defensive/industrial underperformance as geopolitical risks rise
+- **Geopolitical headwind**: ECB survey warns of potential inflation surge if Iran conflict persists, threatening to disrupt fuel, hydrogen, and helium supplies — classic stagflation trigger
+- **Energy dynamics**: Oil prices ticking up despite U.S. naval efforts to maintain Strait of Hormuz shipping, signaling supply concerns
+
+### Summary
+
+Markets closed with **mixed performance today**, with tech momentum offsetting broader index caution. Nasdaq led gains while the Dow retreated amid geopolitical tensions from the Iran conflict and supply chain inflation fears. The VIX at 17.47 reflects normal volatility, with institutional positioning cautiously tilted toward growth tech over defensives.
+
+---
+
+**Data Source:** FMP API | **Published:** 2026-05-04 09:02 AM ET
