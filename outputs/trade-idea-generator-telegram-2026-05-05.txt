@@ -1,0 +1,16 @@
+TRADE IDEA GENERATOR -- 2026-05-05
+Not financial advice. Verify live prices/options before trading.
+
+1) BTC AVGO 310P 2026-03-20
+   P&L $3,800; 60% credit captured.
+
+2) Manage MSFT 430P 2026-03-20
+   Open P&L $-6,850; review roll/close with live chain.
+
+3) Concentration trade
+   Consider 30-45 DTE CCs/trim bands on SPY 17.1%, AVGO 16.7%, GOOGL 13.8%, AMAT 12.6%.
+
+4) CSP watchlist
+   Scan red-day entries: LRCX (B, 67.4), NVDA (B, 66.2), TSM (B-, 61.8), KLAC (B-, 61.3), ADBE (B-, 60.1).
+
+Full report saved in outputs/.
