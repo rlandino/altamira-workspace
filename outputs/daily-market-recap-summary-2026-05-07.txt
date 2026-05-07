@@ -1,0 +1,4 @@
+Altamira Daily Market Recap
+S&P 500 -0.10%, Nasdaq +0.17%, Dow -0.33%; trend Bullish with VIX 17.29 (normal).
+Best sector: Consumer Defensive +0.35%. Worst sector: Utilities -1.53%. Hot stock: AGL +117.63%. Biggest loser: GDC -84.35%.
+Markdown report: outputs/daily-market-recap-2026-05-07.md
