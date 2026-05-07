@@ -403,6 +403,13 @@ def format_money(value: float) -> str:
     return f"${value:,.0f}"
 
 
+def format_percent_text(value: str) -> str:
+    stripped = value.strip()
+    if not stripped or stripped == "unknown" or stripped.endswith("%"):
+        return stripped
+    return f"{stripped}%"
+
+
 def generate_report(
     positions: list[Position],
     watchlist: list[WatchlistCandidate],
@@ -435,7 +442,7 @@ def generate_report(
         f"- Options context: `{OPTIONS_PATH.relative_to(ROOT)}`",
         f"- Portfolio snapshot date in repo: {snapshot['date']}",
         f"- Portfolio market value from positions: {format_money(portfolio_value)}",
-        f"- Cash percent from snapshot: {snapshot['cash_pct']}",
+        f"- Cash percent from snapshot: {format_percent_text(snapshot['cash_pct'])}",
         "",
         "## Market Regime",
         "",
@@ -531,7 +538,7 @@ def generate_report(
         f"Altamira Trade Ideas - {today.isoformat()}",
         "",
         f"Regime: VIX {market['vix']} ({market['vix_regime']}); {market['trend']}",
-        f"Portfolio: {format_money(portfolio_value)} from repo; cash {snapshot['cash_pct']}",
+        f"Portfolio: {format_money(portfolio_value)} from repo; cash {format_percent_text(snapshot['cash_pct'])}",
         f"Repo snapshot date: {snapshot['date']}",
         "",
         "Priority 1 - Manage options:",
@@ -540,6 +547,8 @@ def generate_report(
         for option, status, detail in urgent_options[:4]:
             exp = option.expiration.isoformat() if option.expiration else "unknown"
             telegram_lines.append(f"- {status}: {option.ticker} {option.strike:g}P {exp}; {detail}")
+        if len(urgent_options) > 4:
+            telegram_lines.append(f"- Plus {len(urgent_options) - 4} more option-management item(s) in the report.")
     else:
         telegram_lines.append("- No urgent flags in repo context.")
 
@@ -548,6 +557,8 @@ def generate_report(
         telegram_lines.append(
             f"- {position.ticker}: {position.weight:.1f}% weight; consider {contracts} small covered-call overlay"
         )
+    if len(covered_calls) > 4:
+        telegram_lines.append(f"- Plus {len(covered_calls) - 4} more covered-call candidate(s) in the report.")
 
     telegram_lines.extend(["", "Priority 3 - Watchlist entries:"])
     for candidate, action, reason in watch_ideas[:4]:
@@ -557,6 +568,7 @@ def generate_report(
     telegram_lines.extend(
         [
             "",
+            f"Report: outputs/trade-idea-generator-{today.isoformat()}.md",
             "Guardrails: verify live chain/earnings/liquidity; 5% max trade, 30% options cap.",
             "Operational note only; not financial advice.",
         ]
