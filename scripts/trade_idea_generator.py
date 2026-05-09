@@ -402,7 +402,8 @@ def build_report(
     if not non_held_watchlist:
         lines.append("| - | - | - | - | - | No B- or better non-held watchlist candidates found. |")
 
-    avoided = [entry for entry in watchlist if entry.status.lower() == "avoid" or grade_rank(entry.grade) <= grade_rank("F")]
+    avoided = [entry for entry in watchlist if entry.status.lower() == "avoid" or entry.grade.upper() == "F"]
+    unscored = [entry for entry in watchlist if grade_rank(entry.grade) == 0 and entry.ticker not in {e.ticker for e in avoided}]
     lines.extend(
         [
             "",
@@ -418,6 +419,12 @@ def build_report(
         )
     else:
         lines.append("- No avoid-rated names found in the parsed watchlist.")
+    if unscored:
+        lines.append(
+            "- Unscored names need a fresh `/stockscore` before new capital: "
+            + ", ".join(entry.ticker for entry in unscored)
+            + "."
+        )
 
     lines.extend(
         [
@@ -448,15 +455,22 @@ def build_report(
     else:
         telegram_lines.append("1) No >10% single-position concentration found in the repo snapshot.")
 
-    near_term_options = [opt for opt in active_options if (opt.expiration - as_of).days <= 10]
+    stale_options = [opt for opt in active_options if (opt.expiration - as_of).days < 0]
+    near_term_options = [opt for opt in active_options if 0 <= (opt.expiration - as_of).days <= 10]
     if near_term_options:
         telegram_lines.append(
             "2) Manage near-term short puts before adding risk: "
             + ", ".join(f"{opt.ticker} {opt.strike:g}P {opt.expiration.isoformat()}" for opt in near_term_options[:4])
-            + ". Close/roll if strike test or target profit; reconcile expired rows."
+            + ". Close/roll if strike test or target profit."
         )
     else:
         telegram_lines.append("2) No short-premium contracts inside 10 DTE in the repo snapshot.")
+    if stale_options:
+        telegram_lines.append(
+            "Stale rows to reconcile: "
+            + ", ".join(f"{opt.ticker} {opt.strike:g}P {opt.expiration.isoformat()}" for opt in stale_options[:4])
+            + "."
+        )
 
     if non_held_watchlist:
         telegram_lines.append(
