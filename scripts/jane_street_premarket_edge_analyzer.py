@@ -472,9 +472,9 @@ def unique_levels(
     seen: set[int] = set()
     for _, value, rationale in candidates:
         rounded = floor_to_increment(value, 5) if below else ceil_to_increment(value, 5)
-        if below and rounded >= current:
+        if below and rounded >= current - 5:
             continue
-        if not below and rounded <= current:
+        if not below and rounded <= current + 5:
             continue
         if rounded in seen:
             continue
