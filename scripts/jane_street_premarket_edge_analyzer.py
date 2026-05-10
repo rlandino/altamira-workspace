@@ -432,17 +432,17 @@ def support_resistance(
 
     support_candidates: list[tuple[str, float, str]] = []
     resistance_candidates: list[tuple[str, float, str]] = []
-    if prior_low is not None:
+    if prior_low is not None and prior_low < current:
         support_candidates.append(("Support 1", prior_low, "Prior session low"))
     support_candidates.append(("Support 2", floor_to_increment(current - 1, 25), "Nearest downside round-number shelf"))
-    if prior_close is not None and prior_close < current:
+    if prior_close is not None and prior_close < current - 5:
         support_candidates.append(("Support 3", prior_close, "Prior close / gap reference"))
     support_candidates.append(("Support 3", current - expected_move, "VIX-implied one-day downside"))
 
-    if prior_high is not None:
+    if prior_high is not None and prior_high > current:
         resistance_candidates.append(("Resistance 1", prior_high, "Prior session high"))
     resistance_candidates.append(("Resistance 2", ceil_to_increment(current + 1, 25), "Nearest upside round-number shelf"))
-    if prior_close is not None and prior_close > current:
+    if prior_close is not None and prior_close > current + 5:
         resistance_candidates.append(("Resistance 3", prior_close, "Prior close / gap reference"))
     resistance_candidates.append(("Resistance 3", current + expected_move, "VIX-implied one-day upside"))
 
@@ -471,7 +471,11 @@ def unique_levels(
     out: list[tuple[str, float, str]] = []
     seen: set[int] = set()
     for _, value, rationale in candidates:
-        rounded = round_to_increment(value, 5)
+        rounded = floor_to_increment(value, 5) if below else ceil_to_increment(value, 5)
+        if below and rounded >= current:
+            continue
+        if not below and rounded <= current:
+            continue
         if rounded in seen:
             continue
         seen.add(rounded)
