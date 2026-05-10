@@ -458,6 +458,8 @@ def support_resistance(
         below=False,
         current=current,
     )
+    supports = sorted(supports, key=lambda row: row[1], reverse=True)
+    resistances = sorted(resistances, key=lambda row: row[1])
     return renumber("Support", supports), renumber("Resistance", resistances)
 
 
