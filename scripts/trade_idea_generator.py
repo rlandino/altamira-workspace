@@ -108,6 +108,13 @@ class OptionPosition:
             return 0.0
         return self.current / self.credit
 
+    def is_expired(self, as_of: date) -> bool:
+        """Return whether the option expiration is before the report date."""
+        try:
+            return date.fromisoformat(self.expiration) < as_of
+        except ValueError:
+            return False
+
 
 @dataclass(frozen=True)
 class WatchlistEntry:
@@ -249,6 +256,7 @@ def fmt_pct(value: float) -> str:
 
 
 def build_ideas(
+    run_date: date,
     positions: list[Position],
     options: list[OptionPosition],
     watchlist: list[WatchlistEntry],
@@ -257,8 +265,10 @@ def build_ideas(
     """Create ranked, repository-based trade ideas."""
     overweight = [p for p in positions if p.weight > TACTICAL_POSITION_LIMIT]
     strict_overweight = [p for p in positions if p.weight > STRICT_POSITION_LIMIT]
-    underwater_options = [o for o in options if o.current > o.credit]
-    profitable_options = [o for o in options if o.current <= o.credit]
+    active_options = [o for o in options if not o.is_expired(run_date)]
+    expired_options = [o for o in options if o.is_expired(run_date)]
+    underwater_options = [o for o in active_options if o.current > o.credit]
+    profitable_options = [o for o in active_options if o.current <= o.credit]
     top_watchlist = [w for w in watchlist if w.score is not None and w.score >= 60]
     top_watchlist = sorted(top_watchlist, key=lambda w: w.score or 0.0, reverse=True)
     semis = [w for w in top_watchlist if SECTOR_MAP.get(w.ticker) == "Semiconductors"]
@@ -291,14 +301,32 @@ def build_ideas(
             }
         )
 
-    if underwater_options:
+    if expired_options:
+        expired_rows = ", ".join(
+            f"{o.ticker} {o.strike:g}{o.option_type[0].upper()} {o.expiration}"
+            for o in expired_options
+        )
+        ideas.append(
+            {
+                "priority": "2",
+                "title": "Refresh stale options context",
+                "action": "Do not act on the listed short-premium rows until the portfolio export is refreshed.",
+                "candidates": expired_rows,
+                "rationale": (
+                    f"{len(expired_options)} option rows have expirations before {run_date.isoformat()}, "
+                    "so the repository options snapshot is stale for live trade execution."
+                ),
+                "risk_control": "Refresh broker or Google Sheets context, then rerun options scans before entering or rolling premium trades.",
+            }
+        )
+    elif underwater_options:
         problem_rows = ", ".join(
             f"{o.ticker} {o.strike:g}{o.option_type[0].upper()} {o.expiration} "
-            f"mark {o.current:.2f}/{o.credit:.2f}x credit"
+            f"mark {o.current:.2f} vs {o.credit:.2f} credit"
             for o in underwater_options
         )
         win_rows = ", ".join(
-            f"{o.ticker} {o.strike:g}{o.option_type[0].upper()} mark {o.current:.2f}/{o.credit:.2f}"
+            f"{o.ticker} {o.strike:g}{o.option_type[0].upper()} mark {o.current:.2f} vs {o.credit:.2f} credit"
             for o in profitable_options
         )
         ideas.append(
@@ -437,8 +465,11 @@ def build_report(
         )
 
     option_rows = [["Ticker", "Contract", "Credit", "Current", "Status"]]
+    as_of = date.fromisoformat(run_date)
     for option in options:
-        if option.current <= option.credit * 0.5:
+        if option.is_expired(as_of):
+            status = "Expired/stale in repository"
+        elif option.current <= option.credit * 0.5:
             status = "Profit target zone"
         elif option.current > option.credit * 2:
             status = "Stop-review zone"
@@ -530,7 +561,9 @@ def build_telegram_message(
         key=lambda w: w.score or 0.0,
         reverse=True,
     )[:5]
-    underwater_options = [o for o in options if o.current > o.credit]
+    as_of = date.fromisoformat(run_date)
+    expired_options = [o for o in options if o.is_expired(as_of)]
+    underwater_options = [o for o in options if not o.is_expired(as_of) and o.current > o.credit]
 
     lines = [
         f"ALTAMIRA TRADE IDEAS - {run_date}",
@@ -548,13 +581,21 @@ def build_telegram_message(
         lines.append(f"   Action: {idea['action']}")
         lines.append(f"   Names: {idea['candidates']}")
 
-    if underwater_options:
+    if expired_options:
+        lines.extend(
+            [
+                "",
+                "Options context:",
+                f"{len(expired_options)} listed option rows are expired/stale in the repo snapshot. Refresh positions before trading options.",
+            ]
+        )
+    elif underwater_options:
         lines.extend(
             [
                 "",
                 "Options requiring review:",
                 ", ".join(
-                    f"{o.ticker} {o.strike:g}{o.option_type[0].upper()} {o.current:.2f}/{o.credit:.2f}"
+                    f"{o.ticker} {o.strike:g}{o.option_type[0].upper()} {o.current:.2f} vs {o.credit:.2f}"
                     for o in underwater_options
                 ),
             ]
@@ -656,7 +697,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: No watchlist entries found in {WATCHLIST_PATH}", file=sys.stderr)
         return 1
 
-    ideas = build_ideas(positions, options, watchlist, total_value)
+    report_date = date.fromisoformat(args.date)
+    ideas = build_ideas(report_date, positions, options, watchlist, total_value)
     report = build_report(args.date, positions, options, watchlist, total_value, ideas)
     report_path = write_output(args.date, report)
     telegram_message = build_telegram_message(
