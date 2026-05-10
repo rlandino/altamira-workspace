@@ -193,6 +193,14 @@ Types: `daily` (default), `weekly`, `monthly`, `holdings`. Covers market summary
 
 Example: `/portfolio-report weekly`
 
+### /trade-idea-generator [--send-telegram]
+
+**Purpose:** Generate ranked trade ideas from the repository's current portfolio and watchlist, write `outputs/trade-idea-generator-{DATE}.md`, and optionally send the concise summary to Telegram.
+
+Uses `scripts/trade_idea_generator.py` with `context/portfolio-details.md` and `context/watchlist.md`. For Telegram delivery, set `TELEGRAM_BOT_TOKEN` and either `TELEGRAM_CHAT_ID` or pass `--telegram-chat-id`.
+
+Example: `/trade-idea-generator` or `python3 scripts/trade_idea_generator.py --send-telegram`
+
 ### /paper-trade [details]
 
 **Purpose:** Log a paper trade with pre-trade checklist validation and risk checks.
@@ -588,6 +596,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
+| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist trade ideas and optionally send the summary to Telegram | `python3 scripts/trade_idea_generator.py --print-message` or `--send-telegram` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
