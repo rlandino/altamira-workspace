@@ -306,15 +306,23 @@ def build_ideas(
             f"{o.ticker} {o.strike:g}{o.option_type[0].upper()} {o.expiration}"
             for o in expired_options
         )
+        active_review_rows = ", ".join(
+            f"{o.ticker} {o.strike:g}{o.option_type[0].upper()} {o.expiration} "
+            f"mark {o.current:.2f} vs {o.credit:.2f} credit"
+            for o in underwater_options
+        )
+        candidates = f"Expired rows: {expired_rows}"
+        if active_review_rows:
+            candidates += f"; active marks to verify: {active_review_rows}"
         ideas.append(
             {
                 "priority": "2",
                 "title": "Refresh stale options context",
-                "action": "Do not act on the listed short-premium rows until the portfolio export is refreshed.",
-                "candidates": expired_rows,
+                "action": "Refresh the portfolio export, then review any still-active short puts whose marks are above entry credit.",
+                "candidates": candidates,
                 "rationale": (
                     f"{len(expired_options)} option rows have expirations before {run_date.isoformat()}, "
-                    "so the repository options snapshot is stale for live trade execution."
+                    "so the repository options snapshot needs verification before live option execution."
                 ),
                 "risk_control": "Refresh broker or Google Sheets context, then rerun options scans before entering or rolling premium trades.",
             }
@@ -589,6 +597,14 @@ def build_telegram_message(
                 f"{len(expired_options)} listed option rows are expired/stale in the repo snapshot. Refresh positions before trading options.",
             ]
         )
+        if underwater_options:
+            lines.append(
+                "Active marks to verify after refresh: "
+                + ", ".join(
+                    f"{o.ticker} {o.strike:g}{o.option_type[0].upper()} {o.current:.2f} vs {o.credit:.2f}"
+                    for o in underwater_options
+                )
+            )
     elif underwater_options:
         lines.extend(
             [
