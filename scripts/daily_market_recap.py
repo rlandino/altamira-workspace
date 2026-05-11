@@ -298,17 +298,7 @@ def get_earnings(
     rows = [row for row in data if isinstance(row, dict)]
     rows = sorted(rows, key=lambda row: (row.get("date") or "", row.get("symbol") or ""))
     core_rows = [row for row in rows if str(row.get("symbol", "")).upper() in CORE_EARNINGS_SYMBOLS]
-    if core_rows:
-        return core_rows[:25]
-
-    # The broad calendar is global and often alphabetized by international symbols.
-    # If no core/watchlist names report, keep the recap focused on US-style tickers.
-    us_style_rows = [
-        row
-        for row in rows
-        if str(row.get("symbol", "")).isalpha() and 1 <= len(str(row.get("symbol", ""))) <= 5
-    ]
-    return us_style_rows[:25]
+    return core_rows[:25]
 
 
 def get_headlines(session: requests.Session, api_key: str) -> list[dict[str, Any]]:
@@ -465,7 +455,7 @@ def build_report(api_key: str, report_date: date) -> tuple[Path, str]:
                 f"{fmt_price(row.get('revenueEstimated'), 0)} |"
             )
     else:
-        lines.append("No earnings-calendar entries were returned for the next 7 days.")
+        lines.append("No core Altamira/watchlist earnings-calendar entries were returned for the next 7 days.")
 
     lines.extend(
         [
