@@ -842,6 +842,7 @@ def render_telegram(ideas: list[TradeIdea], context: dict[str, Any], report_path
         [
             "",
             f"Report: {report_path.as_posix()}",
+            "Expired static option rows are ignored.",
             "Decision support only; confirm liquidity, earnings, and risk before trading.",
         ]
     )
