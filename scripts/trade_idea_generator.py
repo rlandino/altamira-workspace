@@ -563,12 +563,14 @@ def build_trade_ideas(
 
     # 1. Manage existing short premium first because it changes risk immediately.
     for opt in option_positions:
+        exp_days = dte(opt.expiration, today)
+        if exp_days is not None and exp_days < 0:
+            continue
         price = quote_price(opt.ticker, quotes)
         if price is None:
             continue
         credit_capture = (opt.credit - opt.current) / opt.credit if opt.credit > 0 else 0
         distance = (price - opt.strike) / opt.strike if opt.strike else 0
-        exp_days = dte(opt.expiration, today)
         if credit_capture >= 0.5:
             action = "Close or roll to lock in premium"
             setup = f"Buy back {opt.ticker} {opt.strike:g}P {opt.expiration} near {money(opt.current)}"
@@ -812,6 +814,7 @@ def render_markdown(
             "## Notes",
             "",
             "- CSP and covered-call contracts target 28-52 DTE and 0.20-0.30 delta where option-chain data is available.",
+            "- Expired short-premium rows in the static portfolio context are ignored for actionable ideas.",
             "- Target-only ideas mean the chain lookup did not return a liquid exact contract; confirm bid/ask, open interest, and earnings before entry.",
             "- Financial calculations are for decision support only and are not investment advice.",
             "",
