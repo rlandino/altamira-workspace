@@ -19,6 +19,39 @@ OUTPUTS = WORKSPACE / "outputs"
 FMP_V3 = "https://financialmodelingprep.com/api/v3"
 FMP_STABLE = "https://financialmodelingprep.com/stable"
 ET = ZoneInfo("America/New_York")
+CORE_EARNINGS_SYMBOLS = {
+    "AAPL",
+    "ABBV",
+    "AMD",
+    "AMGN",
+    "AMZN",
+    "AVGO",
+    "BAC",
+    "BRK-B",
+    "COST",
+    "CRM",
+    "CRWD",
+    "CVX",
+    "GOOG",
+    "GOOGL",
+    "GS",
+    "HD",
+    "JPM",
+    "MA",
+    "META",
+    "MS",
+    "MSFT",
+    "NFLX",
+    "NVDA",
+    "ORCL",
+    "SNOW",
+    "TGT",
+    "TSLA",
+    "UNH",
+    "V",
+    "WMT",
+    "XOM",
+}
 
 
 class RecapError(RuntimeError):
@@ -263,7 +296,19 @@ def get_earnings(
     if not isinstance(data, list):
         return []
     rows = [row for row in data if isinstance(row, dict)]
-    return sorted(rows, key=lambda row: (row.get("date") or "", row.get("symbol") or ""))[:25]
+    rows = sorted(rows, key=lambda row: (row.get("date") or "", row.get("symbol") or ""))
+    core_rows = [row for row in rows if str(row.get("symbol", "")).upper() in CORE_EARNINGS_SYMBOLS]
+    if core_rows:
+        return core_rows[:25]
+
+    # The broad calendar is global and often alphabetized by international symbols.
+    # If no core/watchlist names report, keep the recap focused on US-style tickers.
+    us_style_rows = [
+        row
+        for row in rows
+        if str(row.get("symbol", "")).isalpha() and 1 <= len(str(row.get("symbol", ""))) <= 5
+    ]
+    return us_style_rows[:25]
 
 
 def get_headlines(session: requests.Session, api_key: str) -> list[dict[str, Any]]:
