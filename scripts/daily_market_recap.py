@@ -141,10 +141,15 @@ def get_historical_spx(
         return None, None, None, None
 
     rows = sorted(
-        (row for row in data if isinstance(row, dict) and coerce_float(row.get("close")) is not None),
+        (
+            row
+            for row in data
+            if isinstance(row, dict)
+            and coerce_float(first_value(row, ("close", "adjClose", "price"))) is not None
+        ),
         key=lambda row: row.get("date", ""),
     )
-    closes = [coerce_float(row.get("close")) for row in rows]
+    closes = [coerce_float(first_value(row, ("close", "adjClose", "price"))) for row in rows]
     closes = [value for value in closes if value is not None]
     if not closes:
         return None, None, None, None
@@ -199,7 +204,45 @@ def get_sector_snapshot(session: requests.Session, api_key: str, report_date: da
             worst = f"{parsed[0][0]} ({fmt_pct(parsed[0][1])})"
             best = f"{parsed[-1][0]} ({fmt_pct(parsed[-1][1])})"
             return best, worst
-    return "n/a", "n/a"
+    return get_sector_etf_fallback(session, api_key)
+
+
+def get_sector_etf_fallback(session: requests.Session, api_key: str) -> tuple[str, str]:
+    """Derive sector leadership from liquid SPDR sector ETF quotes."""
+    sector_etfs = {
+        "XLK": "Technology",
+        "XLF": "Financials",
+        "XLE": "Energy",
+        "XLV": "Health Care",
+        "XLI": "Industrials",
+        "XLP": "Consumer Staples",
+        "XLU": "Utilities",
+        "XLY": "Consumer Discretionary",
+        "XLC": "Communication Services",
+        "XLRE": "Real Estate",
+        "XLB": "Materials",
+    }
+    symbols = ",".join(sector_etfs)
+    data = fetch_json(session, f"{FMP_V3}/quote/{symbols}", {"apikey": api_key}, required=False)
+    if not isinstance(data, list):
+        return "n/a", "n/a"
+
+    parsed: list[tuple[str, float]] = []
+    for row in data:
+        if not isinstance(row, dict):
+            continue
+        symbol = row.get("symbol")
+        pct = coerce_float(first_value(row, ("changesPercentage", "changePercentage")))
+        if symbol in sector_etfs and pct is not None:
+            parsed.append((sector_etfs[symbol], pct))
+
+    if not parsed:
+        return "n/a", "n/a"
+
+    parsed.sort(key=lambda item: item[1])
+    worst = f"{parsed[0][0]} ({fmt_pct(parsed[0][1])})"
+    best = f"{parsed[-1][0]} ({fmt_pct(parsed[-1][1])})"
+    return best, worst
 
 
 def get_earnings(
