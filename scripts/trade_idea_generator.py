@@ -22,7 +22,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -35,7 +35,6 @@ WATCHLIST_FILE = CONTEXT_DIR / "watchlist.md"
 STOCK_SCORER_FILE = WORKSPACE / "scripts" / "stock-scorer.py"
 FMP_BASE = "https://financialmodelingprep.com/api/v3"
 MASSIVE_BASE = "https://api.massive.com/v3"
-DEFAULT_TELEGRAM_CHAT = "@rlandino_market_bot"
 USER_AGENT = "Altamira Trade Idea Generator/1.0"
 
 
@@ -849,9 +848,11 @@ def render_telegram(ideas: list[TradeIdea], context: dict[str, Any], report_path
 
 def send_telegram(text: str, chat_id: str | None = None) -> tuple[bool, str]:
     token = os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("TELEGRAM_TOKEN")
-    target = chat_id or os.environ.get("TELEGRAM_CHAT_ID") or DEFAULT_TELEGRAM_CHAT
+    target = chat_id or os.environ.get("TELEGRAM_CHAT_ID") or discover_repo_telegram_chat()
     if not token:
         return False, "TELEGRAM_BOT_TOKEN is not set"
+    if not target:
+        return False, "TELEGRAM_CHAT_ID is not set and no repository fallback chat ID was found"
 
     payload = urllib.parse.urlencode(
         {
@@ -878,6 +879,32 @@ def send_telegram(text: str, chat_id: str | None = None) -> tuple[bool, str]:
     if not result.get("ok"):
         return False, f"Telegram API returned not ok: {result}"
     return True, f"sent to {target}"
+
+
+def discover_repo_telegram_chat() -> str | None:
+    """Use existing workflow metadata as a fallback chat target."""
+    candidates = [
+        OUTPUTS_DIR / "csp-daily-scan-fixed.json",
+        OUTPUTS_DIR / "n8n-workflow-csp-daily-scan.json",
+    ]
+    for path in candidates:
+        if not path.exists():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        nodes = data.get("nodes", []) if isinstance(data, dict) else []
+        for node in nodes:
+            if not isinstance(node, dict):
+                continue
+            name = str(node.get("name", "")).lower()
+            if "telegram" not in name:
+                continue
+            chat_id = node.get("parameters", {}).get("chatId")
+            if chat_id:
+                return str(chat_id).lstrip("=")
+    return None
 
 
 def main() -> int:
@@ -931,7 +958,7 @@ def main() -> int:
     if args.send_telegram:
         ok, message = send_telegram(telegram_text, args.telegram_chat_id)
         status_path = OUTPUTS_DIR / f"trade-idea-generator-telegram-status-{output_date.isoformat()}.txt"
-        status_path.write_text(f"{datetime.utcnow().isoformat()}Z {message}\n", encoding="utf-8")
+        status_path.write_text(f"{datetime.now(UTC).isoformat()} {message}\n", encoding="utf-8")
         print("")
         print(f"Telegram: {message}")
         if not ok:
