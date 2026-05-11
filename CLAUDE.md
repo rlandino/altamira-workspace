@@ -74,6 +74,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── management-quality-evaluator.md # /management-quality-evaluator — management quality (capital allocation, compensation, insider, communication, strategy)
 │   │   ├── market-brief.md    # /market-brief — short market snapshot
 │   │   ├── briefing.md        # /briefing — daily market briefing (Market Commenter style)
+│   │   ├── daily-market-recap.md # /daily-market-recap — market recap markdown + Telegram delivery
 │   │   ├── speak.md          # /speak — TTS: speak text or briefing aloud / save MP3
 │   │   ├── sig-daily-theta-decay-calculator.md # /sig-daily-theta-decay-calculator — theta dashboard (position/portfolio theta, hourly decay, compounding)
 │   │   ├── activist-investor-analyzer.md  # /activist-investor-analyzer — Pershing Square-style activist situation analysis
@@ -441,6 +442,12 @@ Uses Market Data API (port 8001) or FMP for indices and VIX; presents levels and
 
 Uses FMP API (v3 + stable) for quotes, gainers/losers, sector snapshot, earnings calendar, and historical EOD. Computes 5D/20D averages, support/resistance, and trend (Bullish/Bearish/Mixed). Writes `outputs/briefing-{DATE}.md` and optionally runs `scripts/briefing_chart.py` for `outputs/briefing-chart-{DATE}.png`. To hear the summary as audio after a briefing, run `/speak briefing`.
 
+### /daily-market-recap
+
+**Purpose:** Daily market recap with Telegram delivery: major indices, SPY/QQQ/DIA/VIX, best/worst sector, hot stock/biggest loser, S&P 500 technical context, headlines, earnings calendar, and concise commentary.
+
+Runs `python3 scripts/daily_market_recap.py --send-telegram`, writes `outputs/daily-market-recap-{DATE}.md`, sends a plain-text summary to Telegram, and attaches the markdown report. Requires `FMP_API_KEY`, `TELEGRAM_BOT_TOKEN`, and `TELEGRAM_CHAT_ID` (or `--telegram-chat-id`).
+
 ### /speak [text | file path | briefing]
 
 **Purpose:** Run TTS to speak text aloud or save to MP3. Use with inline text, a file path (e.g. `outputs/briefing-voice-2025-02-23.txt`), or the shortcut `briefing` to speak the last briefing’s Voice script. Combines with `/briefing`, `/market-brief`, or any command whose output you want as audio.
@@ -589,6 +596,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
+| `scripts/daily_market_recap.py` | Generate daily market recap markdown and optionally send summary + file to Telegram | `python3 scripts/daily_market_recap.py --send-telegram` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
 | `scripts/13f-holdings-diff.py` | Compare 13F holdings between two periods (new buys, sells, increased/decreased) | `python scripts/13f-holdings-diff.py --cik CIK --prior YYYY-MM-DD --current YYYY-MM-DD` (optional `--out report.md`, `--json-out diff.json`) |
