@@ -350,7 +350,7 @@ Runs `scripts/stock-scorer.py` for portfolio/watchlist tickers; consolidates sco
 
 **Purpose:** Generate daily trade ideas from `context/portfolio-details.md` and `context/watchlist.md`, write `outputs/trade-idea-generator-{DATE}.md`, and send a concise Telegram summary.
 
-Runs `python scripts/trade_idea_generator.py --send`. Uses `FMP_API_KEY` for optional quote enrichment, `TELEGRAM_BOT_TOKEN` for delivery, and `TELEGRAM_CHAT_ID` / `TELEGRAM_CHANNEL_ID` or the existing workflow fallback chat ID. Ideas include near-expiration options management, watchlist CSP/spread candidates, and covered-call/trim discipline for concentrated holdings.
+Runs `python3 scripts/trade_idea_generator.py --send`. Uses `FMP_API_KEY` for optional quote enrichment, `TELEGRAM_BOT_TOKEN` for delivery, and `TELEGRAM_CHAT_ID` / `TELEGRAM_CHANNEL_ID` or the existing workflow fallback chat ID. Ideas include near-expiration options management, watchlist CSP/spread candidates, and covered-call/trim discipline for concentrated holdings.
 
 ### /wireframe [ARTIFACT]
 
@@ -595,7 +595,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
-| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist trade ideas, write a dated report, and optionally send to Telegram | `python scripts/trade_idea_generator.py --send` |
+| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist trade ideas, write a dated report, and optionally send to Telegram | `python3 scripts/trade_idea_generator.py --send` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |

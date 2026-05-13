@@ -18,7 +18,7 @@ Use these repository files:
 From the workspace root, run:
 
 ```bash
-python scripts/trade_idea_generator.py --send
+python3 scripts/trade_idea_generator.py --send
 ```
 
 Optional flags:
