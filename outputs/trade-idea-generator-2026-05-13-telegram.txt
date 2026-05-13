@@ -1,0 +1,21 @@
+TRADE IDEA GENERATOR - 2026-05-13
+Portfolio context: $1,207,271 | 20 positions | 26 watchlist names
+Source: repository snapshot. Verify live quotes/options before entry.
+
+1) MANAGE EXISTING OPTIONS
+Priority: manage near-expiry short puts before adding new premium risk.
+- COST 900P 2026-05-15 (2 DTE) | buffer 9.6% vs repo price $996.08 | repo mark $12.40 (-13% of credit captured)
+- MSFT 380P 2026-05-15 (2 DTE) | buffer 4.9% vs repo price $399.60 | repo mark $11.80 (-17% of credit captured)
+- SPY 620P 2026-05-15 (2 DTE) | buffer 9.7% vs repo price $686.29 | repo mark $10.16 (-47% of credit captured)
+- Plus 1 additional option notes in the report.
+
+2) PORTFOLIO RISK / INCOME IDEA
+- Top weights: SPY 17.1%, AVGO 16.7%, GOOGL 13.8%, AMAT 12.6%
+- Keep new premium sizing light until near-expiry puts are closed, rolled, or expire.
+- Tech exposure is 45.4%; prefer trims/covered calls or defined-risk structures over new naked tech CSPs.
+
+3) NEW SETUP TO SCREEN
+- Watchlist CSP/put-spread candidates: LRCX B/67.4, NVDA B/66.2, TSM B-/61.8, KLAC B-/61.3, ADBE B-/60.1
+- Filter: 30-45 DTE, 0.15-0.25 delta, no near earnings, tight bid/ask, risk <= 2% per idea.
+
+Not financial advice. Confirm live data and portfolio limits before trading.
