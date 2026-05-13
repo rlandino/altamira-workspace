@@ -179,7 +179,7 @@ def sector_name(row: dict[str, Any]) -> str:
 
 
 def sector_change(row: dict[str, Any]) -> Any:
-    for key in ("changesPercentage", "changePercentage", "performance", "changesPercent"):
+    for key in ("changesPercentage", "changePercentage", "performance", "changesPercent", "averageChange"):
         if key in row:
             raw = row.get(key)
             if isinstance(raw, str):
@@ -216,6 +216,9 @@ def historical_closes(api_key: str, date_str: str) -> list[dict[str, Any]]:
             {"symbol": "^GSPC", "from": from_date, "to": date_str},
         )
     )
+    for row in rows:
+        if "close" not in row and "price" in row:
+            row["close"] = row["price"]
     rows.sort(key=lambda row: str(row.get("date", "")))
     return rows
 
