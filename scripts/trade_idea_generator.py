@@ -288,9 +288,19 @@ def choose_watchlist_candidates(
 
 
 def choose_trim_candidates(positions: list[Position], limit: int = 4) -> list[Position]:
+    def trim_rank(position: Position) -> tuple[int, int, float]:
+        sector = SECTOR_BY_TICKER.get(position.symbol, "Unknown")
+        is_single_name = sector not in {"ETF", "Fund"}
+        is_growth_concentration = sector in {
+            "Technology",
+            "Communication Services",
+            "Consumer Discretionary",
+        }
+        return (int(is_single_name), int(is_growth_concentration), position.weight)
+
     return sorted(
         [position for position in positions if position.weight >= 10.0],
-        key=lambda position: position.weight,
+        key=trim_rank,
         reverse=True,
     )[:limit]
 
@@ -357,6 +367,7 @@ def build_trade_ideas(
             ]
         )
 
+    losing_options = [opt for opt in active_options if opt.current > opt.credit]
     if stale_options:
         message_lines.extend(
             [
@@ -364,16 +375,14 @@ def build_trade_ideas(
                 f"Options note: {len(stale_options)} option rows in context are expired as of today; refresh before opening or rolling short-premium trades.",
             ]
         )
-    elif active_options:
-        losing = [opt for opt in active_options if opt.current > opt.credit]
-        if losing:
-            tickers = ", ".join(sorted({opt.ticker for opt in losing}))
-            message_lines.extend(
-                [
-                    "",
-                    f"Options note: manage underwater short-premium positions first ({tickers}); avoid new correlated puts until risk is reduced.",
-                ]
-            )
+    if losing_options:
+        tickers = ", ".join(sorted({opt.ticker for opt in losing_options}))
+        message_lines.extend(
+            [
+                "",
+                f"Options risk: manage underwater short-premium positions first ({tickers}); avoid new correlated puts until risk is reduced.",
+            ]
+        )
 
     message_lines.extend(
         [
