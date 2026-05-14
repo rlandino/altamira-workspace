@@ -213,7 +213,7 @@ def sector_name(row: dict[str, Any]) -> str:
 
 
 def sector_change(row: dict[str, Any]) -> float | None:
-    for key in ("changesPercentage", "changePercentage", "performance", "change"):
+    for key in ("changesPercentage", "changePercentage", "averageChange", "performance", "change"):
         value = to_float(row.get(key))
         if value is not None:
             return value
