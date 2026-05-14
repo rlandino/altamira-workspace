@@ -246,7 +246,13 @@ def fetch_earnings(api_key: str, report_date: str) -> tuple[list[dict[str, Any]]
     if isinstance(data, list):
         rows = [row for row in data if isinstance(row, dict)]
         rows = [row for row in rows if is_us_style_symbol(str(row.get("symbol") or ""))]
-        rows.sort(key=lambda row: (str(row.get("date") or ""), str(row.get("symbol") or "")))
+        rows.sort(
+            key=lambda row: (
+                str(row.get("date") or ""),
+                -(to_float(row.get("revenueEstimated")) or 0),
+                str(row.get("symbol") or ""),
+            )
+        )
         return rows[:20], errors
     return [], errors
 
