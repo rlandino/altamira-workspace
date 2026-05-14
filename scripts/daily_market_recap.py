@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
@@ -244,9 +245,15 @@ def fetch_earnings(api_key: str, report_date: str) -> tuple[list[dict[str, Any]]
     errors = [f"Earnings: {error}"] if error else []
     if isinstance(data, list):
         rows = [row for row in data if isinstance(row, dict)]
+        rows = [row for row in rows if is_us_style_symbol(str(row.get("symbol") or ""))]
         rows.sort(key=lambda row: (str(row.get("date") or ""), str(row.get("symbol") or "")))
         return rows[:20], errors
     return [], errors
+
+
+def is_us_style_symbol(symbol: str) -> bool:
+    """Keep common US exchange tickers and drop global exchange suffixes."""
+    return bool(re.fullmatch(r"[A-Z]{1,5}(?:-[A-Z])?", symbol))
 
 
 def fetch_headlines(api_key: str) -> tuple[list[dict[str, Any]], list[str]]:
