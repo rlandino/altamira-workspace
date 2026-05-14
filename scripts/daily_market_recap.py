@@ -252,8 +252,12 @@ def fetch_earnings(api_key: str, report_date: str) -> tuple[list[dict[str, Any]]
 
 
 def is_us_style_symbol(symbol: str) -> bool:
-    """Keep common US exchange tickers and drop global exchange suffixes."""
-    return bool(re.fullmatch(r"[A-Z]{1,5}(?:-[A-Z])?", symbol))
+    """Keep common US listed tickers and drop global/OTC suffix patterns."""
+    if re.fullmatch(r"[A-Z]{1,4}(?:-[A-Z])?", symbol):
+        return True
+    if re.fullmatch(r"[A-Z]{5}", symbol):
+        return symbol[-1] not in {"F", "Q", "W", "Y"}
+    return False
 
 
 def fetch_headlines(api_key: str) -> tuple[list[dict[str, Any]], list[str]]:
