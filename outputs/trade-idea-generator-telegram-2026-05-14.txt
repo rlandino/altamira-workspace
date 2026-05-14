@@ -1,0 +1,14 @@
+TRADE IDEA GENERATOR - 2026-05-14
+VIX: 17.87 (NORMAL)
+SPY: $745.25, 0.4%
+
+Top ideas:
+1. GOOGL - Sell covered call: GOOGL 420C 2026-06-18 (35 DTE), target 0.20-0.30 delta credit $7.95
+2. AVGO - Trim overweight sleeve: Trim about 188 shares to move AVGO toward 10% target weight
+3. MSFT - Sell covered call: MSFT 425C 2026-06-18 (35 DTE), target 0.20-0.30 delta credit $6.60
+4. AAPL - Sell covered call: AAPL 310C 2026-06-18 (35 DTE), target 0.20-0.30 delta credit $4.40
+5. LRCX - Sell CSP: LRCX 280P 2026-06-18 (35 DTE), target 0.20-0.30 delta credit $14.50
+
+Report: outputs/trade-idea-generator-2026-05-14.md
+Expired static option rows are ignored.
+Decision support only; confirm liquidity, earnings, and risk before trading.
