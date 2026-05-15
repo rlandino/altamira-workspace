@@ -371,6 +371,8 @@ def score_contract(
     dte = calc_dte(expiration)
     if not dte or dte < 20 or dte > 60 or price <= 0:
         return None
+    if earnings_date and earnings_date <= expiration[:10]:
+        return None
     if bid <= 0 or open_interest < 25:
         return None
 
@@ -409,7 +411,6 @@ def score_contract(
             trend_bonus -= 4
     except (TypeError, ValueError):
         pass
-    earnings_penalty = -18 if earnings_date else 0
     total_score = (
         return_score
         + cushion_score
@@ -417,7 +418,6 @@ def score_contract(
         + delta_score
         + trend_bonus
         + grade_bonus(entry)
-        + earnings_penalty
         - spread_penalty
     )
 
@@ -583,6 +583,7 @@ def write_report(ideas: Sequence[OptionIdea], context: Dict[str, Any], out_dir: 
         f"- VIX: {context['vix']:.2f}" if context.get("vix") is not None else "- VIX: unavailable",
         f"- Regime: {context.get('regime', 'UNKNOWN')}",
         f"- Suggested option sizing: {context.get('sizing_pct', 75)}% of normal risk budget",
+        "- Earnings rule: excludes contracts expiring after a known earnings date in the scan window",
         "",
         "## Universe",
         "",
@@ -674,6 +675,7 @@ def build_telegram_message(ideas: Sequence[OptionIdea], context: Dict[str, Any],
     lines = [
         f"Altamira Trade Ideas - {today}",
         f"Universe: {context['universe_count']} portfolio/watchlist tickers | VIX {vix_text} ({context.get('regime', 'UNKNOWN')})",
+        "Earnings filter: excludes contracts expiring after known earnings dates.",
         "",
     ]
     if not ideas:
