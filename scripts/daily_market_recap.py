@@ -7,7 +7,7 @@ import argparse
 import os
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -274,7 +274,7 @@ def build_recap(api_key: str, date_str: str) -> tuple[str, str]:
         f"top loser: {weak_stock.get('symbol', 'n/a')} {pct(weak_stock.get('changesPercentage'))}."
     )
 
-    generated_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     markdown = f"""# Daily Market Recap - {date_str}
 
 **Generated:** {generated_at}  
@@ -396,7 +396,7 @@ def send_telegram(token: str, chat_id: str, summary: str, markdown_path: Path) -
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate and optionally send a daily market recap.")
-    parser.add_argument("--date", default=datetime.utcnow().strftime("%Y-%m-%d"), help="Recap date YYYY-MM-DD")
+    parser.add_argument("--date", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"), help="Recap date YYYY-MM-DD")
     parser.add_argument("--fmp-key", default=os.environ.get("FMP_API_KEY", DEFAULT_FMP_KEY), help="FMP API key")
     parser.add_argument("--telegram-token", default=os.environ.get("TELEGRAM_BOT_TOKEN"), help="Telegram bot token")
     parser.add_argument("--chat-id", default=os.environ.get("TELEGRAM_CHAT_ID"), help="Telegram chat/channel ID")
