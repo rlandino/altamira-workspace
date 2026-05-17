@@ -1,0 +1,24 @@
+Altamira Trade Ideas - 2026-05-17
+
+Portfolio context: $1,207,271 across 20 holdings.
+Top weights: SPY 17.1%, AVGO 16.7%, GOOGL 13.8%, AMAT 12.6%, MSFT 6.7%.
+
+1) Manage concentration first:
+- SPY 17.1%: trim 5-10% on strength or use covered calls only if willing to cap upside.
+- AVGO 16.7%: trim 5-10% on strength or use covered calls only if willing to cap upside.
+- GOOGL 13.8%: trim 5-10% on strength or use covered calls only if willing to cap upside.
+- AMAT 12.6%: trim 5-10% on strength or use covered calls only if willing to cap upside.
+
+2) New-money watchlist:
+- LRCX (67.4, B): starter/pullback buy or 20-30 delta CSP after live chain + earnings check.
+- NVDA (66.2, B): starter/pullback buy or 20-30 delta CSP after live chain + earnings check.
+- TSM (61.8, B-): starter/pullback buy or 20-30 delta CSP after live chain + earnings check.
+- KLAC (61.3, B-): starter/pullback buy or 20-30 delta CSP after live chain + earnings check.
+- ADBE (60.1, B-): starter/pullback buy or 20-30 delta CSP after live chain + earnings check.
+
+3) Options housekeeping:
+- 5 option rows in context are expired; reconcile broker records before opening new premium trades.
+
+Avoid/low-priority: CMG, TSLA, TMO, ABT.
+
+Not financial advice; confirm live market data before execution.
