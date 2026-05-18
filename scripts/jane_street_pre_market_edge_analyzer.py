@@ -179,6 +179,27 @@ def unique_levels(levels: list[tuple[float, str]], limit: int = 3) -> list[tuple
     return output
 
 
+def pad_levels(
+    levels: list[tuple[float, str]],
+    current: float,
+    direction: str,
+    limit: int = 3,
+    step: int = 50,
+) -> list[tuple[float, str]]:
+    """Ensure reports always have the requested number of price levels."""
+    output = list(levels)
+    existing = {int(level) for level, _ in output}
+    offset = step
+    while len(output) < limit:
+        fallback = round_down(current - offset, 5) if direction == "support" else round_up(current + offset, 5)
+        if fallback not in existing:
+            existing.add(fallback)
+            label = "Fallback round-number support" if direction == "support" else "Fallback round-number resistance"
+            output.append((float(fallback), label))
+        offset += step
+    return output[:limit]
+
+
 def classify_event(event: dict[str, Any]) -> bool:
     searchable = " ".join(str(event.get(k, "")) for k in ("event", "title", "name", "country", "currency"))
     return any(keyword in searchable.lower() for keyword in HIGH_IMPACT_KEYWORDS)
@@ -382,7 +403,7 @@ def build_report(raw_args: str = "") -> tuple[Path, str]:
     calendar_recommendation = (
         "wait until after the event window and use wider strikes"
         if high_impact_events
-        else "normal theta entry after the first 15-20 minutes"
+        else "use normal theta entry after the first 15-20 minutes"
     )
 
     prior_spy_high = float(prior_spy.get("high") or current_spy)
@@ -399,7 +420,7 @@ def build_report(raw_args: str = "") -> tuple[Path, str]:
     ]
     support_candidates = [(lvl, reason) for lvl, reason in support_candidates if lvl < current_spx - 5]
     support_candidates.sort(key=lambda item: item[0], reverse=True)
-    supports = unique_levels(support_candidates)
+    supports = pad_levels(unique_levels(support_candidates), current_spx, "support")
 
     resistance_candidates = [
         (current_spx + expected_move, "VIX expected-move upper bound"),
@@ -409,7 +430,7 @@ def build_report(raw_args: str = "") -> tuple[Path, str]:
     ]
     resistance_candidates = [(lvl, reason) for lvl, reason in resistance_candidates if lvl > current_spx + 5]
     resistance_candidates.sort(key=lambda item: item[0])
-    resistances = unique_levels(resistance_candidates)
+    resistances = pad_levels(unique_levels(resistance_candidates), current_spx, "resistance")
 
     short_put = round_down(current_spx - max(expected_move, prior_range_spx * 0.45), 5)
     long_put = short_put - 25
@@ -548,7 +569,7 @@ Prior session SPY closed **{close_desc}** ({close_pct:.0%} of the range), creati
 ## Data and disclaimer
 
 - **Data sources:** FMP quote (^GSPC, SPY, ^VIX), FMP historical-price-full (SPY, ^GSPC, ^VIX), FMP economic_calendar, FMP earning_calendar.
-- **Overnight data:** {data_note}; Globex high/low should be confirmed from a broker or futures platform.
+- **Overnight data:** {data_note} Globex high/low should be confirmed from a broker or futures platform.
 - **Events source:** {events_source}.
 - **Disclaimer:** Educational/research only. This is not investment advice, a recommendation, or an instruction to trade. Validate quotes, options chains, margin, and risk limits before placing any order.
 """
