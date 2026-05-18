@@ -197,6 +197,8 @@ def pad_levels(
             label = "Fallback round-number support" if direction == "support" else "Fallback round-number resistance"
             output.append((float(fallback), label))
         offset += step
+    reverse = direction == "support"
+    output.sort(key=lambda item: item[0], reverse=reverse)
     return output[:limit]
 
 
