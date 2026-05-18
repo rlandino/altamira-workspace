@@ -194,7 +194,7 @@ def pad_levels(
         fallback = round_down(current - offset, 5) if direction == "support" else round_up(current + offset, 5)
         if fallback not in existing:
             existing.add(fallback)
-            label = "Fallback round-number support" if direction == "support" else "Fallback round-number resistance"
+            label = "Secondary downside support" if direction == "support" else "Secondary upside resistance"
             output.append((float(fallback), label))
         offset += step
     reverse = direction == "support"
@@ -227,9 +227,24 @@ def is_us_equity_symbol(symbol: str) -> bool:
     return bool(re.fullmatch(r"[A-Z]{1,5}", symbol))
 
 
+def format_event_time(value: Any) -> str:
+    """Format FMP calendar timestamps as ET labels when parseable."""
+    if not value:
+        return "time n/a"
+    text = str(value)
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=ZoneInfo("UTC"))
+        et_time = parsed.astimezone(ZoneInfo("America/New_York"))
+        return et_time.strftime("%Y-%m-%d %H:%M ET")
+    except ValueError:
+        return text
+
+
 def format_event(event: dict[str, Any]) -> str:
     name = event.get("event") or event.get("title") or event.get("name") or "Economic event"
-    time_value = event.get("date") or event.get("time") or "time n/a"
+    time_value = format_event_time(event.get("date") or event.get("time"))
     country = event.get("country") or event.get("currency") or ""
     impact = "High-impact" if classify_event(event) else "Scheduled"
     return f"- **{time_value}** - {name}{f' ({country})' if country else ''}: {impact}."
@@ -485,7 +500,7 @@ def build_report(raw_args: str = "") -> tuple[Path, str]:
         f"- **Resistance {idx}: {level:,.0f}** - {reason}." for idx, (level, reason) in enumerate(resistances, 1)
     )
 
-    report = f"""# Jane Street Pre-Market Edge - {report_date}
+    report = f"""# Jane Street Pre-Market Edge — {report_date}
 
 ## Market assessment
 
@@ -582,7 +597,7 @@ Prior session SPY closed **{close_desc}** ({close_pct:.0%} of the range), creati
     support_summary = ", ".join(f"{level:,.0f}" for level, _ in supports)
     resistance_summary = ", ".join(f"{level:,.0f}" for level, _ in resistances)
     summary = (
-        f"Jane Street Pre-Market Edge - {report_date}\n\n"
+        f"Jane Street Pre-Market Edge — {report_date}\n\n"
         f"Gap: {points(gap)} pts ({pct(gap_pct)}). View: {view} - {view_reason}.\n"
         f"VIX: {current_vix:.2f} vs {prior_vix_close:.2f} yesterday ({iv_direction}).\n"
         f"Event risk: {calendar_intensity}; {calendar_recommendation}.\n"
