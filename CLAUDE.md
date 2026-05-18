@@ -37,6 +37,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── 0DTE-SPX-credit-spread-scanner.md # /0DTE-SPX-credit-spread-scanner — 0DTE SPX credit spread setup (Tastytrade-style)
 │   │   ├── analyze-ticker.md  # /analyze-ticker — financial ratio analysis
 │   │   ├── options-scan.md    # /options-scan — options chain scanning
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — portfolio/watchlist trade ideas + Telegram summary
 │   │   ├── portfolio-report.md # /portfolio-report — portfolio reports
 │   │   ├── paper-trade.md     # /paper-trade — log paper trades
 │   │   ├── client-report.md   # /client-report — client-facing portfolio reports
@@ -168,6 +169,14 @@ Example: `/analyze-ticker MSFT`
 Fetches real-time options chain, filters by delta/DTE/liquidity, and recommends CSP, covered call, bull put spread, and jade lizard strategies with position sizing. Outputs a scan report to `outputs/`.
 
 Example: `/options-scan AAPL`
+
+### /trade-idea-generator
+
+**Purpose:** Generate top options trade ideas from the current repository portfolio and watchlist, write `outputs/trade-idea-generator-{DATE}.md`, and send a concise top-5 summary to Telegram.
+
+Runs `python3 scripts/trade_idea_generator.py --send-telegram`, using `context/portfolio-details.md`, `context/watchlist.md`, FMP quotes/VIX/earnings, Massive.com 20-60 DTE options snapshots, and `TELEGRAM_BOT_TOKEN` plus `TELEGRAM_CHAT_ID` (or the existing CSP workflow fallback chat ID). Use `--dry-run` for report-only preview.
+
+Example: `/trade-idea-generator`
 
 ### /0DTE-SPX-credit-spread-scanner [optional date]
 
@@ -588,6 +597,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
+| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist options trade ideas and optionally send a Telegram summary | `python3 scripts/trade_idea_generator.py --send-telegram` (use `--dry-run` to preview only) |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
