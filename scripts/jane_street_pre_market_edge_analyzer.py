@@ -184,6 +184,26 @@ def classify_event(event: dict[str, Any]) -> bool:
     return any(keyword in searchable.lower() for keyword in HIGH_IMPACT_KEYWORDS)
 
 
+def is_us_market_event(event: dict[str, Any], report_date: str) -> bool:
+    """Return True when an economic row is relevant to US index risk today."""
+    event_date = str(event.get("date") or event.get("time") or "")
+    if event_date and not event_date.startswith(report_date):
+        return False
+    country = str(event.get("country") or "").strip().upper()
+    currency = str(event.get("currency") or "").strip().upper()
+    if country in {"US", "USA", "UNITED STATES"} or currency == "USD":
+        return True
+    searchable = " ".join(str(event.get(k, "")) for k in ("event", "title", "name")).lower()
+    return any(term in searchable for term in ("fomc", "fed", "powell", "treasury", "jobless", "nonfarm"))
+
+
+def is_us_equity_symbol(symbol: str) -> bool:
+    """Exclude obvious non-US listing suffixes from broad earnings fallback rows."""
+    if "." in symbol or "&" in symbol:
+        return False
+    return bool(re.fullmatch(r"[A-Z]{1,5}", symbol))
+
+
 def format_event(event: dict[str, Any]) -> str:
     name = event.get("event") or event.get("title") or event.get("name") or "Economic event"
     time_value = event.get("date") or event.get("time") or "time n/a"
@@ -210,13 +230,16 @@ def pick_major_earnings(rows: list[dict[str, Any]], limit: int = 10) -> list[dic
                 return float(value)
         return 0.0
 
-    major = [
+    today_us_rows = [
         row
         for row in rows
+        if is_us_equity_symbol(str(row.get("symbol", "")).upper())
+    ]
+    major = [
+        row
+        for row in today_us_rows
         if str(row.get("symbol", "")).upper() in MEGA_CAP_TICKERS or market_cap(row) >= 50_000_000_000
     ]
-    if not major:
-        major = rows[:limit]
     major.sort(key=market_cap, reverse=True)
     return major[:limit]
 
@@ -347,7 +370,8 @@ def build_report(raw_args: str = "") -> tuple[Path, str]:
     expected_pct = (expected_move / current_spx * 100) if current_spx else 0
 
     close_desc, close_lean, close_pct = close_location(prior_spy)
-    high_impact_events = [event for event in econ_rows if classify_event(event)]
+    market_events = [event for event in econ_rows if is_us_market_event(event, report_date)]
+    high_impact_events = [event for event in market_events if classify_event(event)]
     view, view_reason = gap_view(gap_pct, len(high_impact_events), close_lean)
 
     vix_change = current_vix - prior_vix_close
@@ -373,7 +397,7 @@ def build_report(raw_args: str = "") -> tuple[Path, str]:
         (prior_spx_close, "Prior session close"),
         (round_down(current_spx, 50), "Round-number support"),
     ]
-    support_candidates = [(lvl, reason) for lvl, reason in support_candidates if lvl < current_spx + 5]
+    support_candidates = [(lvl, reason) for lvl, reason in support_candidates if lvl < current_spx - 5]
     support_candidates.sort(key=lambda item: item[0], reverse=True)
     supports = unique_levels(support_candidates)
 
@@ -383,7 +407,7 @@ def build_report(raw_args: str = "") -> tuple[Path, str]:
         (prior_spx_close, "Prior session close"),
         (round_up(current_spx, 50), "Round-number resistance"),
     ]
-    resistance_candidates = [(lvl, reason) for lvl, reason in resistance_candidates if lvl > current_spx - 5]
+    resistance_candidates = [(lvl, reason) for lvl, reason in resistance_candidates if lvl > current_spx + 5]
     resistance_candidates.sort(key=lambda item: item[0])
     resistances = unique_levels(resistance_candidates)
 
@@ -425,9 +449,9 @@ def build_report(raw_args: str = "") -> tuple[Path, str]:
     else:
         earnings_lines = ["- No major index-heavy earnings found in today's FMP earnings calendar."]
 
-    econ_lines = [format_event(event) + f" {calendar_historical_note(event)}" for event in econ_rows[:12]]
+    econ_lines = [format_event(event) + f" {calendar_historical_note(event)}" for event in market_events[:12]]
     if not econ_lines:
-        econ_lines = ["- No major events returned by FMP for today."]
+        econ_lines = ["- No major US market-moving events returned by FMP for today."]
 
     data_note = "SPX/ES from user input" if parsed.futures_price else "FMP ^GSPC quote used as SPX/ES proxy; use broker futures for exact Globex."
     vix_source = "VIX from user input" if parsed.vix else "VIX from FMP ^VIX quote"
