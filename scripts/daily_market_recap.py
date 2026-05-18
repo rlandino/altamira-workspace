@@ -8,7 +8,7 @@ import html
 import os
 import re
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -27,6 +27,19 @@ FMP_STABLE = "https://financialmodelingprep.com/stable"
 FMP_API_KEY = os.environ.get("FMP_API_KEY", "FAAjnYQTvfGg8j7RoPSvHYRVtSKTvJyz")
 DEFAULT_QUOTE_SYMBOLS = "^GSPC,^DJI,^IXIC,^VIX,SPY,QQQ"
 WATCHLIST = ("AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "JPM", "V", "UNH")
+SECTOR_ETFS = {
+    "XLK": "Technology",
+    "XLC": "Communication Services",
+    "XLY": "Consumer Discretionary",
+    "XLP": "Consumer Staples",
+    "XLE": "Energy",
+    "XLF": "Financials",
+    "XLV": "Health Care",
+    "XLI": "Industrials",
+    "XLB": "Materials",
+    "XLRE": "Real Estate",
+    "XLU": "Utilities",
+}
 
 
 @dataclass
@@ -201,6 +214,27 @@ def extract_sector_performance(raw: Any) -> Tuple[Optional[Dict[str, Any]], Opti
         if name and pct is not None:
             rows.append({"sector": str(name), "change_pct": pct})
 
+    if not rows:
+        return None, None
+    sorted_rows = sorted(rows, key=lambda row: row["change_pct"], reverse=True)
+    return sorted_rows[0], sorted_rows[-1]
+
+
+def sector_etf_fallback(
+    quotes: Dict[str, Dict[str, Any]]
+) -> Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
+    """Infer sector leadership from liquid sector ETF daily changes."""
+    rows = []
+    for symbol, sector in SECTOR_ETFS.items():
+        quote = quotes.get(symbol)
+        if not quote or quote.get("change_pct") is None:
+            continue
+        rows.append(
+            {
+                "sector": f"{sector} ({symbol} proxy)",
+                "change_pct": quote["change_pct"],
+            }
+        )
     if not rows:
         return None, None
     sorted_rows = sorted(rows, key=lambda row: row["change_pct"], reverse=True)
@@ -436,7 +470,7 @@ def build_report(
 
     markdown = f"""# Daily Market Recap - {date_str}
 
-**Generated:** {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}  
+**Generated:** {datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")}  
 **Source:** Financial Modeling Prep (quotes, sectors, gainers/losers, earnings, headlines)
 
 > Financial market data can be delayed or revised. This recap is for informational purposes only and is not investment advice.
@@ -499,7 +533,13 @@ def generate_recap(date_str: str) -> RecapResult:
     warnings: List[str] = []
     OUTPUTS.mkdir(parents=True, exist_ok=True)
 
-    quote_symbols = DEFAULT_QUOTE_SYMBOLS + "," + ",".join(WATCHLIST)
+    quote_symbols = ",".join(
+        [
+            DEFAULT_QUOTE_SYMBOLS,
+            ",".join(WATCHLIST),
+            ",".join(SECTOR_ETFS.keys()),
+        ]
+    )
     raw_quotes = safe_fmp_get(
         warnings,
         "Quotes",
@@ -530,6 +570,8 @@ def generate_recap(date_str: str) -> RecapResult:
             "sector-performance-snapshot",
         )
         best_sector, worst_sector = extract_sector_performance(sector_raw)
+    if best_sector is None and worst_sector is None:
+        best_sector, worst_sector = sector_etf_fallback(quotes)
 
     end = datetime.strptime(date_str, "%Y-%m-%d") + timedelta(days=7)
     earnings_raw = safe_fmp_get(
