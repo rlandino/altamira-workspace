@@ -563,14 +563,6 @@ def generate_recap(date_str: str) -> RecapResult:
     )
     best_sector, worst_sector = extract_sector_performance(sector_raw)
     if best_sector is None and worst_sector is None:
-        sector_raw = safe_fmp_get(
-            warnings,
-            "Sector performance fallback",
-            FMP_STABLE,
-            "sector-performance-snapshot",
-        )
-        best_sector, worst_sector = extract_sector_performance(sector_raw)
-    if best_sector is None and worst_sector is None:
         best_sector, worst_sector = sector_etf_fallback(quotes)
 
     end = datetime.strptime(date_str, "%Y-%m-%d") + timedelta(days=7)
