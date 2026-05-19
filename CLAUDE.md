@@ -169,6 +169,14 @@ Fetches real-time options chain, filters by delta/DTE/liquidity, and recommends 
 
 Example: `/options-scan AAPL`
 
+### /trade-idea-generator
+
+**Purpose:** Generate ranked trade ideas from the current repository portfolio, watchlist, and open short-premium positions, then optionally send the concise summary to Telegram.
+
+Runs `scripts/trade_idea_generator.py`, reads `context/portfolio-details.md`, `context/watchlist.md`, and `context/options-positions.md`, fetches live quotes/technicals/VIX/earnings plus option-chain candidates when available, writes `outputs/trade-idea-generator-{DATE}.md` and `outputs/trade-idea-generator-telegram-{DATE}.txt`, and sends to Telegram with `--send-telegram`.
+
+Example: `/trade-idea-generator` or `python scripts/trade_idea_generator.py --send-telegram`
+
 ### /0DTE-SPX-credit-spread-scanner [optional date]
 
 **Purpose:** Complete 0DTE SPX credit spread setup for today: market conditions (VIX, overnight, economic calendar), SPX expected move (ATM straddle or VIX-based), put/call credit spreads (0.10–0.15 delta, 5–10 pt width), iron condor if conditions favor, premium target $0.50–$1.00 and min 1:3 R:R, entry 9:45–10:30 AM ET, stop-loss at 2× premium or short-strike breach, exit at 50% profit before 2 PM or expire worthless. Tastytrade-style trade ticket with exact strikes when chain available.
@@ -588,6 +596,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
+| `scripts/trade_idea_generator.py` | Generate ranked trade ideas from current portfolio, watchlist, and open options; write report and optional Telegram summary | `python scripts/trade_idea_generator.py --send-telegram` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
