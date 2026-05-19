@@ -845,7 +845,13 @@ def render_report(
     )
     for opt in open_options:
         status = "Monitor"
-        if opt.current >= opt.credit * 2:
+        try:
+            option_dte = (datetime.fromisoformat(opt.expiration).date() - date.today()).days
+        except ValueError:
+            option_dte = None
+        if option_dte is not None and option_dte < 0:
+            status = "Expired - verify broker/status"
+        elif opt.current >= opt.credit * 2:
             status = "Beyond 2x stop"
         elif opt.current <= opt.credit * 0.5:
             status = "At/through 50% profit target"
