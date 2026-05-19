@@ -1,0 +1,48 @@
+{
+  "date": "2026-05-19",
+  "earnings_blocks": {
+    "ACN": "2026-06-18",
+    "ADBE": "2026-06-11",
+    "AVGO": "2026-06-03",
+    "COST": "2026-05-28",
+    "CRM": "2026-05-27",
+    "CRWD": "2026-06-03",
+    "NVDA": "2026-05-20",
+    "PANW": "2026-06-02"
+  },
+  "ideas": [
+    {
+      "action": "Sell 2x WM 210P 2026-06-18",
+      "annualized_return_pct": 8.69047619047619,
+      "collateral_or_notional": 42000.0,
+      "premium": 300.0,
+      "rank": 1,
+      "risk_notes": "Delta -0.18; close at 50% profit, defend at 200% of credit.",
+      "score": 45.02,
+      "strategy": "Cash-secured put",
+      "ticker": "WM"
+    },
+    {
+      "action": "Sell 2x WM 210P 2026-07-17",
+      "annualized_return_pct": 7.364810330912026,
+      "collateral_or_notional": 42000.0,
+      "premium": 500.0,
+      "rank": 2,
+      "risk_notes": "Delta -0.24; close at 50% profit, defend at 200% of credit.",
+      "score": 40.27,
+      "strategy": "Cash-secured put",
+      "ticker": "WM"
+    }
+  ],
+  "option_errors": {},
+  "report_path": "/workspace/outputs/trade-idea-generator-2026-05-19.md",
+  "sent_telegram": true,
+  "telegram_chat_id": "7830722515",
+  "telegram_message": "ALTAMIRA TRADE IDEAS - 2026-05-19\nVIX: 18.2% (NORMAL)\n\n1) CASH-SECURED PUT - WM\n   Action: Sell 2x WM 210P 2026-06-18\n   Credit: $300.00 | DTE: 30 | Ann prem: 8.7%\n   Score: 45.0/100\n   Manage: Delta -0.18; close at 50% profit, defend at 200% of credit.\n\n2) CASH-SECURED PUT - WM\n   Action: Sell 2x WM 210P 2026-07-17\n   Credit: $500.00 | DTE: 59 | Ann prem: 7.4%\n   Score: 40.3/100\n   Manage: Delta -0.24; close at 50% profit, defend at 200% of credit.\n\nReport: /workspace/outputs/trade-idea-generator-2026-05-19.md\n\nNot financial advice. Verify live chain, earnings, and risk limits before trading.",
+  "telegram_response": {
+    "chat_id": 7830722515,
+    "date": 1779185362,
+    "message_id": 1047,
+    "ok": true
+  }
+}
