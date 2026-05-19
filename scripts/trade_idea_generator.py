@@ -523,6 +523,7 @@ def build_trade_ideas(
 ) -> list[TradeIdea]:
     ideas: list[TradeIdea] = []
     held = {p.ticker: p for p in positions}
+    expired_option_details: list[str] = []
 
     for opt in open_options:
         snap = snapshots.get(opt.ticker, MarketSnapshot(opt.ticker))
@@ -535,6 +536,13 @@ def build_trade_ideas(
             dte = (datetime.fromisoformat(opt.expiration).date() - date.today()).days
         except ValueError:
             pass
+
+        if dte is not None and dte < 0:
+            expired_option_details.append(
+                f"{opt.ticker} {opt.strike:g}{opt.option_type[0].upper()} expired {opt.expiration} "
+                f"(credit ${opt.credit:.2f}, stale mark ${opt.current:.2f}, contracts {opt.contracts})"
+            )
+            continue
 
         if opt.current >= stop:
             ideas.append(
@@ -577,6 +585,23 @@ def build_trade_ideas(
                     source="context/options-positions.md",
                 )
             )
+
+    if expired_option_details:
+        ideas.append(
+            TradeIdea(
+                rank_score=94,
+                ticker="OPTIONS",
+                action="REFRESH EXPIRED OPTIONS CONTEXT",
+                idea_type="Data hygiene / risk control",
+                thesis=(
+                    "The repository still lists expired short-premium contracts. Verify broker status "
+                    "before relying on option marks or adding replacement risk."
+                ),
+                risk="Expired or stale option records can create false roll/close signals and distort buying-power estimates.",
+                details=expired_option_details[:5],
+                source="context/options-positions.md",
+            )
+        )
 
     top_watchlist = [
         w
