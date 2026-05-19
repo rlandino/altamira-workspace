@@ -1,0 +1,35 @@
+TRADE IDEA GENERATOR -- 2026-05-19
+VIX: 17.9 (NORMAL) | Options sizing: 100%
+
+1. OPTIONS -- REFRESH EXPIRED OPTIONS CONTEXT
+   The repository still lists expired short-premium contracts. Verify broker status before relying on option marks or adding replacement risk.
+   Risk: Expired or stale option records can create false roll/close signals and distort buying-power estimates.
+   Setup: MSFT 430P expired 2026-03-20 (credit $8.70, stale mark $22.40, contracts 5)
+   MSFT 380P expired 2026-05-15 (credit $10.12, stale mark $11.80, contracts 5)
+
+2. GOOGL -- CONSIDER COVERED CALL
+   GOOGL is a profitable existing holding (+74.0% P&L, +13.8% portfolio weight) and can fund income while enforcing a trim level.
+   Risk: Covered calls cap upside; avoid selling below a price where you are comfortable trimming shares.
+   Setup: Underlying: $393.32; RSI: 72.3; trend: Uptrend
+   Candidate: sell 2026-06-18 $420C for about $5.75 bid (30 DTE, delta 0.27, OTM +6.8%)
+
+3. LRCX -- CONSIDER CSP / BULL PUT SPREAD
+   LRCX is a top-ranked watchlist name (B, score 67.4) with mixed trend and no earnings conflict in the next 45 days.
+   Risk: VIX regime is NORMAL; use 100% regime sizing and prefer defined risk if spread/liquidity worsens.
+   Setup: Underlying: $266.63; RSI: 59.0; 20D return: +1.6%
+   Candidate: sell 2026-06-18 $240P for about $7.15 bid (30 DTE, delta -0.25, OTM +10.0%)
+
+4. TSM -- CONSIDER CSP / BULL PUT SPREAD
+   TSM is a top-ranked watchlist name (B-, score 61.8) with mixed trend and no earnings conflict in the next 45 days.
+   Risk: VIX regime is NORMAL; use 100% regime sizing and prefer defined risk if spread/liquidity worsens.
+   Setup: Underlying: $388.26; RSI: 47.4; 20D return: +0.2%
+   Candidate: sell 2026-06-18 $360P for about $7.30 bid (30 DTE, delta -0.25, OTM +7.3%)
+
+5. KLAC -- CONSIDER CSP / BULL PUT SPREAD
+   KLAC is a top-ranked watchlist name (B-, score 61.3) with mixed trend and no earnings conflict in the next 45 days.
+   Risk: VIX regime is NORMAL; use 100% regime sizing and prefer defined risk if spread/liquidity worsens.
+   Setup: Underlying: $1705.41; RSI: 42.1; 20D return: -5.8%
+   Candidate: sell 2026-06-18 $1600P for about $51.20 bid (30 DTE, delta -0.31, OTM +6.2%)
+
+Informational scan only; verify live market data before trading.
+Report: /workspace/outputs/trade-idea-generator-2026-05-19.md
