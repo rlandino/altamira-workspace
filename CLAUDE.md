@@ -440,7 +440,7 @@ Uses Market Data API (port 8001) or FMP for indices and VIX; presents levels and
 
 **Purpose:** Generate a daily market recap markdown file and send both a concise summary and the markdown file to Telegram.
 
-Runs `scripts/daily_market_recap.py`, using FMP quotes, movers, sector performance, historical S&P 500 data, headlines, and earnings calendar. Writes `outputs/daily-market-recap-{DATE}.md`; with `--send-telegram`, sends summary via Telegram `sendMessage` and the markdown report via `sendDocument`. Requires `TELEGRAM_BOT_TOKEN` and either `TELEGRAM_CHAT_ID` or a `--telegram-chat-id` override.
+Runs `scripts/daily_market_recap.py`, using FMP quotes, movers, sector performance (with sector ETF fallback), historical S&P 500 data, headlines, and earnings calendar. Writes `outputs/daily-market-recap-{DATE}.md`; with `--send-telegram`, sends summary via Telegram `sendMessage` and the markdown report via `sendDocument`. Requires `TELEGRAM_BOT_TOKEN` and either `TELEGRAM_CHAT_ID` or a `--telegram-chat-id` override.
 
 ### /briefing
 

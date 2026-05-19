@@ -28,6 +28,20 @@ INDEX_NAMES = {
     "QQQ": "QQQ",
 }
 
+SECTOR_ETFS = {
+    "XLC": "Communication Services",
+    "XLY": "Consumer Discretionary",
+    "XLP": "Consumer Staples",
+    "XLE": "Energy",
+    "XLF": "Financials",
+    "XLV": "Health Care",
+    "XLI": "Industrials",
+    "XLB": "Materials",
+    "XLRE": "Real Estate",
+    "XLK": "Technology",
+    "XLU": "Utilities",
+}
+
 
 def get_json(url: str, params: dict[str, Any] | None = None) -> Any:
     """Fetch JSON from an API endpoint and return None on failure."""
@@ -138,9 +152,33 @@ def fetch_sectors(run_date: date) -> tuple[dict[str, Any] | None, dict[str, Any]
     scored = [(sector_change(row), row) for row in rows]
     scored = [(change, row) for change, row in scored if change is not None]
     if not scored:
+        rows = fetch_sector_etf_performance()
+        scored = [(sector_change(row), row) for row in rows]
+        scored = [(change, row) for change, row in scored if change is not None]
+    if not scored:
         return None, None
     scored.sort(key=lambda item: item[0])
     return scored[-1][1], scored[0][1]
+
+
+def fetch_sector_etf_performance() -> list[dict[str, Any]]:
+    """Fallback sector performance using SPDR sector ETF quotes."""
+    symbols = ",".join(SECTOR_ETFS)
+    rows = as_list(get_json(f"{FMP_V3}/quote/{symbols}"))
+    normalized: list[dict[str, Any]] = []
+    for row in rows:
+        symbol = str(row.get("symbol", "")).upper()
+        if symbol not in SECTOR_ETFS:
+            continue
+        normalized.append(
+            {
+                "sector": SECTOR_ETFS[symbol],
+                "symbol": symbol,
+                "changesPercentage": row.get("changesPercentage") or row.get("changePercentage"),
+                "price": row.get("price"),
+            }
+        )
+    return normalized
 
 
 def fetch_history(run_date: date) -> list[dict[str, Any]]:

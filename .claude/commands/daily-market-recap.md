@@ -21,6 +21,7 @@ Optional arguments:
 
 - FMP v3 quotes: S&P 500, Dow, Nasdaq, VIX, SPY, QQQ.
 - FMP stable: biggest gainers/losers, sector performance, historical S&P 500 EOD, and general market headlines.
+- FMP v3 sector ETF quotes as a fallback for sector leadership when the sector snapshot endpoint is unavailable.
 - FMP earnings calendar: companies reporting over the next seven days.
 
 ## Output
