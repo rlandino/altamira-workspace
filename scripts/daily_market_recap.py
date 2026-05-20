@@ -8,6 +8,7 @@ import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
+import re
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -19,7 +20,20 @@ OUTPUTS = WORKSPACE / "outputs"
 FMP_V3 = "https://financialmodelingprep.com/api/v3"
 FMP_STABLE = "https://financialmodelingprep.com/stable"
 TELEGRAM_API = "https://api.telegram.org"
-DEFAULT_INDEX_SYMBOLS = "^GSPC,^DJI,^IXIC,^VIX,SPY,QQQ"
+SECTOR_ETFS = {
+    "XLC": "Communication Services",
+    "XLY": "Consumer Discretionary",
+    "XLP": "Consumer Staples",
+    "XLE": "Energy",
+    "XLF": "Financials",
+    "XLV": "Health Care",
+    "XLI": "Industrials",
+    "XLB": "Materials",
+    "XLRE": "Real Estate",
+    "XLK": "Technology",
+    "XLU": "Utilities",
+}
+DEFAULT_INDEX_SYMBOLS = ",".join(["^GSPC", "^DJI", "^IXIC", "^VIX", "SPY", "QQQ", *SECTOR_ETFS])
 
 
 @dataclass(frozen=True)
@@ -152,6 +166,17 @@ def pick_best_worst(rows: list[dict[str, Any]]) -> tuple[dict[str, Any] | None, 
     return valid[-1][1], valid[0][1]
 
 
+def sector_rows_from_etfs(quotes: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    """Build sector rows from sector ETF quote changes as a fallback."""
+    rows = []
+    for symbol, name in SECTOR_ETFS.items():
+        quote = quotes.get(symbol, {})
+        pct = pct_from_row(quote)
+        if pct is not None:
+            rows.append({"sector": name, "symbol": symbol, "changesPercentage": pct})
+    return rows
+
+
 def historical_closes(rows: Any) -> list[float]:
     """Extract close prices from FMP historical rows ordered oldest to newest."""
     if not isinstance(rows, list):
@@ -230,13 +255,19 @@ def fetch_market_data(api_key: str, recap_date: str) -> dict[str, Any]:
     return data
 
 
+def is_us_equity_symbol(symbol: str) -> bool:
+    """Return True for simple U.S.-style listed equity symbols."""
+    return bool(re.fullmatch(r"[A-Z]{1,5}(-[A-Z])?", symbol))
+
+
 def top_earnings_rows(rows: Any, limit: int = 10) -> list[dict[str, Any]]:
     """Return upcoming earnings rows sorted by date."""
     if not isinstance(rows, list):
         return []
     cleaned = [row for row in rows if isinstance(row, dict)]
     cleaned.sort(key=lambda row: (row.get("date") or "", row.get("symbol") or ""))
-    return cleaned[:limit]
+    us_rows = [row for row in cleaned if is_us_equity_symbol(str(row.get("symbol") or ""))]
+    return (us_rows or cleaned)[:limit]
 
 
 def headline_rows(rows: Any, limit: int = 5) -> list[dict[str, Any]]:
@@ -294,6 +325,8 @@ def build_recap(data: dict[str, Any], recap_date: str, out_dir: Path) -> RecapRe
     qqq = quotes.get("QQQ", {})
 
     sector_rows = normalize_sector_rows(data.get("sectors"))
+    if not any(pct_from_row(row) is not None for row in sector_rows):
+        sector_rows = sector_rows_from_etfs(quotes)
     best_sector, worst_sector = pick_best_worst(sector_rows)
     top_gainer = first_row(data.get("gainers"))
     top_loser = first_row(data.get("losers"))
