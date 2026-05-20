@@ -378,6 +378,8 @@ def find_chat_id_from_workflows() -> str | None:
         for node in data.get("nodes", []):
             params = node.get("parameters", {})
             chat_id = str(params.get("chatId", "")).strip()
+            if chat_id.startswith("=") and re.fullmatch(r"=-?\d{6,}", chat_id):
+                chat_id = chat_id[1:]
             if re.fullmatch(r"-?\d{6,}", chat_id):
                 return chat_id
     return None
