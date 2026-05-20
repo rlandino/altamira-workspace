@@ -1,0 +1,28 @@
+TRADE IDEA GENERATOR -- 2026-05-20
+Informational only; verify live data before trading.
+
+Portfolio: $1,207,271 | Cash: 22.5%
+Top weights: SPY 17.1%, AVGO 16.7%, GOOGL 13.8%, AMAT 12.6%
+Risk flags: Single-name concentration: AVGO 16.7%, GOOGL 13.8%, AMAT 12.6%. Semiconductors exposure is elevated at 29.3%.
+
+1) Risk trim / rebalance
+Action: Trim or hedge oversized winners: AVGO (16.7%), GOOGL (13.8%), AMAT (12.6%).
+Why: The repository risk framework emphasizes position and sector limits; current weights are concentrated before adding more beta.
+Risk: Do not chase replacement trades in the same crowded sector unless total exposure is reduced first.
+
+2) Watchlist starter candidate
+Action: Consider ADBE (B-, Adobe Inc.) as the cleanest watchlist add on a pullback.
+Why: It ranks near the top of the watchlist and adds Information Technology exposure without worsening the largest portfolio concentration as much as another semiconductor add.
+Risk: Use a small starter size only after confirming valuation, earnings date, and liquidity.
+
+3) Semiconductor rotation candidate
+Action: Keep LRCX (B) on deck, but fund it by rotating from existing semiconductor exposure.
+Why: The watchlist score is strong, yet AVGO and AMAT already create a large semiconductor sleeve.
+Risk: Adding without a source of funds would increase correlated downside.
+
+4) Thesis repair check
+Action: Review NOW, currently -35.7% from cost and 0.5% of the portfolio.
+Why: The position is small enough to fix thoughtfully, but persistent underperformance should have a written keep/add/exit thesis.
+Risk: Avoid averaging down until fundamentals and catalyst timing are refreshed.
+
+Report saved in outputs/trade-idea-generator-YYYY-MM-DD.md
