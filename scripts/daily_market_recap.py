@@ -28,6 +28,7 @@ FMP_STABLE = "https://financialmodelingprep.com/stable"
 DEFAULT_FMP_KEY = "FAAjnYQTvfGg8j7RoPSvHYRVtSKTvJyz"
 DEFAULT_TELEGRAM_CHAT_ID = "7830722515"
 WATCHLIST = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "JPM", "V", "UNH"]
+MAJOR_US_EXCHANGES = {"NYSE", "NASDAQ", "AMEX"}
 
 
 @dataclass
@@ -94,6 +95,20 @@ def fmt_percent(value: Any, signed: bool = True) -> str:
         return "N/A"
     sign = "+" if signed else ""
     return f"{parsed:{sign}.2f}%"
+
+
+def fmt_market_cap(value: Any) -> str:
+    """Format market capitalization compactly."""
+    parsed = as_float(value)
+    if parsed is None:
+        return "N/A"
+    if abs(parsed) >= 1_000_000_000_000:
+        return f"${parsed / 1_000_000_000_000:.2f}T"
+    if abs(parsed) >= 1_000_000_000:
+        return f"${parsed / 1_000_000_000:.2f}B"
+    if abs(parsed) >= 1_000_000:
+        return f"${parsed / 1_000_000:.2f}M"
+    return f"${parsed:,.0f}"
 
 
 def quote_map(rows: Any) -> dict[str, dict[str, Any]]:
@@ -254,6 +269,22 @@ def direction_label(changes: list[float]) -> str:
     return "mixed"
 
 
+def quote_metadata(symbols: list[str]) -> dict[str, dict[str, Any]]:
+    """Fetch quote metadata for symbol filtering and market-cap sorting."""
+    metadata: dict[str, dict[str, Any]] = {}
+    chunk_size = 80
+    for idx in range(0, len(symbols), chunk_size):
+        chunk = symbols[idx : idx + chunk_size]
+        if not chunk:
+            continue
+        try:
+            rows = fmp_v3(f"/quote/{','.join(chunk)}")
+        except Exception:
+            continue
+        metadata.update(quote_map(rows))
+    return metadata
+
+
 def earnings_rows(run_date: date) -> list[dict[str, Any]]:
     """Fetch upcoming earnings calendar rows."""
     end = (run_date + timedelta(days=7)).isoformat()
@@ -261,7 +292,8 @@ def earnings_rows(run_date: date) -> list[dict[str, Any]]:
     if not isinstance(data, list):
         return []
     seen: set[tuple[str, str]] = set()
-    rows: list[dict[str, Any]] = []
+    candidates: list[dict[str, Any]] = []
+    symbols: list[str] = []
     for row in data:
         if not isinstance(row, dict):
             continue
@@ -272,8 +304,35 @@ def earnings_rows(run_date: date) -> list[dict[str, Any]]:
         if key in seen:
             continue
         seen.add(key)
-        rows.append(row)
-    rows.sort(key=lambda row: (str(row.get("date", "")), str(row.get("symbol", ""))))
+        normalized = dict(row)
+        normalized["symbol"] = symbol
+        candidates.append(normalized)
+        symbols.append(symbol)
+
+    metadata = quote_metadata(symbols[:240])
+    rows: list[dict[str, Any]] = []
+    for row in candidates:
+        symbol = row.get("symbol", "")
+        quote = metadata.get(symbol, {})
+        exchange = str(quote.get("exchange", "")).upper()
+        if exchange not in MAJOR_US_EXCHANGES:
+            continue
+        enriched = dict(row)
+        enriched["_companyName"] = quote.get("name") or quote.get("companyName") or ""
+        enriched["_marketCap"] = quote.get("marketCap")
+        enriched["_exchange"] = exchange
+        rows.append(enriched)
+
+    if not rows:
+        rows = candidates
+
+    rows.sort(
+        key=lambda row: (
+            str(row.get("date", "")),
+            -(as_float(row.get("_marketCap")) or 0),
+            str(row.get("symbol", "")),
+        )
+    )
     return rows[:20]
 
 
@@ -402,21 +461,23 @@ def build_recap(run_date: date) -> tuple[Path, Path, str]:
         headline_lines.append("- No broad-market headlines returned by FMP.")
 
     earnings_lines = [
-        "| Date | Symbol | EPS estimate | Revenue estimate |",
-        "|------|--------|--------------|------------------|",
+        "| Date | Symbol | Company | EPS estimate | Revenue estimate | Market cap |",
+        "|------|--------|---------|--------------|------------------|------------|",
     ]
     if earnings:
         for row in earnings:
             earnings_lines.append(
-                "| {date} | {symbol} | {eps} | {revenue} |".format(
+                "| {date} | {symbol} | {company} | {eps} | {revenue} | {market_cap} |".format(
                     date=str(row.get("date", "N/A"))[:10],
                     symbol=row.get("symbol", "N/A"),
+                    company=str(row.get("_companyName") or "N/A")[:42],
                     eps=fmt_number(row.get("epsEstimated")),
                     revenue=fmt_number(row.get("revenueEstimated"), 0),
+                    market_cap=fmt_market_cap(row.get("_marketCap")),
                 )
             )
     else:
-        earnings_lines.append("| N/A | No earnings returned for the next 7 days | N/A | N/A |")
+        earnings_lines.append("| N/A | No major US exchange earnings returned | N/A | N/A | N/A | N/A |")
 
     watchlist_lines = [
         "| Ticker | Day change |",
