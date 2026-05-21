@@ -483,6 +483,14 @@ def post_telegram_message(text: str, edit_message_id: int | None = None) -> dict
             response_body = response.read().decode("utf-8")
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")
+        if edit_message_id and exc.code == 400 and "message is not modified" in body:
+            return {
+                "ok": True,
+                "action": "unchanged",
+                "chat_id": chat_id,
+                "message_id": edit_message_id,
+                "date": None,
+            }
         raise RuntimeError(f"Telegram HTTP {exc.code}: {body}") from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(f"Telegram request failed: {exc.reason}") from exc
