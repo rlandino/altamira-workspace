@@ -1,0 +1,16 @@
+TRADE IDEA - 2026-05-21
+
+Primary: risk-reduction rebalance before adding new tech exposure.
+Trim 25% of AVGO: 152 shares at repo price $333.51 = approx $50,694.
+Estimated AVGO weight: 16.7% -> 12.5%.
+
+Why:
+- Portfolio parsed value: $1,207,271
+- Overweight names: SPY 17.1%, AVGO 16.7%, GOOGL 13.8%, AMAT 12.6%
+- Tech exposure: 45.4%
+
+Watchlist: ADBE (Adobe Inc.) - score 60.1, grade B-, Software.
+Optional starter only after price/valuation refresh: cap at 0.75% of portfolio ($9,055).
+
+Options context: 0 active rows; 5 expired rows skipped.
+Verify live prices, spreads, earnings dates, liquidity, and tax impact before acting. Not financial advice.
