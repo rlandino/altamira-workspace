@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-05-21T10:05:44.352516+00:00",
+  "report_path": "outputs/trade-idea-generator-2026-05-21.md",
+  "telegram_text_path": "outputs/trade-idea-generator-telegram-2026-05-21.txt",
+  "send_requested": true,
+  "edit_message_id": 1065,
+  "telegram": {
+    "ok": true,
+    "action": "edited",
+    "chat_id": "7830722515",
+    "message_id": 1065,
+    "date": 1779357880
+  }
+}

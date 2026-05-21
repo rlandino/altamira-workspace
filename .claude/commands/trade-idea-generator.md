@@ -17,6 +17,12 @@ summary to the configured channel.
 python3 scripts/trade_idea_generator.py --send-telegram
 ```
 
+To correct an existing Telegram post without creating a duplicate:
+
+```bash
+python3 scripts/trade_idea_generator.py --send-telegram --edit-message-id MESSAGE_ID
+```
+
 ## Output
 
 - `outputs/trade-idea-generator-{DATE}.md`
