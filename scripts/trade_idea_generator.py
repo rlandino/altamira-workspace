@@ -286,6 +286,20 @@ def select_watchlist_candidate(
     return eligible[0] if eligible else None
 
 
+def select_rebalance_position(positions: list[Position], exposures: dict[str, float]) -> Position:
+    oversized = [position for position in positions if position.weight >= 10.0]
+    oversized.sort(key=lambda position: position.weight, reverse=True)
+    if exposures.get("Technology", 0.0) >= 40:
+        tech_oversized = [
+            position
+            for position in oversized
+            if BROAD_SECTOR.get(position.symbol) == "Technology"
+        ]
+        if tech_oversized:
+            return tech_oversized[0]
+    return oversized[0] if oversized else max(positions, key=lambda position: position.weight)
+
+
 def money(value: float) -> str:
     return f"${value:,.0f}"
 
@@ -314,7 +328,7 @@ def build_report(
     oversized.sort(key=lambda position: position.weight, reverse=True)
     top_candidate = select_watchlist_candidate(candidates, held_symbols, tech_weight)
 
-    largest = oversized[0] if oversized else max(positions, key=lambda position: position.weight)
+    largest = select_rebalance_position(positions, exposures)
     trim_quantity = max(round(largest.quantity * 0.25), 1)
     trim_value = trim_quantity * largest.current_price
     post_value = max(largest.market_value - trim_value, 0.0)
