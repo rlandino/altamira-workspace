@@ -459,7 +459,7 @@ def get_telegram_chat_id() -> str | None:
     return None
 
 
-def post_telegram_message(text: str) -> dict:
+def post_telegram_message(text: str, edit_message_id: int | None = None) -> dict:
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = get_telegram_chat_id()
     if not token:
@@ -467,12 +467,11 @@ def post_telegram_message(text: str) -> dict:
     if not chat_id:
         raise RuntimeError("TELEGRAM_CHAT_ID is not set and fallback chat ID was not found")
 
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": text,
-        "disable_web_page_preview": True,
-    }
+    endpoint = "editMessageText" if edit_message_id else "sendMessage"
+    url = f"https://api.telegram.org/bot{token}/{endpoint}"
+    payload = {"chat_id": chat_id, "text": text, "disable_web_page_preview": True}
+    if edit_message_id:
+        payload["message_id"] = edit_message_id
     request = urllib.request.Request(
         url,
         data=json.dumps(payload).encode("utf-8"),
@@ -493,13 +492,14 @@ def post_telegram_message(text: str) -> dict:
         raise RuntimeError(f"Telegram API error: {response_body}")
     return {
         "ok": True,
+        "action": "edited" if edit_message_id else "sent",
         "chat_id": chat_id,
         "message_id": data.get("result", {}).get("message_id"),
         "date": data.get("result", {}).get("date"),
     }
 
 
-def run(send_telegram: bool, as_of: date) -> dict:
+def run(send_telegram: bool, as_of: date, edit_message_id: int | None = None) -> dict:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     portfolio_md = PORTFOLIO_PATH.read_text(encoding="utf-8")
     watchlist_md = WATCHLIST_PATH.read_text(encoding="utf-8")
@@ -527,10 +527,11 @@ def run(send_telegram: bool, as_of: date) -> dict:
         "report_path": str(report_path.relative_to(ROOT)),
         "telegram_text_path": str(telegram_path.relative_to(ROOT)),
         "send_requested": send_telegram,
+        "edit_message_id": edit_message_id,
         "telegram": None,
     }
     if send_telegram:
-        status["telegram"] = post_telegram_message(telegram_text)
+        status["telegram"] = post_telegram_message(telegram_text, edit_message_id=edit_message_id)
 
     status_path.write_text(json.dumps(status, indent=2) + "\n", encoding="utf-8")
     status["status_path"] = str(status_path.relative_to(ROOT))
@@ -549,6 +550,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default=date.today().isoformat(),
         help="Run date in YYYY-MM-DD format; defaults to today.",
     )
+    parser.add_argument(
+        "--edit-message-id",
+        type=int,
+        default=None,
+        help="Edit an existing Telegram message instead of sending a new one.",
+    )
     return parser.parse_args(argv)
 
 
@@ -556,7 +563,11 @@ def main(argv: list[str]) -> int:
     args = parse_args(argv)
     try:
         as_of = datetime.strptime(args.date, "%Y-%m-%d").date()
-        status = run(send_telegram=args.send_telegram, as_of=as_of)
+        status = run(
+            send_telegram=args.send_telegram,
+            as_of=as_of,
+            edit_message_id=args.edit_message_id,
+        )
     except Exception as exc:
         print(f"trade_idea_generator error: {exc}", file=sys.stderr)
         return 1
