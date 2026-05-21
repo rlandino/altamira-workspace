@@ -8,7 +8,9 @@ and can send both a short summary and the markdown file to Telegram.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -159,7 +161,14 @@ def parse_sector_rows(data: Any) -> list[tuple[str, float]]:
             or item.get("symbol")
         )
         change = None
-        for key in ("changesPercentage", "changePercentage", "performance", "change", "percentChange"):
+        for key in (
+            "changesPercentage",
+            "changePercentage",
+            "averageChange",
+            "performance",
+            "change",
+            "percentChange",
+        ):
             change = as_float(item.get(key))
             if change is not None:
                 break
@@ -190,7 +199,14 @@ def fetch_history(symbol: str, run_date: date) -> list[dict[str, Any]]:
     rows = fmp_stable("/historical-price-eod/light", {"symbol": symbol, "from": start, "to": end})
     if not isinstance(rows, list):
         return []
-    normalized = [row for row in rows if isinstance(row, dict) and row.get("date")]
+    normalized = []
+    for row in rows:
+        if not isinstance(row, dict) or not row.get("date"):
+            continue
+        normalized_row = dict(row)
+        if normalized_row.get("close") is None and normalized_row.get("price") is not None:
+            normalized_row["close"] = normalized_row["price"]
+        normalized.append(normalized_row)
     normalized.sort(key=lambda row: str(row.get("date")))
     return normalized
 
@@ -244,7 +260,19 @@ def earnings_rows(run_date: date) -> list[dict[str, Any]]:
     data = fmp_v3("/earning_calendar", {"from": run_date.isoformat(), "to": end})
     if not isinstance(data, list):
         return []
-    rows = [row for row in data if isinstance(row, dict)]
+    seen: set[tuple[str, str]] = set()
+    rows: list[dict[str, Any]] = []
+    for row in data:
+        if not isinstance(row, dict):
+            continue
+        symbol = str(row.get("symbol", "")).upper()
+        if not re.fullmatch(r"[A-Z]{1,5}", symbol):
+            continue
+        key = (str(row.get("date", ""))[:10], symbol)
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(row)
     rows.sort(key=lambda row: (str(row.get("date", "")), str(row.get("symbol", ""))))
     return rows[:20]
 
@@ -275,6 +303,9 @@ def generate_chart(run_date: date) -> Path | None:
     """Run the existing chart helper if available."""
     script = WORKSPACE / "scripts" / "briefing_chart.py"
     if not script.exists():
+        return None
+    if importlib.util.find_spec("matplotlib") is None:
+        print("[daily-market-recap] Chart generation skipped: matplotlib is not installed.", file=sys.stderr)
         return None
     try:
         subprocess.run(
@@ -311,7 +342,7 @@ def make_table_row(label: str, row: dict[str, Any] | None) -> str:
 def build_recap(run_date: date) -> tuple[Path, Path, str]:
     """Generate the markdown recap and return paths plus Telegram summary."""
     paths = build_paths(run_date)
-    generated_at = datetime.now().strftime("%Y-%m-%d %H:%M %Z")
+    generated_at = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M %Z")
 
     symbols = "^GSPC,^DJI,^IXIC,^VIX,SPY,QQQ," + ",".join(WATCHLIST)
     quotes = quote_map(fmp_v3(f"/quote/{symbols}"))
