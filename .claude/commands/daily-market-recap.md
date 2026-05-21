@@ -7,15 +7,15 @@ Generate a daily Altamira Capital market recap, write it to markdown, and send b
 Run from the workspace root:
 
 ```bash
-python scripts/daily_market_recap.py
+python3 scripts/daily_market_recap.py
 ```
 
 Optional arguments:
 
 ```bash
-python scripts/daily_market_recap.py --date YYYY-MM-DD
-python scripts/daily_market_recap.py --chat-id TELEGRAM_CHAT_ID
-python scripts/daily_market_recap.py --no-telegram
+python3 scripts/daily_market_recap.py --date YYYY-MM-DD
+python3 scripts/daily_market_recap.py --chat-id TELEGRAM_CHAT_ID
+python3 scripts/daily_market_recap.py --no-telegram
 ```
 
 ## Environment

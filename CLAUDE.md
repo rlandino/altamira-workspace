@@ -446,7 +446,7 @@ Uses FMP API (v3 + stable) for quotes, gainers/losers, sector snapshot, earnings
 
 **Purpose:** Generate a daily market recap markdown report and send both a concise text summary and the markdown file to Telegram.
 
-Runs `scripts/daily_market_recap.py`, using FMP quotes, gainers/losers, sector snapshot, S&P 500 history, earnings calendar, broad-market headlines, and watchlist movers. Writes `outputs/daily-market-recap-{DATE}.md`, `outputs/daily-market-recap-summary-{DATE}.txt`, and `outputs/briefing-chart-{DATE}.png` when chart generation succeeds. Requires `TELEGRAM_BOT_TOKEN`; destination can be overridden with `TELEGRAM_CHAT_ID`, `TELEGRAM_CHANNEL_ID`, `TELEGRAM_DEFAULT_CHAT_ID`, or `--chat-id`.
+Runs `python3 scripts/daily_market_recap.py`, using FMP quotes, gainers/losers, sector snapshot, S&P 500 history, earnings calendar, broad-market headlines, and watchlist movers. Writes `outputs/daily-market-recap-{DATE}.md`, `outputs/daily-market-recap-summary-{DATE}.txt`, and `outputs/briefing-chart-{DATE}.png` when chart generation succeeds. Requires `TELEGRAM_BOT_TOKEN`; destination can be overridden with `TELEGRAM_CHAT_ID`, `TELEGRAM_CHANNEL_ID`, `TELEGRAM_DEFAULT_CHAT_ID`, or `--chat-id`.
 
 Example: `/daily-market-recap` or `/daily-market-recap 2026-05-21`
 
@@ -595,7 +595,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `scripts/daily_market_recap.py` | Generate daily market recap markdown and send summary/file to Telegram | `python scripts/daily_market_recap.py [--date YYYY-MM-DD] [--chat-id CHAT_ID]` |
+| `scripts/daily_market_recap.py` | Generate daily market recap markdown and send summary/file to Telegram | `python3 scripts/daily_market_recap.py [--date YYYY-MM-DD] [--chat-id CHAT_ID]` |
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
