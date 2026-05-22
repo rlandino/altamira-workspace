@@ -61,6 +61,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── compounder-screen.md # /compounder-screen — compounder quality screen (7-point checklist) for watchlist candidates
 │   │   ├── DE-shaw-iron-condor-income-machine.md # /DE-shaw-iron-condor-income-machine — systematic iron condor (SPX/SPY/QQQ/IWM), sizing, adjustments, income
 │   │   ├── watchlist-refresh.md # /watchlist-refresh — refresh and score watchlist
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — daily portfolio/watchlist trade ideas + Telegram alert
 │   │   ├── wolverine-trading-risk-management-system.md # /wolverine-trading-risk-management-system — theta risk manual, limits, roll/close, daily checklist
 │   │   ├── 13f-diff.md        # /13f-diff — 13F holdings diff
 │   │   ├── copycat-13f.md     # /copycat-13f — 13F copycat portfolio
@@ -232,6 +233,14 @@ Example: `/moat GOOGL`
 Calculates five component scores (0-100 each) based on weighted financial metrics, combines into composite score, assigns letter grade (A+ to F), and identifies strengths/weaknesses. Scores all current portfolio holdings if no ticker provided, or evaluates new entrants before adding to portfolio. Outputs scoring reports to `outputs/`.
 
 Example: `/stockscore` (scores all holdings) or `/stockscore MSFT` (scores single ticker)
+
+### /trade-idea-generator
+
+**Purpose:** Generate daily trade ideas from the current portfolio and watchlist, write a report, and optionally send a concise Telegram alert.
+
+Reads `context/portfolio-details.md` and `context/watchlist.md`, fetches FMP quotes/historicals/earnings, uses Massive.com options snapshots when available, ranks covered calls, cash-secured puts, and staged equity entries, and writes `outputs/trade-idea-generator-{DATE}.md`. Send with `python3 scripts/trade_idea_generator.py --send-telegram --print-message`.
+
+Example: `/trade-idea-generator`
 
 ### /pre-launch
 
@@ -587,6 +596,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | Script | Purpose | Usage |
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
+| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist trade ideas and optional Telegram alert | `python3 scripts/trade_idea_generator.py --send-telegram --print-message` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
