@@ -776,6 +776,12 @@ def format_money(value: float | None) -> str:
     return f"${value:.2f}"
 
 
+def format_price(value: float | None) -> str:
+    """Format a nullable security price without abbreviating shares."""
+
+    return f"${value:.2f}" if value is not None else "N/A"
+
+
 def option_line(option: OptionCandidate | None, fallback_price: float | None, strategy: str) -> str:
     """Format option contract details."""
 
@@ -819,7 +825,7 @@ def build_report(
         f"- **As of:** {as_of.strftime('%Y-%m-%d %H:%M %Z')}",
         f"- **Portfolio value:** {format_money(portfolio_value)}",
         f"- **Universe:** {len(positions)} current positions + {len(watchlist)} watchlist names",
-        f"- **SPY:** {format_money(spy.price if spy else None)} ({format_pct(spy.change_pct if spy else None)} today)",
+        f"- **SPY:** {format_price(spy.price if spy else None)} ({format_pct(spy.change_pct if spy else None)} today)",
         f"- **VIX:** {format_number(vix.price if vix else None)}",
         "",
         "## Top Trade Ideas",
@@ -841,8 +847,8 @@ def build_report(
                 "",
                 f"- **Action:** {idea.action}",
                 f"- **Score:** {idea.score:.1f}",
-                f"- **Price:** {format_money(snap.price)} | **Day change:** {format_pct(snap.change_pct)} | **RSI:** {format_number(snap.rsi_14)}",
-                f"- **{option_line(idea.option, snap.price, idea.strategy)}",
+                f"- **Price:** {format_price(snap.price)} | **Day change:** {format_pct(snap.change_pct)} | **RSI:** {format_number(snap.rsi_14)}",
+                f"- {option_line(idea.option, snap.price, idea.strategy)}",
                 "- **Rationale:**",
             ]
         )
@@ -896,7 +902,7 @@ def build_telegram_message(
     spy = snapshots.get("SPY")
     lines = [
         f"TRADE IDEA GENERATOR - {as_of.date().isoformat()}",
-        f"SPY {format_money(spy.price if spy else None)} ({format_pct(spy.change_pct if spy else None)}) | VIX {format_number(vix.price if vix else None)}",
+        f"SPY {format_price(spy.price if spy else None)} ({format_pct(spy.change_pct if spy else None)}) | VIX {format_number(vix.price if vix else None)}",
         f"Portfolio: {format_money(portfolio_value)}",
         "",
     ]
