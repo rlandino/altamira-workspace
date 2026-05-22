@@ -503,6 +503,12 @@ def find_option_candidate(
             continue
         if option.open_interest < 25:
             continue
+        if contract_type == "put":
+            if option.strike >= spot_price * 0.99 or option.strike < spot_price * 0.70:
+                continue
+        else:
+            if option.strike <= spot_price * 1.01 or option.strike > spot_price * 1.40:
+                continue
         spread = option.ask - option.bid
         mid = (option.ask + option.bid) / 2
         if mid <= 0 or spread / mid > 0.25:
@@ -517,7 +523,12 @@ def find_option_candidate(
         return None
 
     def score(option: OptionCandidate) -> float:
-        delta = abs(option.delta) if option.delta is not None else target_delta
+        if option.delta is not None:
+            delta = abs(option.delta)
+        elif contract_type == "put":
+            delta = max(0.05, min(0.45, (1 - (option.strike / spot_price)) * 3.0))
+        else:
+            delta = max(0.05, min(0.45, ((option.strike / spot_price) - 1) * 3.0))
         delta_score = abs(delta - target_delta) * 100
         dte_score = abs(option.dte - 35) / 5
         spread_score = ((option.ask - option.bid) / max((option.ask + option.bid) / 2, 0.01)) * 10
