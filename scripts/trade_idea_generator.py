@@ -431,6 +431,10 @@ def quote_score(quote: dict[str, Any] | None, watch_score: float | None = None) 
     return round(max(0.0, min(100.0, score)), 1)
 
 
+def clamp_score(value: float) -> float:
+    return round(max(0.0, min(100.0, value)), 1)
+
+
 def has_near_earnings(ticker: str, earnings: dict[str, dict[str, Any]], today: date, days: int) -> bool:
     row = earnings.get(ticker)
     if not row:
@@ -469,7 +473,7 @@ def build_trade_ideas(
         if not extended and weight < 4:
             continue
         target_strike = round_strike(price * (1.05 if weight >= 10 else 1.07))
-        score = quote_score(quote) + min(weight, 15) * 0.8 + (8 if extended else 0)
+        score = clamp_score(quote_score(quote) + min(weight, 15) * 0.8 + (8 if extended else 0))
         contract = find_contract(position.ticker, "call", target_strike, today) if include_contracts else None
         if contract:
             setup = (
@@ -489,7 +493,7 @@ def build_trade_ideas(
                     f"and trades near ${price:.2f}."
                 ),
                 risk="Upside is capped above the short call; avoid if a near-term breakout is desired.",
-                score=round(score, 1),
+                score=score,
                 contract=contract,
             )
         )
