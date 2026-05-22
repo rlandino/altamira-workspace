@@ -804,15 +804,29 @@ def send_telegram(text: str, edit_message_id: str | None = None) -> dict[str, An
     except Exception as exc:
         return {"ok": False, "error": str(exc), "method": method, "chat_id": chat_id}
 
+    result = data.get("result") if isinstance(data, dict) else None
+    result_summary: dict[str, Any] = {}
+    if isinstance(result, dict):
+        result_summary = {
+            "message_id": result.get("message_id"),
+            "date": result.get("date"),
+            "edit_date": result.get("edit_date"),
+        }
+    telegram_summary = {
+        "ok": data.get("ok") if isinstance(data, dict) else False,
+        "description": data.get("description") if isinstance(data, dict) else None,
+        "result": result_summary,
+    }
+
     if response.status_code == 400 and edit_message_id and data.get("description", "").endswith("message is not modified"):
-        return {"ok": True, "action": "unchanged", "method": method, "chat_id": chat_id, "telegram": data}
+        return {"ok": True, "action": "unchanged", "method": method, "chat_id": chat_id, "telegram": telegram_summary}
     return {
         "ok": bool(data.get("ok")),
         "action": "edited" if edit_message_id else "sent",
         "method": method,
         "chat_id": chat_id,
         "status_code": response.status_code,
-        "telegram": data,
+        "telegram": telegram_summary,
     }
 
 
