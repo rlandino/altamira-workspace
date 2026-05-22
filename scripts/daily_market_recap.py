@@ -569,6 +569,8 @@ def normalize_chat_id(value: Any) -> str | None:
     text = str(value).strip()
     if not text:
         return None
+    if text.startswith("="):
+        text = text[1:].strip()
     placeholder_markers = ("TELEGRAM_CHAT_ID", "$env", "{{", "}}")
     if any(marker in text for marker in placeholder_markers):
         return None
