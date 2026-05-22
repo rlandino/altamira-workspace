@@ -529,6 +529,52 @@ def discover_telegram_chat_id(token: str) -> str | None:
     return None
 
 
+def find_workspace_telegram_chat_id() -> str | None:
+    """Find a concrete Telegram chat ID from existing workflow exports."""
+    for path in sorted((WORKSPACE / "outputs").glob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        chat_id = first_concrete_chat_id(data)
+        if chat_id:
+            print(f"[daily_market_recap] Using Telegram chat ID from {path.relative_to(WORKSPACE)}")
+            return chat_id
+    return None
+
+
+def first_concrete_chat_id(data: Any) -> str | None:
+    """Return the first usable chat ID from nested workflow JSON data."""
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key in {"chatId", "chat_id"}:
+                chat_id = normalize_chat_id(value)
+                if chat_id:
+                    return chat_id
+            nested = first_concrete_chat_id(value)
+            if nested:
+                return nested
+    if isinstance(data, list):
+        for item in data:
+            nested = first_concrete_chat_id(item)
+            if nested:
+                return nested
+    return None
+
+
+def normalize_chat_id(value: Any) -> str | None:
+    """Return a usable Telegram chat identifier or None for placeholders."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    placeholder_markers = ("TELEGRAM_CHAT_ID", "$env", "{{", "}}")
+    if any(marker in text for marker in placeholder_markers):
+        return None
+    return text
+
+
 def send_to_telegram(markdown_path: Path, summary: str, chat_id: str | None = None) -> None:
     """Send the summary and markdown file to Telegram."""
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -540,6 +586,7 @@ def send_to_telegram(markdown_path: Path, summary: str, chat_id: str | None = No
         or os.environ.get("TELEGRAM_CHAT_ID")
         or os.environ.get("TELEGRAM_CHANNEL_ID")
         or os.environ.get("TELEGRAM_CHANNEL_USERNAME")
+        or find_workspace_telegram_chat_id()
         or discover_telegram_chat_id(token)
     )
     if not resolved_chat_id:

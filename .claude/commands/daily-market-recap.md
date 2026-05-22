@@ -29,7 +29,7 @@ Required for Telegram delivery:
 - `TELEGRAM_BOT_TOKEN`
 - One of `TELEGRAM_CHAT_ID`, `TELEGRAM_CHANNEL_ID`, or `TELEGRAM_CHANNEL_USERNAME`.
 
-If no chat/channel ID is configured, the script attempts to discover the most recent chat from Telegram bot updates.
+If no chat/channel ID is configured, the script checks existing workflow JSON exports in `outputs/` for a concrete `chatId`, then attempts to discover the most recent chat from Telegram bot updates.
 
 Optional for richer market data:
 
