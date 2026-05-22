@@ -1,0 +1,16 @@
+{
+  "action": "edited",
+  "chat_id": "7830722515",
+  "method": "editMessageText",
+  "ok": true,
+  "status_code": 200,
+  "telegram": {
+    "description": null,
+    "ok": true,
+    "result": {
+      "date": 1779444360,
+      "edit_date": 1779444438,
+      "message_id": 1075
+    }
+  }
+}

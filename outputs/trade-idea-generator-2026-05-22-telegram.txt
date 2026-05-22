@@ -1,0 +1,33 @@
+TRADE IDEA GENERATOR - 2026-05-22
+
+Market: VIX 17.03 (NORMAL), SPY +0.20%
+Sizing posture: standard premium selling size
+
+Top ideas:
+1. SPY - Covered call (score 100.0)
+   Setup: Manual chain lookup: 2026-06-26 ~$780 covered call
+   Why: Holding has 300 shares, 17.1% portfolio weight, and trades near $742.72.
+   Risk: Upside is capped above the short call; avoid if a near-term breakout is desired.
+
+2. GOOGL - Covered call (score 100.0)
+   Setup: Manual chain lookup: 2026-06-26 ~$405 covered call
+   Why: Holding has 551 shares, 13.8% portfolio weight, and trades near $387.66.
+   Risk: Upside is capped above the short call; avoid if a near-term breakout is desired.
+
+3. AMAT - Covered call (score 100.0)
+   Setup: Manual chain lookup: 2026-06-26 ~$450 covered call
+   Why: Holding has 413 shares, 12.6% portfolio weight, and trades near $427.36.
+   Risk: Upside is capped above the short call; avoid if a near-term breakout is desired.
+
+4. AMZN - Covered call (score 100.0)
+   Setup: Manual chain lookup: 2026-06-26 ~$285 covered call
+   Why: Holding has 288 shares, 4.9% portfolio weight, and trades near $268.46.
+   Risk: Upside is capped above the short call; avoid if a near-term breakout is desired.
+
+5. AAPL - Covered call (score 100.0)
+   Setup: Manual chain lookup: 2026-06-26 ~$325 covered call
+   Why: Holding has 212 shares, 4.6% portfolio weight, and trades near $304.99.
+   Risk: Upside is capped above the short call; avoid if a near-term breakout is desired.
+
+Checklist: confirm liquidity, earnings date, sizing, and price before entry.
+Research/paper-trading support only; not financial advice.
