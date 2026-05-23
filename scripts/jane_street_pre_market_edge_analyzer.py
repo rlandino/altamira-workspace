@@ -239,8 +239,6 @@ def earnings_exposure(earnings: list[dict[str, Any]]) -> tuple[str, list[str]]:
         symbol = str(item.get("symbol") or "").upper()
         if symbol in MARKET_MOVING_TICKERS:
             selected.append(item)
-    if not selected:
-        selected = earnings[:8]
 
     lines: list[str] = []
     market_movers = 0
@@ -256,7 +254,9 @@ def earnings_exposure(earnings: list[dict[str, Any]]) -> tuple[str, list[str]]:
         lines.append(f"- **{symbol}{display_name}:** {when}{cap_text}; market-moving potential {potential}.")
 
     if not lines:
-        lines.append("- No major index-heavy earnings found in FMP for the report date.")
+        total_reports = len(earnings)
+        suffix = f" ({total_reports} total global reports in FMP)." if total_reports else "."
+        lines.append(f"- No major index-heavy earnings found in FMP for the report date{suffix}")
 
     exposure = "High" if market_movers >= 2 else "Medium" if market_movers == 1 else "Low"
     return exposure, lines
@@ -579,8 +579,8 @@ def build_report(args: argparse.Namespace) -> tuple[Path, str, dict[str, str]]:
 
         - **Strategy:** {trade_plan}
         - **Expiration:** {'No same-day order because the market is closed.' if not is_open_session else '0DTE / same-day SPX expiration.'}
-        - **Entry time:** {'None today; re-run next regular session.' if not is_open_session else trade_details.get('entry', '9:35-9:50 AM ET after open settles')}.
-        - **Position size:** {'0% today.' if not is_open_session else trade_details.get('size', '1x normal size; risk cap 1-2% of account')}.
+        - **Entry time:** {'None today; re-run next regular session' if not is_open_session else trade_details.get('entry', '9:35-9:50 AM ET after open settles')}.
+        - **Position size:** {'0% today' if not is_open_session else trade_details.get('size', '1x normal size; risk cap 1-2% of account')}.
 
         ## Scenario playbook
 
@@ -595,6 +595,7 @@ def build_report(args: argparse.Namespace) -> tuple[Path, str, dict[str, str]]:
         - **Disclaimer:** Educational/research only, not investment advice. Options involve risk and can lose more than expected if managed poorly.
         """
     )
+    report = "\n".join(line[8:] if line.startswith("        ") else line for line in report.splitlines()) + "\n"
     if errors:
         report += "\n\n### Fetch warnings\n\n" + "\n".join(f"- {error}" for error in errors) + "\n"
 
