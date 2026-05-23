@@ -15,6 +15,8 @@ Format examples: `5850 18.5` or `SPX futures 5848 VIX 19.2 CPI 8:30` or no args 
 
 **Output:** A Jane Street-style morning briefing written to `outputs/Jane-Street-pre-market-edge-analyzer-{DATE}.md` with: overnight movement and gap hold/fade view, pre-market IV vs yesterday, economic calendar impact, earnings exposure, Globex range, opening gap strategy, IV crush opportunity, previous close analysis, three support/resistance levels, pre-market trade plan (strategy, strikes, expiration, entry time), and scenario playbook for bull, bear, and neutral outcomes. Use today's date in YYYY-MM-DD.
 
+**Automation runner:** `python scripts/jane_street_pre_market_edge_analyzer.py --telegram-full` generates the report and sends the full briefing to Telegram using `TELEGRAM_BOT_TOKEN` plus `TELEGRAM_CHAT_ID` when set.
+
 ---
 
 ## Instructions
