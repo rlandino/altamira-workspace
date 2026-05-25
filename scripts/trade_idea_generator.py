@@ -84,6 +84,13 @@ def parse_int(value: str) -> int:
     return int(number) if number is not None else 0
 
 
+def clean_status(value: str) -> str:
+    """Normalize watchlist status labels that may include emoji or markdown."""
+    cleaned = re.sub(r"\*+", "", value).strip()
+    cleaned = re.sub(r"[^A-Za-z /-]+", "", cleaned).strip()
+    return re.sub(r"\s+", " ", cleaned)
+
+
 def parse_markdown_tables(text: str) -> list[tuple[list[str], list[list[str]]]]:
     tables: list[tuple[list[str], list[list[str]]]] = []
     current: list[str] = []
@@ -181,7 +188,7 @@ def load_watchlist() -> list[WatchlistCandidate]:
                 score=parse_number(item.get("Score", "")),
                 grade=re.sub(r"\*+", "", item.get("Grade", "")).strip(),
                 company=item.get("Company", "").strip(),
-                status=item.get("Status", "").strip(),
+                status=clean_status(item.get("Status", "")),
             )
         )
     return candidates
@@ -295,7 +302,8 @@ def score_option_status(option: OptionPosition, price: Optional[float]) -> tuple
     if profit_pct >= 0.50:
         return "Close / harvest", f"{option.ticker} {option.strike:g}{option.option_type[0]} {option.expiration}: {profit_pct:.0%} of credit captured; close per 50% profit rule."
     if option.current >= option.credit * 2:
-        return "Risk review", f"{option.ticker} {option.strike:g}{option.option_type[0]} {option.expiration}: current mark is >=2x credit; review stop/roll plan,{moneyness_note.strip()}."
+        suffix = f"; {moneyness_note.strip()}" if moneyness_note else "."
+        return "Risk review", f"{option.ticker} {option.strike:g}{option.option_type[0]} {option.expiration}: current mark is >=2x credit; review stop/roll plan{suffix}"
     if moneyness_note:
         return "Monitor", f"{option.ticker} {option.strike:g}{option.option_type[0]} {option.expiration}:{moneyness_note}; do not add correlated risk until managed."
     return "Hold / monitor", f"{option.ticker} {option.strike:g}{option.option_type[0]} {option.expiration}: current mark {fmt_money(option.current)} vs credit {fmt_money(option.credit)}."
@@ -305,7 +313,7 @@ def candidate_watchlist(watchlist: list[WatchlistCandidate]) -> list[WatchlistCa
     priority = {"Top Candidate": 0, "Consider": 1, "Monitor": 2, "Low Priority": 3, "Avoid": 4}
     return sorted(
         [c for c in watchlist if "Avoid" not in c.status],
-        key=lambda c: (priority.get(c.status.replace("*", "").strip(), 2), -(c.score or -999)),
+        key=lambda c: (priority.get(c.status, 2), -(c.score or -999)),
     )[:6]
 
 
