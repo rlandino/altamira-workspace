@@ -138,6 +138,7 @@ def quote_lookup() -> dict[str, dict[str, Any]]:
 
 def fetch_sector_snapshot(report_date: date) -> tuple[list[dict[str, Any]], str | None]:
     """Fetch sector snapshot, retrying recent dates when today has no data."""
+    zero_change_fallback: tuple[list[dict[str, Any]], str] | None = None
     for days_back in range(0, 8):
         snapshot_date = (report_date - timedelta(days=days_back)).isoformat()
         try:
@@ -150,7 +151,12 @@ def fetch_sector_snapshot(report_date: date) -> tuple[list[dict[str, Any]], str 
             continue
         rows = normalize_sector_rows(data)
         if rows:
-            return rows, snapshot_date
+            if any(abs(row["changesPercentage"]) > 0.0001 for row in rows):
+                return rows, snapshot_date
+            if zero_change_fallback is None:
+                zero_change_fallback = (rows, snapshot_date)
+    if zero_change_fallback:
+        return zero_change_fallback
     return [], None
 
 
@@ -208,7 +214,16 @@ def fetch_earnings(report_date: date) -> list[dict[str, Any]]:
         )
     except Exception:
         return []
-    return data if isinstance(data, list) else []
+    if not isinstance(data, list):
+        return []
+    return [item for item in data if isinstance(item, dict) and is_us_style_symbol(str(item.get("symbol", "")))]
+
+
+def is_us_style_symbol(symbol: str) -> bool:
+    """Keep the earnings table focused on US-style tickers."""
+    if not symbol or "." in symbol:
+        return False
+    return any(char.isalpha() for char in symbol) and len(symbol) <= 5
 
 
 def fetch_headlines(limit: int = 8) -> list[dict[str, Any]]:
