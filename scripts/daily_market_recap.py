@@ -24,6 +24,19 @@ WORKSPACE = Path(__file__).resolve().parent.parent
 OUTPUTS = WORKSPACE / "outputs"
 FMP_V3 = "https://financialmodelingprep.com/api/v3"
 FMP_STABLE = "https://financialmodelingprep.com/stable"
+SECTOR_ETFS = {
+    "Basic Materials": "XLB",
+    "Communication Services": "XLC",
+    "Consumer Cyclical": "XLY",
+    "Consumer Defensive": "XLP",
+    "Energy": "XLE",
+    "Financial Services": "XLF",
+    "Healthcare": "XLV",
+    "Industrials": "XLI",
+    "Real Estate": "XLRE",
+    "Technology": "XLK",
+    "Utilities": "XLU",
+}
 
 
 @dataclass(frozen=True)
@@ -155,9 +168,30 @@ def fetch_sector_snapshot(report_date: date) -> tuple[list[dict[str, Any]], str 
                 return rows, snapshot_date
             if zero_change_fallback is None:
                 zero_change_fallback = (rows, snapshot_date)
+    etf_rows = fetch_sector_etf_snapshot()
+    if etf_rows:
+        return etf_rows, "sector ETF proxies"
     if zero_change_fallback:
         return zero_change_fallback
     return [], None
+
+
+def fetch_sector_etf_snapshot() -> list[dict[str, Any]]:
+    """Build sector performance from liquid sector ETF proxies."""
+    try:
+        data = fmp_get(FMP_V3, f"/quote/{','.join(SECTOR_ETFS.values())}")
+    except Exception:
+        return []
+    if not isinstance(data, list):
+        return []
+
+    quotes = {str(item.get("symbol", "")).upper(): item for item in data if isinstance(item, dict)}
+    rows = []
+    for sector, symbol in SECTOR_ETFS.items():
+        change = as_float(quotes.get(symbol, {}).get("changesPercentage"), default=float("nan"))
+        if change == change:
+            rows.append({"sector": sector, "changesPercentage": change})
+    return sorted(rows, key=lambda row: row["changesPercentage"], reverse=True)
 
 
 def normalize_sector_rows(data: Any) -> list[dict[str, Any]]:
@@ -222,6 +256,8 @@ def fetch_earnings(report_date: date) -> list[dict[str, Any]]:
 def is_us_style_symbol(symbol: str) -> bool:
     """Keep the earnings table focused on US-style tickers."""
     if not symbol or "." in symbol:
+        return False
+    if len(symbol) > 1 and symbol.endswith(("F", "Q", "W")):
         return False
     return any(char.isalpha() for char in symbol) and len(symbol) <= 5
 
