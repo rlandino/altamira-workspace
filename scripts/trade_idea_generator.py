@@ -235,7 +235,9 @@ def fetch_yahoo_quote(symbol: str) -> Quote:
         highs = [float(v) for v in quote.get("high", []) if isinstance(v, (int, float))]
         lows = [float(v) for v in quote.get("low", []) if isinstance(v, (int, float))]
         price = meta.get("regularMarketPrice")
-        previous_close = meta.get("chartPreviousClose") or meta.get("previousClose")
+        previous_close = meta.get("regularMarketPreviousClose") or meta.get("previousClose")
+        if previous_close is None and len(closes) >= 2:
+            previous_close = closes[-2]
         if price is None and closes:
             price = closes[-1]
         change_pct = None
