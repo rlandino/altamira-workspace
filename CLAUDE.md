@@ -37,6 +37,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── 0DTE-SPX-credit-spread-scanner.md # /0DTE-SPX-credit-spread-scanner — 0DTE SPX credit spread setup (Tastytrade-style)
 │   │   ├── analyze-ticker.md  # /analyze-ticker — financial ratio analysis
 │   │   ├── options-scan.md    # /options-scan — options chain scanning
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — portfolio/watchlist trade ideas + Telegram delivery
 │   │   ├── portfolio-report.md # /portfolio-report — portfolio reports
 │   │   ├── paper-trade.md     # /paper-trade — log paper trades
 │   │   ├── client-report.md   # /client-report — client-facing portfolio reports
@@ -168,6 +169,14 @@ Example: `/analyze-ticker MSFT`
 Fetches real-time options chain, filters by delta/DTE/liquidity, and recommends CSP, covered call, bull put spread, and jade lizard strategies with position sizing. Outputs a scan report to `outputs/`.
 
 Example: `/options-scan AAPL`
+
+### /trade-idea-generator
+
+**Purpose:** Generate ranked trade ideas from `context/portfolio-details.md` and `context/watchlist.md`, including portfolio concentration actions, open short-premium risk checks, and watchlist entry candidates.
+
+Runs `scripts/trade_idea_generator.py`, writes `outputs/trade-idea-generator-{DATE}.md`, and can send the concise summary to Telegram with `--send-telegram` when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (or `--telegram-chat-id`) are available.
+
+Example: `/trade-idea-generator` or run `python3 scripts/trade_idea_generator.py --send-telegram`
 
 ### /0DTE-SPX-credit-spread-scanner [optional date]
 
@@ -586,6 +595,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
+| `scripts/trade_idea_generator.py` | Generate ranked trade ideas from repository portfolio/watchlist context and optionally send Telegram summary | `python3 scripts/trade_idea_generator.py` or `python3 scripts/trade_idea_generator.py --send-telegram --telegram-chat-id CHAT_ID` |
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
