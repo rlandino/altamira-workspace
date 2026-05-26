@@ -14,7 +14,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -83,7 +83,7 @@ def fmt_pct(value: Any, signed: bool = True) -> str:
 
 
 def pct_value(row: dict[str, Any]) -> float | None:
-    for key in ("changesPercentage", "changePercentage", "changes", "change", "percent", "1D Change"):
+    for key in ("changesPercentage", "changePercentage", "averageChange", "changes", "change", "percent", "1D Change"):
         value = as_float(row.get(key))
         if value is not None:
             return value
@@ -418,7 +418,7 @@ def build_report(
             "",
             "## Delivery Metadata",
             "",
-            f"- Generated at: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC",
+            f"- Generated at: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC",
             f"- Report date: {report_date.isoformat()}",
         ]
     )
