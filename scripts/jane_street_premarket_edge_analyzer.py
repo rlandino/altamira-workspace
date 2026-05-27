@@ -408,8 +408,16 @@ def build_report(args: argparse.Namespace) -> tuple[Path, str, str]:
     else:
         vix_compare = f"{vix:.2f}; compare with broker prior close for exact IV change."
 
+    ordered_events = sorted(
+        economic_events,
+        key=lambda event: (
+            not is_high_impact_event(event),
+            str(event.get("country") or event.get("region") or "") != "US",
+            str(event.get("date") or event.get("time") or ""),
+        ),
+    )
     event_lines = []
-    for event in economic_events[:12]:
+    for event in ordered_events[:12]:
         country = event.get("country") or event.get("region") or "Global"
         marker = "HIGH" if is_high_impact_event(event) else "Normal"
         event_lines.append(f"- {event_time(event)} - {country} - {event_name(event)} ({marker}): {impact_note(event)}")
@@ -417,6 +425,7 @@ def build_report(args: argparse.Namespace) -> tuple[Path, str, str]:
         event_lines.insert(0, f"- User note - {args.events}")
     if not event_lines:
         event_lines.append("- No major FMP economic calendar items returned for today.")
+    main_event = event_lines[0].replace("- ", "", 1)
 
     earnings_lines = []
     for row in major_earnings:
@@ -549,7 +558,7 @@ Index read: single-name IV is elevated around reporters; index impact is {'mater
         f"Jane Street Pre-Market Edge {report_date}\n"
         f"Gap: {gap_points:+.1f} pts ({gap_pct:+.2f}%) - {gap_view}\n"
         f"VIX: {vix_compare}\n"
-        f"Main event risk: {calendar_load} calendar; {event_lines[0].replace('- ', '', 1)}\n"
+        f"Main event risk: {calendar_load} calendar; {main_event}\n"
         f"Plan: {strategy_name} {short_put:,.0f}/{long_put:,.0f}P and {short_call:,.0f}/{long_call:,.0f}C, entry {entry_time}.\n"
         f"Support: {supports[0][0]:,.0f}, {supports[1][0]:,.0f}, {supports[2][0]:,.0f}. "
         f"Resistance: {resistances[0][0]:,.0f}, {resistances[1][0]:,.0f}, {resistances[2][0]:,.0f}."
