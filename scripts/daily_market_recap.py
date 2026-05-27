@@ -8,7 +8,7 @@ import json
 import os
 import re
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -184,12 +184,23 @@ def historical_spx(report_date: str) -> tuple[list[dict[str, Any]], list[str]]:
     if result.error:
         return [], [f"S&P 500 historical fetch failed: {result.error}"]
     rows = result.data if isinstance(result.data, list) else []
-    cleaned = [
-        {"date": row.get("date"), "close": as_float(row.get("close")), "high": as_float(row.get("high")), "low": as_float(row.get("low"))}
-        for row in rows
-    ]
+    cleaned = []
+    for row in rows:
+        close = as_float(row.get("close"))
+        if close is None:
+            close = as_float(row.get("price"))
+        cleaned.append(
+            {
+                "date": row.get("date"),
+                "close": close,
+                "high": as_float(row.get("high")),
+                "low": as_float(row.get("low")),
+            }
+        )
     cleaned = [row for row in cleaned if row["date"] and row["close"] is not None]
     cleaned.sort(key=lambda row: str(row["date"]))
+    if not cleaned:
+        return [], ["S&P 500 historical fetch returned no usable close/price rows."]
     return cleaned, []
 
 
@@ -236,8 +247,13 @@ def earnings_calendar(report_date: str) -> tuple[list[dict[str, Any]], list[str]
     if result.error:
         return [], [f"Earnings calendar fetch failed: {result.error}"]
     rows = result.data if isinstance(result.data, list) else []
-    rows.sort(key=lambda row: (row.get("date") or "", row.get("symbol") or ""))
-    return rows[:20], []
+    us_rows = [
+        row for row in rows
+        if re.fullmatch(r"[A-Z]{1,5}", str(row.get("symbol") or ""))
+    ]
+    selected = us_rows if us_rows else rows
+    selected.sort(key=lambda row: (row.get("date") or "", row.get("symbol") or ""))
+    return selected[:20], []
 
 
 def market_news() -> tuple[list[dict[str, Any]], list[str]]:
@@ -331,7 +347,7 @@ def build_markdown(
     warnings: list[str],
 ) -> tuple[str, str]:
     summary = concise_summary(report_date, quotes, sectors, tech, gainer, loser)
-    generated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
     index_rows = []
     for symbol, name in INDEX_SYMBOLS.items():
