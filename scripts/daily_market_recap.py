@@ -392,7 +392,7 @@ def build_markdown(
         f"Sector breadth is led by {best_sector}; {worst_sector} is lagging."
     )
 
-    markdown = f"""# Altamira Daily Market Recap — {report_date}
+    markdown = f"""# Altamira Daily Market Recap - {report_date}
 
 Generated: {generated}
 

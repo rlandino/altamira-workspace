@@ -1,4 +1,4 @@
-# /daily-market-recap — Daily Market Recap with Telegram Delivery
+# /daily-market-recap - Daily Market Recap with Telegram Delivery
 
 Generate Altamira Capital's daily market recap, write a markdown report, and optionally send both the summary and markdown file to Telegram.
 
