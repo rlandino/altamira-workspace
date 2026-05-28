@@ -297,7 +297,18 @@ def fetch_earnings(report_date: str) -> list[dict[str, Any]]:
         seen.add(key)
         row["symbol"] = symbol
         rows.append(row)
-    return sorted(rows, key=lambda row: (row.get("date") or "", row.get("symbol") or ""))
+    return sorted(rows, key=earnings_sort_key)
+
+
+def earnings_sort_key(row: dict[str, Any]) -> tuple[str, int, float, str]:
+    revenue = as_float(row.get("revenueEstimated"))
+    has_revenue_rank = 0 if revenue is not None else 1
+    return (
+        row.get("date") or "",
+        has_revenue_rank,
+        -(revenue or 0),
+        row.get("symbol") or "",
+    )
 
 
 def is_us_style_symbol(symbol: str) -> bool:
@@ -309,7 +320,7 @@ def is_us_style_symbol(symbol: str) -> bool:
     if len(normalized) > 5:
         return False
     # Common OTC/foreign/bankruptcy suffixes clutter broad FMP calendars.
-    if len(normalized) == 5 and normalized[-1] in {"F", "Y", "Q"}:
+    if len(normalized) == 5 and normalized[-1] in {"F", "Q", "R", "U", "W", "Y"}:
         return False
     return True
 
