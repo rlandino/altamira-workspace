@@ -304,7 +304,14 @@ def is_us_style_symbol(symbol: str) -> bool:
     if not symbol or "." in symbol or symbol[0].isdigit():
         return False
     normalized = symbol.replace("-", "").replace("/", "")
-    return normalized.isalnum() and any(char.isalpha() for char in normalized)
+    if not normalized.isalnum() or not any(char.isalpha() for char in normalized):
+        return False
+    if len(normalized) > 5:
+        return False
+    # Common OTC/foreign/bankruptcy suffixes clutter broad FMP calendars.
+    if len(normalized) == 5 and normalized[-1] in {"F", "Y", "Q"}:
+        return False
+    return True
 
 
 def fetch_news() -> list[dict[str, Any]]:
