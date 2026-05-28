@@ -1,0 +1,14 @@
+TRADE IDEA GENERATOR - 2026-05-28
+VIX: 16.69 (NORMAL)
+SPY: $750.46, -0.0%
+
+Top ideas:
+1. GOOGL - Sell covered call: GOOGL 415C 2026-07-17 (50 DTE), target 0.20-0.30 delta credit $8.80
+2. AVGO - Trim overweight sleeve: Trim about 191 shares to move AVGO toward 10% target weight
+3. AMAT - Sell covered call: AMAT 500C 2026-07-17 (50 DTE), target 0.20-0.30 delta credit $18.80
+4. MSFT - Sell covered call: MSFT 440C 2026-07-17 (50 DTE), target 0.20-0.30 delta credit $8.40
+5. AMZN - Sell covered call: AMZN 290C 2026-07-17 (50 DTE), target 0.20-0.30 delta credit $6.30
+
+Report: outputs/trade-idea-generator-2026-05-28.md
+Expired static option rows are ignored.
+Decision support only; confirm liquidity, earnings, and risk before trading.
