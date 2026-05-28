@@ -21,7 +21,7 @@ Optional arguments:
 - `context/watchlist.md` — scored watchlist and candidate status
 - `context/options-positions.md` — open short-premium positions, if present
 - `TELEGRAM_BOT_TOKEN` — required when sending to Telegram
-- `TELEGRAM_CHAT_ID`, `TELEGRAM_CHANNEL_ID`, or `TELEGRAM_CHANNEL_USERNAME` — optional; if absent, the script falls back to the workspace channel convention
+- `TELEGRAM_CHAT_ID`, `TELEGRAM_CHANNEL_ID`, or `TELEGRAM_CHANNEL_USERNAME` — optional; if absent, the script falls back to the repository's fixed Telegram chat ID
 
 ## Output
 

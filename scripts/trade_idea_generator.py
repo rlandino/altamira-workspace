@@ -30,7 +30,7 @@ WORKSPACE = Path(__file__).resolve().parent.parent
 CONTEXT_DIR = WORKSPACE / "context"
 OUTPUTS_DIR = WORKSPACE / "outputs"
 
-DEFAULT_TELEGRAM_CHANNEL = "@rlandino_market_bot"
+DEFAULT_TELEGRAM_CHAT_ID = "7830722515"
 
 GRADE_SCORE = {
     "A+": 95,
@@ -514,7 +514,7 @@ def resolve_chat_id(cli_chat_id: Optional[str]) -> Optional[str]:
         os.environ.get("TELEGRAM_CHANNEL_ID"),
         os.environ.get("TELEGRAM_CHANNEL_USERNAME"),
         os.environ.get("TELEGRAM_DEFAULT_CHAT_ID"),
-        DEFAULT_TELEGRAM_CHANNEL,
+        DEFAULT_TELEGRAM_CHAT_ID,
     ]
     return next((candidate for candidate in candidates if candidate), None)
 
