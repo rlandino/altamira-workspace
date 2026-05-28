@@ -86,6 +86,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── distressed-debt-opportunity-finder.md  # /distressed-debt-opportunity-finder — Appaloosa-style distressed credit analysis
 │   │   ├── portfolio-construction-optimizer.md  # /portfolio-construction-optimizer — Citadel-style portfolio construction framework
 │   │   ├── risk-adjusted-portfolio-builder.md   # /risk-adjusted-portfolio-builder — risk-adjusted build from watchlist (Kelly, correlation, tiers, stress test)
+│   │   ├── trade-idea-generator.md  # /trade-idea-generator — portfolio/watchlist trade ideas + Telegram summary
 │   │   └── hedgefund-quantitative-analyzer.md  # /hedgefund-quantitative-analyzer — Renaissance-style factor decomposition
 │   └── skills/            # Workspace-specific skills (kept intentionally minimal)
 ├── context/               # Background context about the user and project
@@ -192,6 +193,14 @@ Example: `/DE-shaw-iron-condor-income-machine SPY 500000 weekly` or `/DE-shaw-ir
 Types: `daily` (default), `weekly`, `monthly`, `holdings`. Covers market summary, watchlist performance, sector exposure, options landscape, risk dashboard, and action items. Outputs to `outputs/`.
 
 Example: `/portfolio-report weekly`
+
+### /trade-idea-generator
+
+**Purpose:** Generate actionable trade ideas from the current portfolio, watchlist, and open short-premium positions, then send a concise summary to Telegram.
+
+Runs `scripts/trade_idea_generator.py`, writes `outputs/trade-idea-generator-{DATE}.md` and `outputs/trade-idea-generator-message-{DATE}.txt`, and sends via Telegram when `--send-telegram` is used. Uses `context/portfolio-details.md`, `context/watchlist.md`, and `context/options-positions.md`.
+
+Example: `/trade-idea-generator` or `python3 scripts/trade_idea_generator.py --send-telegram`
 
 ### /paper-trade [details]
 
@@ -587,6 +596,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | Script | Purpose | Usage |
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
+| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist trade ideas and optional Telegram summary | `python3 scripts/trade_idea_generator.py --send-telegram` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |

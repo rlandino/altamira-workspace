@@ -1,0 +1,41 @@
+TRADE IDEA GENERATOR - 2026-05-28
+Portfolio + watchlist scan
+
+1. AVGO - Close profitable 2026-03-20 310P
+   Confidence: High (97)
+   Action: Buy to close and release buying power.
+   Why: Premium captured is about 60% ($12.60 credit vs $5.00 current).
+   Risk: Re-open only if IV remains attractive and no earnings conflict exists.
+
+2. MSFT - Manage 2026-03-20 430P
+   Confidence: High (90)
+   Action: Evaluate roll/down-and-out or close per 200% premium stop rule.
+   Why: Option is marked $22.40 vs $8.70 credit; underlying $399.60 is below strike.
+   Risk: Do not add new correlated short puts until this risk is resolved.
+
+3. SPY - Covered call or partial trim
+   Confidence: High (94)
+   Action: Harvest 30% of position or sell a 30-45 DTE 0.20-0.30 delta covered call.
+   Why: SPY is 17.1% of portfolio with +43.3% unrealized P&L.
+   Risk: Do not cap upside around known earnings/catalyst events unless premium compensates.
+
+4. AVGO - Covered call or partial trim
+   Confidence: High (93)
+   Action: Harvest 30% of position or sell a 30-45 DTE 0.20-0.30 delta covered call.
+   Why: AVGO is 16.7% of portfolio with +175.4% unrealized P&L.
+   Risk: Do not cap upside around known earnings/catalyst events unless premium compensates.
+
+5. LRCX - Cash-secured put / starter entry
+   Confidence: Medium-High (75)
+   Action: Wait for a red day or support retest; sell a 30-45 DTE 0.20-0.25 delta CSP or buy a 1-2% starter if no liquid options are available.
+   Why: Lam Research Corporation is graded B with score 67.4 and ranks near the top of the current watchlist.
+   Risk: Skip if earnings fall inside the option window or bid/ask spread is wider than 10%.
+
+6. NVDA - Cash-secured put / starter entry
+   Confidence: Medium (74)
+   Action: Wait for a red day or support retest; sell a 30-45 DTE 0.20-0.25 delta CSP or buy a 1-2% starter if no liquid options are available.
+   Why: NVIDIA Corporation is graded B with score 66.2 and ranks near the top of the current watchlist.
+   Risk: Skip if earnings fall inside the option window or bid/ask spread is wider than 10%.
+
+Verify live prices/options/earnings before trading.
+Educational research only; not investment advice.
