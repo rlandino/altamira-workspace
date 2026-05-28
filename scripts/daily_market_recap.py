@@ -283,10 +283,28 @@ def fetch_earnings(report_date: str) -> list[dict[str, Any]]:
     )
     if not isinstance(data, list):
         return []
-    return sorted(
-        [row for row in data if isinstance(row, dict)],
-        key=lambda row: (row.get("date") or "", row.get("symbol") or ""),
-    )
+    rows = []
+    seen = set()
+    for row in data:
+        if not isinstance(row, dict):
+            continue
+        symbol = str(row.get("symbol") or "").strip().upper()
+        if not is_us_style_symbol(symbol):
+            continue
+        key = (row.get("date") or "", symbol)
+        if key in seen:
+            continue
+        seen.add(key)
+        row["symbol"] = symbol
+        rows.append(row)
+    return sorted(rows, key=lambda row: (row.get("date") or "", row.get("symbol") or ""))
+
+
+def is_us_style_symbol(symbol: str) -> bool:
+    if not symbol or "." in symbol or symbol[0].isdigit():
+        return False
+    normalized = symbol.replace("-", "").replace("/", "")
+    return normalized.isalnum() and any(char.isalpha() for char in normalized)
 
 
 def fetch_news() -> list[dict[str, Any]]:
@@ -343,7 +361,7 @@ def top_news_lines(news: list[dict[str, Any]], limit: int = 5) -> list[str]:
 
 def earnings_rows(earnings: list[dict[str, Any]], limit: int = 12) -> list[str]:
     if not earnings:
-        return ["No earnings returned for the next 7 days."]
+        return ["No US-style ticker earnings returned for the next 7 days."]
     rows = ["| Date | Symbol | EPS Est. | Revenue Est. |", "|---|---:|---:|---:|"]
     for row in earnings[:limit]:
         eps = as_float(row.get("epsEstimated"))
