@@ -12,7 +12,7 @@ import argparse
 import os
 import sys
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -400,17 +400,12 @@ def build_recap(report_date: str) -> tuple[str, str]:
     summary = (
         f"Daily Market Recap {report_date}: S&P 500 {fmt_pct(spx.get('change_pct'))} "
         f"at {fmt_num(spx_price)}, Nasdaq {fmt_pct(nasdaq.get('change_pct'))}; "
-        f"trend {trend}, VIX {fmt_num(vix.get('price'))} ({vix_context}). "
-        f"Best sector: {best_sector['name']} {fmt_pct(best_sector['change_pct'])}."
-        if best_sector
-        else (
-            f"Daily Market Recap {report_date}: S&P 500 {fmt_pct(spx.get('change_pct'))} "
-            f"at {fmt_num(spx_price)}, Nasdaq {fmt_pct(nasdaq.get('change_pct'))}; "
-            f"trend {trend}, VIX {fmt_num(vix.get('price'))} ({vix_context})."
-        )
+        f"trend {trend}, VIX {fmt_num(vix.get('price'))} ({vix_context})."
     )
+    if best_sector:
+        summary += f" Best sector: {best_sector['name']} {fmt_pct(best_sector['change_pct'])}."
     if worst_sector:
-        summary += f"; worst sector: {worst_sector['name']} {fmt_pct(worst_sector['change_pct'])}."
+        summary += f" Worst sector: {worst_sector['name']} {fmt_pct(worst_sector['change_pct'])}."
     if hot_stock and big_loser:
         summary += (
             f" Hot stock: {hot_stock['symbol']} {fmt_pct(hot_stock['change_pct'])}; "
@@ -527,7 +522,7 @@ def build_recap(report_date: str) -> tuple[str, str]:
             "",
             "---",
             "",
-            f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}",
+            f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
         ]
     )
     return "\n".join(lines) + "\n", summary
