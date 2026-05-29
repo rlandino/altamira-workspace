@@ -5,7 +5,7 @@ Generate a daily market recap markdown file and send both the summary and markdo
 ## Usage
 
 ```bash
-python scripts/daily_market_recap.py --send-telegram
+python3 scripts/daily_market_recap.py --send-telegram
 ```
 
 Optional arguments:
