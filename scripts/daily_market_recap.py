@@ -21,6 +21,19 @@ FMP_STABLE = "https://financialmodelingprep.com/stable"
 DEFAULT_FMP_KEY = "FAAjnYQTvfGg8j7RoPSvHYRVtSKTvJyz"
 DEFAULT_TELEGRAM_CHAT_ID = "7830722515"
 INDEX_SYMBOLS = "^GSPC,^DJI,^IXIC,^VIX,SPY,QQQ"
+SECTOR_ETFS = {
+    "XLC": "Communication Services",
+    "XLY": "Consumer Discretionary",
+    "XLP": "Consumer Staples",
+    "XLE": "Energy",
+    "XLF": "Financials",
+    "XLV": "Health Care",
+    "XLI": "Industrials",
+    "XLB": "Materials",
+    "XLRE": "Real Estate",
+    "XLK": "Technology",
+    "XLU": "Utilities",
+}
 
 
 @dataclass
@@ -139,6 +152,35 @@ def parse_sector_snapshot(data: Any) -> tuple[dict[str, Any], dict[str, Any]]:
     return max(scored, key=lambda item: item[1])[0], min(scored, key=lambda item: item[1])[0]
 
 
+def parse_sector_etfs(data: Any) -> tuple[dict[str, Any], dict[str, Any]]:
+    if not isinstance(data, list):
+        return {}, {}
+
+    rows: list[dict[str, Any]] = []
+    for quote in data:
+        if not isinstance(quote, dict):
+            continue
+        symbol = str(quote.get("symbol", ""))
+        if symbol not in SECTOR_ETFS:
+            continue
+        change = as_float(quote.get("changesPercentage"))
+        if change is None:
+            continue
+        rows.append(
+            {
+                "sector": f"{SECTOR_ETFS[symbol]} ({symbol})",
+                "changesPercentage": change,
+            }
+        )
+
+    if not rows:
+        return {}, {}
+    return (
+        max(rows, key=lambda row: as_float(row.get("changesPercentage")) or 0),
+        min(rows, key=lambda row: as_float(row.get("changesPercentage")) or 0),
+    )
+
+
 def sector_name(item: dict[str, Any]) -> str:
     for key in ("sector", "sectorName", "name"):
         if item.get(key):
@@ -227,6 +269,9 @@ def build_recap(report_date: date, out_dir: Path, fmp_key: str) -> MarketRecap:
     top_gainer = pick_first(gainers)
     top_loser = pick_first(losers)
     best_sector, worst_sector = parse_sector_snapshot(sector_data)
+    if not best_sector or not worst_sector:
+        sector_quotes = safe_fetch([], fetch_fmp_v3, f"quote/{','.join(SECTOR_ETFS)}", fmp_key)
+        best_sector, worst_sector = parse_sector_etfs(sector_quotes)
 
     spx_quote = quotes.get("^GSPC", {})
     spx_current = as_float(spx_quote.get("price"))
