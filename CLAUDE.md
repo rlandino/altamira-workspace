@@ -60,6 +60,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── earnings-quality-investigator.md # /earnings-quality-investigator — Sloan accrual, Beneish M-Score, cash conversion, earnings quality rating
 │   │   ├── compounder-screen.md # /compounder-screen — compounder quality screen (7-point checklist) for watchlist candidates
 │   │   ├── DE-shaw-iron-condor-income-machine.md # /DE-shaw-iron-condor-income-machine — systematic iron condor (SPX/SPY/QQQ/IWM), sizing, adjustments, income
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — portfolio/watchlist trade ideas with Telegram delivery
 │   │   ├── watchlist-refresh.md # /watchlist-refresh — refresh and score watchlist
 │   │   ├── wolverine-trading-risk-management-system.md # /wolverine-trading-risk-management-system — theta risk manual, limits, roll/close, daily checklist
 │   │   ├── 13f-diff.md        # /13f-diff — 13F holdings diff
@@ -168,6 +169,14 @@ Example: `/analyze-ticker MSFT`
 Fetches real-time options chain, filters by delta/DTE/liquidity, and recommends CSP, covered call, bull put spread, and jade lizard strategies with position sizing. Outputs a scan report to `outputs/`.
 
 Example: `/options-scan AAPL`
+
+### /trade-idea-generator [optional date]
+
+**Purpose:** Generate daily trade ideas from the repository's current portfolio, watchlist, and open short premium context, then send a concise summary to Telegram.
+
+Runs `scripts/trade_idea_generator.py`, writes `outputs/trade-idea-generator-{DATE}.md` and `outputs/trade-idea-generator-telegram-{DATE}.txt`, and sends via Telegram when `--send-telegram` is used. Uses live FMP quotes/earnings when `FMP_API_KEY` or `FINANCIAL_MODELING_PREP_API_KEY` is set; otherwise falls back to repository snapshot prices. Telegram requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
+
+Example: `/trade-idea-generator` or `python scripts/trade_idea_generator.py --send-telegram`
 
 ### /0DTE-SPX-credit-spread-scanner [optional date]
 
@@ -588,6 +597,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
+| `scripts/trade_idea_generator.py` | Generate ranked trade ideas from current portfolio/watchlist/options context and optionally send Telegram | `python scripts/trade_idea_generator.py --send-telegram` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
