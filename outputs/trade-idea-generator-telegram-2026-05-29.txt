@@ -1,0 +1,34 @@
+Altamira Trade Ideas — 2026-05-29
+VIX: N/A
+
+1) AVGO — Short Put management
+Action: Close / harvest profit
+Setup: 5x AVGO 2026-03-20 310P
+Why: Current mark is 40% of original credit; estimated open P&L $3,800.00.
+
+2) MSFT — Short Put management
+Action: Defend or roll
+Setup: 5x MSFT 2026-03-20 430P
+Why: Current mark is 257% of original credit; estimated open P&L $-6,850.00.
+
+3) SPY — Covered call
+Action: Sell 0.20-0.30 delta call
+Setup: 2026-07-03 ~710C, up to 3 contract(s); target 1-2% notional credit.
+Why: SPY is a 17.1% portfolio weight; covered calls monetize concentration while preserving defined upside. No known earnings conflict inside scan window.
+
+4) AVGO — Covered call
+Action: Sell 0.20-0.30 delta call
+Setup: 2026-07-03 ~345C, up to 6 contract(s); target 1-2% notional credit.
+Why: AVGO is a 16.7% portfolio weight; covered calls monetize concentration while preserving defined upside. No known earnings conflict inside scan window.
+
+5) GOOGL — Covered call
+Action: Sell 0.20-0.30 delta call
+Setup: 2026-07-03 ~315C, up to 5 contract(s); target 1-2% notional credit.
+Why: GOOGL is a 13.8% portfolio weight; covered calls monetize concentration while preserving defined upside. No known earnings conflict inside scan window.
+
+Risk notes:
+- Concentration watch: SPY 17.1%, AVGO 16.7%, GOOGL 13.8%, AMAT 12.6%. Prefer income/trim ideas over adding more exposure.
+- Risk framework target cash reserve is >=15%; confirm current cash before new CSPs.
+
+Report: trade-idea-generator-2026-05-29.md
+Educational only. Validate live chain/liquidity and risk limits before trading.
