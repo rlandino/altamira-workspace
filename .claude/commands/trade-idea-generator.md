@@ -12,13 +12,13 @@ Generate a concise trade-idea report from the repository's current portfolio and
 Run from the workspace root:
 
 ```bash
-python scripts/trade_idea_generator.py
+python3 scripts/trade_idea_generator.py
 ```
 
 To send the report to Telegram:
 
 ```bash
-python scripts/trade_idea_generator.py --send-telegram --telegram-chat-id "$TELEGRAM_CHAT_ID"
+python3 scripts/trade_idea_generator.py --send-telegram --telegram-chat-id "$TELEGRAM_CHAT_ID"
 ```
 
 If `TELEGRAM_CHAT_ID` is not configured in the environment, use the existing deployed workflow/channel configuration as the source for the chat id and pass it with `--telegram-chat-id`.
