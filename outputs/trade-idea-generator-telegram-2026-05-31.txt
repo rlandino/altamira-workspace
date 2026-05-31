@@ -1,0 +1,14 @@
+📌 Altamira Trade Ideas — 2026-05-31
+VIX 15.32 (NORMAL); sizing 100% of normal. CSP cap $60,363.55. Sunday run: validate live quotes before entry.
+Earnings conflicts and oversized naked puts excluded.
+
+Top ideas:
+1) AMAT CC: sell 520C 2026-07-17 @ ~$13.90, delta 0.28, upside 15.5%, 2x, score 82.6.
+2) LRCX CSP: sell 280P 2026-07-17 @ ~$12.45, delta -0.25, BE $267.55, buffer 12.0%, 2x, score 82.2.
+3) NVDA CSP: sell 200P 2026-07-17 @ ~$7.10, delta -0.31, BE $192.90, buffer 5.3%, 3x, score 76.5.
+4) TSM CSP: sell 400P 2026-07-02 @ ~$11.75, delta -0.33, BE $388.25, buffer 4.4%, 1x, score 74.5.
+
+Risk notes: SPY 17.1% weight; AVGO 16.7% weight; GOOGL 13.8% weight; AMAT 12.6% weight.
+Watchlist focus: LRCX (B), NVDA (B), TSM (B-), KLAC (B-), ADBE (B-).
+
+Manage: limit orders only; close at 50% credit; stop/reassess at 2x credit or short-strike breach. Not financial advice.
