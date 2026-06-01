@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
@@ -68,12 +69,14 @@ def resolve_fmp_key() -> str:
         if key:
             return key
 
+    market_api = WORKSPACE / "scripts" / "market_data_api.py"
     try:
-        from scripts.market_data_api import DEFAULT_KEY  # type: ignore
-
-        return str(DEFAULT_KEY)
-    except Exception:
+        text = market_api.read_text(encoding="utf-8")
+    except OSError:
         return ""
+
+    match = re.search(r'DEFAULT_KEY\s*=\s*os\.environ\.get\("FMP_API_KEY",\s*"([^"]+)"\)', text)
+    return match.group(1) if match else ""
 
 
 def api_get(base: str, path: str, params: dict[str, Any] | None, api_key: str) -> ApiResult:
