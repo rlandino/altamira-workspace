@@ -1,0 +1,30 @@
+TRADE IDEA GENERATOR -- 2026-06-01
+Research only. Verify live chain, earnings, and risk limits before trading.
+
+Context warning: 5 expired option row(s) found (AVGO, COST, MSFT, SPY).
+Refresh broker/portfolio context before placing any new trade.
+
+1. AMAT -- Covered call / trim overlay
+Action: Evaluate selling up to 4 covered call contract(s) against shares, or trim if portfolio concentration is above target.
+Why: Position weight 12.6% with P&L +100.5% creates a monetization opportunity without adding downside exposure.
+Next: Target 0.20-0.30 delta, 30-45 DTE calls after confirming current chain liquidity.
+
+2. AVGO -- Covered call / trim overlay
+Action: Evaluate selling up to 6 covered call contract(s) against shares, or trim if portfolio concentration is above target.
+Why: Position weight 16.7% with P&L +175.4% creates a monetization opportunity without adding downside exposure.
+Next: Target 0.20-0.30 delta, 30-45 DTE calls after confirming current chain liquidity.
+
+3. GOOGL -- Covered call / trim overlay
+Action: Evaluate selling up to 5 covered call contract(s) against shares, or trim if portfolio concentration is above target.
+Why: Position weight 13.8% with P&L +74.0% creates a monetization opportunity without adding downside exposure.
+Next: Target 0.20-0.30 delta, 30-45 DTE calls after confirming current chain liquidity.
+
+4. SPY -- Covered call / trim overlay
+Action: Evaluate selling up to 3 covered call contract(s) against shares, or trim if portfolio concentration is above target.
+Why: Position weight 17.1% with P&L +43.3% creates a monetization opportunity without adding downside exposure.
+Next: Target 0.20-0.30 delta, 30-45 DTE calls after confirming current chain liquidity.
+
+5. AAPL -- Covered call / trim overlay
+Action: Evaluate selling up to 2 covered call contract(s) against shares, or trim if portfolio concentration is above target.
+Why: Position weight 4.6% with P&L +45.6% creates a monetization opportunity without adding downside exposure.
+Next: Target 0.20-0.30 delta, 30-45 DTE calls after confirming current chain liquidity.
