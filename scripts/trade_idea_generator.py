@@ -192,6 +192,16 @@ def days_to_expiration(expiration: str, today: date) -> int | None:
     return (exp - today).days
 
 
+def describe_dte(dte: int | None) -> str:
+    if dte is None:
+        return "DTE unavailable"
+    if dte < 0:
+        return f"expired {abs(dte)} day{'s' if abs(dte) != 1 else ''} ago"
+    if dte == 0:
+        return "expires today"
+    return f"{dte} DTE"
+
+
 def build_ideas(
     equities: list[EquityPosition],
     options: list[OptionPosition],
@@ -206,7 +216,7 @@ def build_ideas(
         underlying = equity_by_symbol.get(opt.ticker)
         stop = opt.credit * 2
         profit_target = opt.credit * 0.5
-        dte_text = f"{dte} DTE" if dte is not None else "DTE unavailable"
+        dte_text = describe_dte(dte)
         underlying_price = underlying.current if underlying else None
         moneyness = ""
         if underlying_price and opt.option_type.lower() == "put":
@@ -215,6 +225,23 @@ def build_ideas(
             else:
                 cushion = (underlying_price - opt.strike) / underlying_price * 100
                 moneyness = f" Snapshot cushion to strike: {cushion:.1f}%."
+
+        if dte is not None and dte < 0:
+            ideas.append(
+                TradeIdea(
+                    priority=100,
+                    ticker=opt.ticker,
+                    strategy=f"Reconcile expired short {opt.option_type}",
+                    action=(
+                        f"Refresh broker context for {opt.contracts}x {opt.strike:g} {opt.option_type} "
+                        f"{opt.expiration}; repository expiration is already past."
+                    ),
+                    rationale=f"The option table shows this position {dte_text}; live status must be confirmed before acting.{moneyness}",
+                    risk="Using stale option rows can create false close/roll signals and inaccurate portfolio risk.",
+                    follow_up="Run the portfolio refresh/export before entering any new trade and remove expired rows after reconciliation.",
+                )
+            )
+            continue
 
         if opt.current <= profit_target and opt.credit > 0:
             ideas.append(
