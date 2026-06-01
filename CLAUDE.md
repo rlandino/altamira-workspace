@@ -197,7 +197,7 @@ Example: `/portfolio-report weekly`
 
 **Purpose:** Generate a concise trade-idea report from the current repository portfolio/watchlist context and optionally send it to Telegram.
 
-Runs `python3 scripts/trade_idea_generator.py`; with `telegram`/`send`, run `python3 scripts/trade_idea_generator.py --send-telegram --telegram-chat-id "$TELEGRAM_CHAT_ID"`. Writes `outputs/trade-idea-generator-{DATE}.md`.
+Runs `python3 scripts/trade_idea_generator.py`; with `telegram`/`send`, run `python3 scripts/trade_idea_generator.py --send-telegram`. Writes `outputs/trade-idea-generator-{DATE}.md`, `outputs/trade-idea-generator-telegram-{DATE}.txt`, and a Telegram status file when sending.
 
 Example: `/trade-idea-generator telegram`
 
