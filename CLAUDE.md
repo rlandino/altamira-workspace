@@ -193,6 +193,14 @@ Types: `daily` (default), `weekly`, `monthly`, `holdings`. Covers market summary
 
 Example: `/portfolio-report weekly`
 
+### /trade-idea-generator [telegram | send]
+
+**Purpose:** Generate a concise trade-idea report from the current repository portfolio/watchlist context and optionally send it to Telegram.
+
+Runs `python3 scripts/trade_idea_generator.py`; with `telegram`/`send`, run `python3 scripts/trade_idea_generator.py --send-telegram --telegram-chat-id "$TELEGRAM_CHAT_ID"`. Writes `outputs/trade-idea-generator-{DATE}.md`.
+
+Example: `/trade-idea-generator telegram`
+
 ### /paper-trade [details]
 
 **Purpose:** Log a paper trade with pre-trade checklist validation and risk checks.
