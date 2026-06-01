@@ -454,12 +454,25 @@ def format_report(
 
 
 def format_telegram(ideas: list[TradeIdea], generated_on: date, limit: int = 5) -> str:
+    stale_context = [idea for idea in ideas if idea.strategy.startswith("Reconcile expired")]
+    actionable = [idea for idea in ideas if idea not in stale_context]
     lines = [
         f"TRADE IDEA GENERATOR -- {generated_on.isoformat()}",
         "Research only. Verify live chain, earnings, and risk limits before trading.",
         "",
     ]
-    for idx, idea in enumerate(ideas[:limit], start=1):
+    if stale_context:
+        tickers = ", ".join(sorted({idea.ticker for idea in stale_context}))
+        lines.extend(
+            [
+                f"Context warning: {len(stale_context)} expired option row(s) found ({tickers}).",
+                "Refresh broker/portfolio context before placing any new trade.",
+                "",
+            ]
+        )
+
+    display_ideas = actionable[:limit]
+    for idx, idea in enumerate(display_ideas, start=1):
         lines.extend(
             [
                 f"{idx}. {idea.ticker} -- {idea.strategy}",
@@ -469,7 +482,7 @@ def format_telegram(ideas: list[TradeIdea], generated_on: date, limit: int = 5) 
                 "",
             ]
         )
-    if not ideas:
+    if not display_ideas:
         lines.append("No qualifying ideas generated from repository context.")
     return "\n".join(lines).strip()
 
