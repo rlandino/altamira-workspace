@@ -1,0 +1,1 @@
+Your daily market recap for 2026-06-02. S&P 500 is +0.12% at 7,609.40, with a bullish trend signal, and VIX is normal at 16.02. Utilities led sectors at +2.15%, while Healthcare lagged at -1.42%. Hot stock is DXST at +133.75%, and the biggest loser is JZ at -87.49%. Full report saved to outputs/briefing-2026-06-02.md.
