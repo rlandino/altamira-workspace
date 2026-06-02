@@ -1,0 +1,29 @@
+TRADE IDEA GENERATOR - 2026-06-02
+VIX: 16.0 (NORMAL) | Sizing: 100% | AUM: $1.21M
+Universe: 35 optionable portfolio/watchlist tickers | 41 candidate contracts
+
+1. NOW $115P 2026-07-17 (45DTE)
+  Credit $5.60 | Delta -0.28 | AnnRet 39.5% | Score 95.4
+  BE $109.40 | OI 1,734 | Max 5x / $57,500
+
+2. LRCX $290P 2026-07-17 (45DTE)
+  Credit $12.45 | Delta -0.25 | AnnRet 34.8% | Score 88.0
+  BE $277.55 | OI 815 | Max 2x / $58,000
+
+3. NVDA $215P 2026-07-02 (30DTE)
+  Credit $4.95 | Delta -0.27 | AnnRet 28.0% | Score 81.8
+  BE $210.05 | OI 1,212 | Max 2x / $43,000
+
+4. CRM $185P 2026-07-17 (45DTE)
+  Credit $6.25 | Delta -0.30 | AnnRet 27.4% | Score 75.9
+  BE $178.75 | OI 2,972 | Max 3x / $55,500
+
+5. ANET $150P 2026-07-17 (45DTE)
+  Credit $4.10 | Delta -0.20 | AnnRet 22.2% | Score 74.3
+  BE $145.90 | OI 1,388 | Max 4x / $60,000
+
+Earnings exclusions: ACN, ADBE, ASML, AVGO, CRWD, JPM, KMI, NFLX, PANW, TSM
+Risk note: existing short-premium tickers: AVGO, COST, MSFT, SPY.
+Use /paper-trade only after live quote/risk review.
+Not financial advice.
+Report: outputs/trade-idea-generator-2026-06-02.md
