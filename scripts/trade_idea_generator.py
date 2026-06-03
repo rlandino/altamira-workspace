@@ -408,6 +408,7 @@ def build_watchlist_entry_ideas(
 def build_portfolio_overlay_ideas(
     positions: list[Position],
     quotes: dict[str, dict[str, Any]],
+    earnings: dict[str, str],
     expiration: date,
 ) -> list[TradeIdea]:
     ideas: list[TradeIdea] = []
@@ -418,7 +419,19 @@ def build_portfolio_overlay_ideas(
         if price <= 0:
             continue
         priority = int(min(92, 50 + position.weight_pct * 2 + max(position.pnl_pct, 0) / 10))
-        if position.weight_pct >= 10:
+        if position.symbol in earnings:
+            priority = max(55, priority - 20)
+            action = (
+                f"Defer new covered calls until after earnings on {earnings[position.symbol]}; "
+                "review a post-earnings overwrite or staged trim once IV/gap risk resets."
+            )
+            rationale = (
+                f"{position.symbol} is {position.weight_pct:.1f}% of portfolio with "
+                f"{position.pnl_pct:.1f}% unrealized gain, but the earnings event is inside "
+                "the short-premium window."
+            )
+            risk = "Earnings gap risk can overwhelm option premium; avoid opening new short premium before the event."
+        elif position.weight_pct >= 10:
             strike = round_strike(price * 1.08)
             action = (
                 f"Consider a covered-call overwrite or staged trim: "
@@ -428,6 +441,7 @@ def build_portfolio_overlay_ideas(
                 f"{position.symbol} is {position.weight_pct:.1f}% of portfolio with "
                 f"{position.pnl_pct:.1f}% unrealized gain."
             )
+            risk = "Only overwrite shares you are willing to have called away; avoid caps before major catalysts."
         else:
             strike = round_strike(price * 1.10)
             action = (
@@ -438,6 +452,7 @@ def build_portfolio_overlay_ideas(
                 f"{position.symbol} has at least 100 shares and a {position.weight_pct:.1f}% weight; "
                 f"covered calls can add income without adding downside notional."
             )
+            risk = "Only overwrite shares you are willing to have called away; avoid caps before major catalysts."
         ideas.append(
             TradeIdea(
                 priority=priority,
@@ -445,7 +460,7 @@ def build_portfolio_overlay_ideas(
                 strategy="Covered call / rebalance overlay",
                 action=action,
                 rationale=rationale,
-                risk="Only overwrite shares you are willing to have called away; avoid caps before major catalysts.",
+                risk=risk,
                 reference=f"{position.quantity:g} shares, {position.weight_pct:.1f}% weight",
             )
         )
@@ -619,7 +634,7 @@ def main() -> int:
     ideas = []
     ideas.extend(build_option_management_ideas(option_positions))
     ideas.extend(build_watchlist_entry_ideas(watchlist, positions_by_symbol, quotes, earnings, expiration))
-    ideas.extend(build_portfolio_overlay_ideas(positions, quotes, expiration))
+    ideas.extend(build_portfolio_overlay_ideas(positions, quotes, earnings, expiration))
     ideas.sort(key=lambda idea: idea.priority, reverse=True)
 
     out_path = Path(args.out) if args.out else OUTPUTS_DIR / f"trade-ideas-{today.isoformat()}.md"
