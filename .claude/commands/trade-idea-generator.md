@@ -5,7 +5,7 @@ Generate daily trade ideas from the repository's current portfolio and watchlist
 ## Usage
 
 ```bash
-python scripts/trade_idea_generator.py --send-telegram
+python3 scripts/trade_idea_generator.py --send-telegram
 ```
 
 Optional arguments:
