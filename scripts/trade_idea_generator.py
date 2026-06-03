@@ -598,6 +598,162 @@ def score_covered_calls(
     return opportunities
 
 
+def target_expiration() -> tuple[str, int]:
+    """Return a Friday expiration near the middle of the 30-45 DTE window."""
+    start = date.today() + timedelta(days=TARGET_MIN_DTE)
+    end = date.today() + timedelta(days=TARGET_MAX_DTE)
+    target = date.today() + timedelta(days=40)
+    fridays: list[date] = []
+    day = start
+    while day <= end:
+        if day.weekday() == 4:
+            fridays.append(day)
+        day += timedelta(days=1)
+    expiration = min(fridays or [target], key=lambda d: abs((d - target).days))
+    return expiration.isoformat(), (expiration - date.today()).days
+
+
+def strike_increment(price: float) -> float:
+    if price >= 500:
+        return 10.0
+    if price >= 200:
+        return 5.0
+    if price >= 50:
+        return 2.5
+    return 1.0
+
+
+def round_to_increment(value: float, increment: float, direction: str) -> float:
+    scaled = value / increment
+    rounded = math.floor(scaled) * increment if direction == "down" else math.ceil(scaled) * increment
+    return round(rounded, 2)
+
+
+def volatility_multiplier(symbol: str) -> float:
+    high_beta = {"TSLA", "NVDA", "CRWD", "PLTR", "MRVL", "ANET", "MELI"}
+    semis = {"AVGO", "AMAT", "LRCX", "TSM", "KLAC", "ASML"}
+    defensive = {"COST", "ABBV", "ABT", "TMO", "WM", "KMI", "GD", "SPY", "QQQ"}
+    if symbol in high_beta:
+        return 2.0
+    if symbol in semis:
+        return 1.6
+    if symbol in defensive:
+        return 0.85
+    return 1.25
+
+
+def estimated_sigma(price: float, vix: float, dte: int, symbol: str) -> float:
+    annual_vol = max(0.12, (vix / 100.0) * volatility_multiplier(symbol))
+    return price * annual_vol * math.sqrt(dte / 365)
+
+
+def estimated_csp_ideas(
+    option_symbols: list[str],
+    quotes: dict[str, dict[str, Any]],
+    holding_map: dict[str, Holding],
+    portfolio_value: float,
+    sizing_pct: int,
+    vix: float,
+) -> list[dict[str, Any]]:
+    expiration, dte = target_expiration()
+    ideas: list[dict[str, Any]] = []
+    for symbol in option_symbols:
+        quote = quotes[symbol]
+        price = float(quote.get("price") or 0)
+        if price <= 0:
+            continue
+        sigma = estimated_sigma(price, vix, dte, symbol)
+        strike = round_to_increment(price - 0.67 * sigma, strike_increment(price), "down")
+        if strike <= 0 or strike >= price:
+            continue
+        min_credit = max(0.05, strike * 0.15 * (dte / 365))
+        collateral = strike * 100
+        max_allocation = portfolio_value * MAX_POSITION_PCT * (sizing_pct / 100)
+        contracts_allowed = math.floor(max_allocation / collateral)
+        if contracts_allowed < 1:
+            continue
+        annualized_return = (min_credit / strike) * (365 / dte) * 100
+        priority_bonus = 15 if symbol in holding_map else 0
+        ideas.append(
+            {
+                "strategy": "CSP",
+                "symbol": symbol,
+                "source": ("portfolio" if symbol in holding_map else "watchlist") + " estimated",
+                "strike": strike,
+                "expiration": expiration,
+                "dte": dte,
+                "bid": min_credit,
+                "ask": min_credit,
+                "delta": -0.25,
+                "iv": None,
+                "open_interest": 0,
+                "volume": 0,
+                "spread_pct": None,
+                "annualized_return": annualized_return,
+                "breakeven": strike - min_credit,
+                "contracts": contracts_allowed,
+                "premium": min_credit * 100 * contracts_allowed,
+                "collateral": collateral * contracts_allowed,
+                "score": 50 + priority_bonus + min(25, annualized_return),
+                "estimated": True,
+            }
+        )
+    return sorted(ideas, key=lambda idea: idea["score"], reverse=True)
+
+
+def estimated_covered_call_ideas(
+    option_symbols: list[str],
+    quotes: dict[str, dict[str, Any]],
+    holding_map: dict[str, Holding],
+    vix: float,
+) -> list[dict[str, Any]]:
+    expiration, dte = target_expiration()
+    ideas: list[dict[str, Any]] = []
+    for symbol in option_symbols:
+        holding = holding_map.get(symbol)
+        if not holding or holding.qty < 100:
+            continue
+        quote = quotes[symbol]
+        price = float(quote.get("price") or 0)
+        if price <= 0:
+            continue
+        sigma = estimated_sigma(price, vix, dte, symbol)
+        strike = round_to_increment(price + 0.67 * sigma, strike_increment(price), "up")
+        min_credit = max(0.05, price * 0.08 * (dte / 365))
+        contracts_allowed = math.floor(holding.qty / 100)
+        premium_yield = (min_credit / price) * 100
+        annualized_yield = premium_yield * (365 / dte)
+        upside_cap = ((strike - price) / price) * 100
+        if_called_return = None
+        if holding.avg_price:
+            if_called_return = ((strike + min_credit - holding.avg_price) / holding.avg_price) * 100
+        ideas.append(
+            {
+                "strategy": "Covered Call",
+                "symbol": symbol,
+                "source": "portfolio estimated",
+                "strike": strike,
+                "expiration": expiration,
+                "dte": dte,
+                "bid": min_credit,
+                "ask": min_credit,
+                "delta": 0.25,
+                "iv": None,
+                "open_interest": 0,
+                "volume": 0,
+                "spread_pct": None,
+                "annualized_yield": annualized_yield,
+                "upside_cap": upside_cap,
+                "if_called_return": if_called_return,
+                "contracts": contracts_allowed,
+                "premium": min_credit * 100 * contracts_allowed,
+                "score": 50 + min(25, annualized_yield) + min(25, upside_cap * 2),
+                "estimated": True,
+            }
+        )
+    return sorted(ideas, key=lambda idea: idea["score"], reverse=True)
+
+
 def money(value: float) -> str:
     return f"${value:,.0f}"
 
@@ -668,10 +824,12 @@ def report_lines(
     if csp_ideas:
         for index, idea in enumerate(csp_ideas[:3], 1):
             eligibility = "ENTRY" if risk_gate else "WATCHLIST"
+            credit_label = "target credit >=" if idea.get("estimated") else "credit"
+            estimate_label = " (verify chain)" if idea.get("estimated") else ""
             msg.append(
                 f"{index}) {idea['symbol']} {idea['strike']:g}P {idea['expiration']} "
-                f"credit ${idea['bid']:.2f}, delta {idea['delta']:.2f}, DTE {idea['dte']}, "
-                f"ann {idea['annualized_return']:.1f}%, {eligibility}."
+                f"{credit_label} ${idea['bid']:.2f}, delta {idea['delta']:.2f}, DTE {idea['dte']}, "
+                f"ann {idea['annualized_return']:.1f}%, {eligibility}{estimate_label}."
             )
     else:
         msg.append("- No CSP passed the delta/DTE/liquidity/earnings screen.")
@@ -680,10 +838,12 @@ def report_lines(
     msg.append("Top covered-call candidates:")
     if call_ideas:
         for index, idea in enumerate(call_ideas[:3], 1):
+            credit_label = "target credit >=" if idea.get("estimated") else "credit"
+            estimate_label = " (verify chain)" if idea.get("estimated") else ""
             msg.append(
                 f"{index}) {idea['symbol']} {idea['strike']:g}C {idea['expiration']} "
-                f"credit ${idea['bid']:.2f}, delta {idea['delta']:.2f}, DTE {idea['dte']}, "
-                f"ann yield {idea['annualized_yield']:.1f}%."
+                f"{credit_label} ${idea['bid']:.2f}, delta {idea['delta']:.2f}, DTE {idea['dte']}, "
+                f"ann yield {idea['annualized_yield']:.1f}%{estimate_label}."
             )
     else:
         msg.append("- No covered call passed the delta/DTE/liquidity/earnings screen.")
@@ -708,7 +868,7 @@ def report_lines(
         f"- Holdings parsed: {len(holdings)}",
         f"- Watchlist names parsed: {len(watchlist)}",
         f"- Universe symbols: {total_universe}",
-        f"- Option chains fetched: {len(option_symbols)} ({', '.join(option_symbols)})",
+            f"- Option chains attempted: {len(option_symbols)} ({', '.join(option_symbols)})",
         f"- VIX regime: {vix:.2f} ({regime}), sizing multiplier {sizing_pct}%",
         f"- Current short-put notional: {money(option_notional)} ({pct(option_notional_pct * 100)} of portfolio)",
         f"- Risk gate: {action_line}",
@@ -725,9 +885,10 @@ def report_lines(
         md.append("| Rank | Symbol | Source | Contract | Credit | Delta | DTE | Ann. Return | Breakeven | Contracts | Collateral | Score |")
         md.append("|---:|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|")
         for index, idea in enumerate(csp_ideas[:10], 1):
+            credit_label = f">= ${idea['bid']:.2f}" if idea.get("estimated") else f"${idea['bid']:.2f}"
             md.append(
                 f"| {index} | {idea['symbol']} | {idea['source']} | "
-                f"{idea['strike']:g}P {idea['expiration']} | ${idea['bid']:.2f} | "
+                f"{idea['strike']:g}P {idea['expiration']} | {credit_label} | "
                 f"{idea['delta']:.2f} | {idea['dte']} | {idea['annualized_return']:.1f}% | "
                 f"${idea['breakeven']:.2f} | {idea['contracts']} | {money(idea['collateral'])} | {idea['score']:.1f} |"
             )
@@ -739,9 +900,10 @@ def report_lines(
         md.append("| Rank | Symbol | Contract | Credit | Delta | DTE | Ann. Yield | Upside Cap | Contracts | Premium | Score |")
         md.append("|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|")
         for index, idea in enumerate(call_ideas[:10], 1):
+            credit_label = f">= ${idea['bid']:.2f}" if idea.get("estimated") else f"${idea['bid']:.2f}"
             md.append(
                 f"| {index} | {idea['symbol']} | {idea['strike']:g}C {idea['expiration']} | "
-                f"${idea['bid']:.2f} | {idea['delta']:.2f} | {idea['dte']} | "
+                f"{credit_label} | {idea['delta']:.2f} | {idea['dte']} | "
                 f"{idea['annualized_yield']:.1f}% | {idea['upside_cap']:.1f}% | "
                 f"{idea['contracts']} | {money(idea['premium'])} | {idea['score']:.1f} |"
             )
@@ -865,6 +1027,26 @@ def generate(max_options_tickers: int) -> tuple[str, str, Path, dict[str, Any]]:
 
     csp_ideas.sort(key=lambda idea: idea["score"], reverse=True)
     call_ideas.sort(key=lambda idea: idea["score"], reverse=True)
+
+    if not csp_ideas:
+        csp_ideas = estimated_csp_ideas(
+            option_symbols=option_symbols,
+            quotes=quotes,
+            holding_map=holding_map,
+            portfolio_value=portfolio_value,
+            sizing_pct=sizing_pct,
+            vix=vix,
+        )
+        chain_errors["CSP fallback"] = "Live option chains unavailable; generated estimated strike/credit targets."
+
+    if not call_ideas:
+        call_ideas = estimated_covered_call_ideas(
+            option_symbols=option_symbols,
+            quotes=quotes,
+            holding_map=holding_map,
+            vix=vix,
+        )
+        chain_errors["Covered-call fallback"] = "Live option chains unavailable; generated estimated strike/credit targets."
 
     message, markdown = report_lines(
         generated_at=generated_at,
