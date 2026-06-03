@@ -4,12 +4,11 @@
 from __future__ import annotations
 
 import argparse
-import html
 import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 from zoneinfo import ZoneInfo
 
 import requests
@@ -20,6 +19,19 @@ DEFAULT_OUTPUT_DIR = WORKSPACE / "outputs"
 FMP_V3 = "https://financialmodelingprep.com/api/v3"
 FMP_STABLE = "https://financialmodelingprep.com/stable"
 ET = ZoneInfo("America/New_York")
+SECTOR_ETFS = {
+    "XLC": "Communication Services",
+    "XLY": "Consumer Discretionary",
+    "XLP": "Consumer Staples",
+    "XLE": "Energy",
+    "XLF": "Financials",
+    "XLV": "Health Care",
+    "XLI": "Industrials",
+    "XLB": "Materials",
+    "XLRE": "Real Estate",
+    "XLK": "Technology",
+    "XLU": "Utilities",
+}
 
 
 @dataclass
@@ -163,6 +175,28 @@ def fetch_sector_snapshot(api_key: str, date_str: str) -> tuple[dict[str, Any] |
         if parsed:
             parsed.sort(key=lambda item: item["change_pct"])
             return parsed[-1], parsed[0]
+    return fetch_sector_etf_snapshot(api_key)
+
+
+def fetch_sector_etf_snapshot(api_key: str) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    data = get_json(f"{FMP_V3}/quote/{','.join(SECTOR_ETFS)}", {"apikey": api_key})
+    rows = normalize_rows(data)
+    parsed: list[dict[str, Any]] = []
+    for row in rows:
+        symbol = row.get("symbol")
+        change = as_float(row.get("changesPercentage") or row.get("changePercentage"))
+        if symbol in SECTOR_ETFS and change is not None:
+            parsed.append(
+                {
+                    "sector": SECTOR_ETFS[symbol],
+                    "change_pct": change,
+                    "date": "sector ETF proxy",
+                    "symbol": symbol,
+                }
+            )
+    if parsed:
+        parsed.sort(key=lambda item: item["change_pct"])
+        return parsed[-1], parsed[0]
     return None, None
 
 
@@ -316,18 +350,24 @@ def build_markdown(
 ) -> tuple[str, str]:
     spx = quotes.get("^GSPC")
     vix = quotes.get("^VIX")
+    technical_source = str(technicals.get("source_symbol") or "^GSPC")
+    technical_label = "SPY proxy" if technical_source == "SPY" else "S&P 500"
+    technical_quote = quotes.get("SPY") if technical_source == "SPY" else quotes.get("^GSPC")
+    trend_text = str(technicals.get("trend", "Unknown"))
+    if technical_source == "SPY":
+        trend_text = f"{trend_text} (SPY proxy)"
     commentary = build_commentary(
         quotes,
         best_sector,
         worst_sector,
         hot_stock,
         loser,
-        str(technicals.get("trend", "Unknown")),
+        trend_text,
     )
     summary = (
         f"Altamira Daily Market Recap - {date_str}\n"
         f"S&P 500: {fmt_number(spx.price if spx else None)} ({fmt_pct(spx.change_pct if spx else None)}); "
-        f"Trend: {technicals.get('trend', 'Unknown')}; "
+        f"Trend: {trend_text}; "
         f"VIX: {fmt_number(vix.price if vix else None)} ({vix_label(vix.price if vix else None)}).\n"
         f"Best sector: {best_sector['sector'] if best_sector else 'N/A'} "
         f"({fmt_pct(best_sector['change_pct'] if best_sector else None)}); "
@@ -379,11 +419,12 @@ Generated: {generated_text}
 
 ## Technical Snapshot
 
-- **S&P 500 vs 5D average:** {fmt_number(spx.price if spx else None)} vs {fmt_number(technicals.get("ma_5"))}
-- **S&P 500 vs 20D average:** {fmt_number(spx.price if spx else None)} vs {fmt_number(technicals.get("ma_20"))}
+- **Technical source:** {technical_label}
+- **{technical_label} vs 5D average:** {fmt_number(technical_quote.price if technical_quote else None)} vs {fmt_number(technicals.get("ma_5"))}
+- **{technical_label} vs 20D average:** {fmt_number(technical_quote.price if technical_quote else None)} vs {fmt_number(technicals.get("ma_20"))}
 - **20D resistance:** {fmt_number(technicals.get("resistance"))}
 - **20D support:** {fmt_number(technicals.get("support"))}
-- **Trend:** {technicals.get("trend", "Unknown")}
+- **Trend:** {trend_text}
 
 ## Market Drivers / Headlines
 
@@ -469,7 +510,16 @@ def main() -> None:
     hot_stock, loser = fetch_gainers_losers(api_key)
     best_sector, worst_sector = fetch_sector_snapshot(api_key, date_str)
     history = fetch_history(api_key, "^GSPC", date_str)
-    technicals = technicals_from_history(history, quotes.get("^GSPC").price if quotes.get("^GSPC") else None)
+    technical_symbol = "^GSPC"
+    technical_quote = quotes.get("^GSPC")
+    if len(history) < 20 and quotes.get("SPY"):
+        spy_history = fetch_history(api_key, "SPY", date_str)
+        if len(spy_history) >= 20:
+            history = spy_history
+            technical_symbol = "SPY"
+            technical_quote = quotes.get("SPY")
+    technicals = technicals_from_history(history, technical_quote.price if technical_quote else None)
+    technicals["source_symbol"] = technical_symbol
     earnings = fetch_earnings(api_key, date_str)
     news = fetch_news(api_key)
 
