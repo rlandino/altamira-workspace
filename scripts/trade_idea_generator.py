@@ -8,12 +8,12 @@ live quotes and option snapshots to produce a concise short-premium idea alert.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 import math
 import os
 import re
 import sys
-import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -28,6 +28,7 @@ CONTEXT_DIR = WORKSPACE / "context"
 OUTPUTS_DIR = WORKSPACE / "outputs"
 OPTIONS_SCAN_COMMAND = WORKSPACE / ".claude" / "commands" / "options-scan.md"
 CSP_FIXED_WORKFLOW = WORKSPACE / "outputs" / "csp-daily-scan-fixed.json"
+CSP_WORKFLOW = WORKSPACE / "outputs" / "n8n-workflow-csp-daily-scan.json"
 
 PORTFOLIO_FILE = CONTEXT_DIR / "portfolio-details.md"
 WATCHLIST_FILE = CONTEXT_DIR / "watchlist.md"
@@ -204,14 +205,14 @@ def credential_candidates() -> tuple[str | None, list[str]]:
     massive_candidates: list[str] = []
     if os.environ.get("MASSIVE_API_KEY"):
         massive_candidates.append(os.environ["MASSIVE_API_KEY"])
-    doc_key = extract_backticked_key(command_text, "Massive.com API")
-    if doc_key:
-        massive_candidates.append(doc_key)
-    workflow_text = read_text(CSP_FIXED_WORKFLOW)
+    workflow_text = read_text(CSP_FIXED_WORKFLOW) + "\n" + read_text(CSP_WORKFLOW)
     for key in re.findall(r"MASSIVE_API_KEY\s*=\s*'([^']+)'", workflow_text):
         massive_candidates.append(key)
     for key in re.findall(r"apiKey=([A-Za-z0-9_\-]+)", workflow_text):
         massive_candidates.append(key)
+    doc_key = extract_backticked_key(command_text, "Massive.com API")
+    if doc_key:
+        massive_candidates.append(doc_key)
 
     deduped: list[str] = []
     for key in massive_candidates:
@@ -376,7 +377,7 @@ def fetch_option_snapshot(
     last_error = "not attempted"
     for key in massive_keys:
         try:
-            data = http_json(massive_url(ticker, key, params), timeout=25)
+            data = http_json(massive_url(ticker, key, params), timeout=8)
             contracts = data.get("results") if isinstance(data, dict) else None
             if isinstance(contracts, list):
                 return [normalize_contract(c) for c in contracts], "massive"
@@ -830,27 +831,37 @@ def generate(max_options_tickers: int) -> tuple[str, str, Path, dict[str, Any]]:
     call_ideas: list[dict[str, Any]] = []
     chain_errors: dict[str, str] = {}
 
-    for idx, symbol in enumerate(option_symbols, 1):
+    def process_symbol(symbol: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, str]]:
         quote = quotes[symbol]
         spot = float(quote.get("price") or 0)
         source = "portfolio" if symbol in holding_map else "watchlist"
+        local_csp: list[dict[str, Any]] = []
+        local_calls: list[dict[str, Any]] = []
+        local_errors: dict[str, str] = {}
 
         puts, put_source = fetch_option_snapshot(symbol, "put", spot, massive_keys)
         if puts:
-            csp_ideas.extend(score_csp(symbol, quote, puts, portfolio_value, sizing_pct, source))
+            local_csp.extend(score_csp(symbol, quote, puts, portfolio_value, sizing_pct, source))
         else:
-            chain_errors[f"{symbol} puts"] = put_source
+            local_errors[f"{symbol} puts"] = put_source
 
         holding = holding_map.get(symbol)
         if holding and holding.qty >= 100:
             calls, call_source = fetch_option_snapshot(symbol, "call", spot, massive_keys)
             if calls:
-                call_ideas.extend(score_covered_calls(symbol, holding, quote, calls))
+                local_calls.extend(score_covered_calls(symbol, holding, quote, calls))
             else:
-                chain_errors[f"{symbol} calls"] = call_source
+                local_errors[f"{symbol} calls"] = call_source
 
-        if idx < len(option_symbols):
-            time.sleep(0.15)
+        return local_csp, local_calls, local_errors
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        future_map = {executor.submit(process_symbol, symbol): symbol for symbol in option_symbols}
+        for future in concurrent.futures.as_completed(future_map):
+            local_csp, local_calls, local_errors = future.result()
+            csp_ideas.extend(local_csp)
+            call_ideas.extend(local_calls)
+            chain_errors.update(local_errors)
 
     csp_ideas.sort(key=lambda idea: idea["score"], reverse=True)
     call_ideas.sort(key=lambda idea: idea["score"], reverse=True)
