@@ -17,7 +17,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -600,7 +600,7 @@ def main() -> int:
     parser.add_argument("--out", help="Output report path. Defaults to outputs/trade-ideas-YYYY-MM-DD.md.")
     args = parser.parse_args()
 
-    today = date.fromisoformat(args.date) if args.date else datetime.utcnow().date()
+    today = date.fromisoformat(args.date) if args.date else datetime.now(UTC).date()
     positions = parse_portfolio(PORTFOLIO_PATH)
     option_positions = parse_options(PORTFOLIO_PATH)
     watchlist = parse_watchlist(WATCHLIST_PATH)
