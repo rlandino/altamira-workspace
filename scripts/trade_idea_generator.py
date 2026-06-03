@@ -851,7 +851,7 @@ def report_lines(
     msg.extend(
         [
             "",
-            f"Options chains fetched for {len(option_symbols)} prioritized symbols.",
+            f"Options chains attempted for {len(option_symbols)} prioritized symbols.",
             "Not financial advice. Validate liquidity, earnings dates, and order prices before trading.",
         ]
     )
