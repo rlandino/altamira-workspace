@@ -208,7 +208,11 @@ def fetch_history(api_key: str, symbol: str, date_str: str) -> list[dict[str, An
         {"symbol": symbol, "from": from_date, "to": to_date, "apikey": api_key},
     )
     rows = normalize_rows(data)
-    rows = [row for row in rows if row.get("date") and as_float(row.get("close") or row.get("adjClose")) is not None]
+    rows = [
+        row
+        for row in rows
+        if row.get("date") and as_float(row.get("close") or row.get("adjClose") or row.get("price")) is not None
+    ]
     rows.sort(key=lambda row: row["date"])
     return rows
 
@@ -220,7 +224,7 @@ def moving_average(values: list[float], length: int) -> float | None:
 
 
 def technicals_from_history(history: list[dict[str, Any]], current_price: float | None) -> dict[str, Any]:
-    closes = [as_float(row.get("close") or row.get("adjClose")) for row in history]
+    closes = [as_float(row.get("close") or row.get("adjClose") or row.get("price")) for row in history]
     closes = [close for close in closes if close is not None]
     ma_5 = moving_average(closes, 5)
     ma_20 = moving_average(closes, 20)
