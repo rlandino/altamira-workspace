@@ -86,6 +86,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── distressed-debt-opportunity-finder.md  # /distressed-debt-opportunity-finder — Appaloosa-style distressed credit analysis
 │   │   ├── portfolio-construction-optimizer.md  # /portfolio-construction-optimizer — Citadel-style portfolio construction framework
 │   │   ├── risk-adjusted-portfolio-builder.md   # /risk-adjusted-portfolio-builder — risk-adjusted build from watchlist (Kelly, correlation, tiers, stress test)
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — daily portfolio/watchlist trade ideas with Telegram delivery
 │   │   └── hedgefund-quantitative-analyzer.md  # /hedgefund-quantitative-analyzer — Renaissance-style factor decomposition
 │   └── skills/            # Workspace-specific skills (kept intentionally minimal)
 ├── context/               # Background context about the user and project
@@ -345,6 +346,12 @@ Example: `/compounder-screen COST` or `/compounder-screen COST MSFT AVGO`
 
 Runs `scripts/stock-scorer.py` for portfolio/watchlist tickers; consolidates scores and optionally updates `context/watchlist.md` with grades and notes. Flags low scores and high-score candidates.
 
+### /trade-idea-generator
+
+**Purpose:** Generate daily short-premium trade ideas from the current repository portfolio and watchlist, write a markdown report, and optionally send the concise alert to Telegram.
+
+Runs `python3 scripts/trade_idea_generator.py --send-telegram`; uses `context/portfolio-details.md`, `context/watchlist.md`, `context/options-positions.md`, FMP quotes/earnings, and Massive option snapshots. Writes `outputs/trade-idea-generator-{DATE}.md`.
+
 ### /wireframe [ARTIFACT]
 
 **Purpose:** Three-step flow: (1) Generate — output only an ASCII wireframe of the artifact using box-drawing characters and arrows, no code. (2) Iterate — apply 1–2 specific changes and redraw the wireframe only. (3) Build — implement the artifact from the pasted wireframe and stack/requirements, matching the wireframe exactly. Artifacts: Dashboard, slides, workflows, schemas, landing pages (or short description).
@@ -603,6 +610,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | `scripts/build-holding-monthly-snapshots.py` | Build monthly snapshot per holding for Holding Snapshot dashboard | `python scripts/build-holding-monthly-snapshots.py --sheets` or `--file context/position-history-export.csv`; writes `context/holding-monthly-snapshots.json` |
 | `scripts/streamlit_holding_snapshot.py` | Streamlit Holding Snapshot section for page /a (copy or import into app) | `streamlit run scripts/streamlit_holding_snapshot.py` for standalone preview; see `reference/holding-snapshot-dashboard.md` |
 | `scripts/deploy-holding-snapshot-to-app.py` | Deploy Holding Snapshot to Streamlit app (copy fragment + JSON, inject into page /a) | `python scripts/deploy-holding-snapshot-to-app.py --app-dir "X:\path\to\streamlit-app"`; use `--snippet-only` to print paste snippet |
+| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist short-premium trade ideas and optional Telegram alert | `python3 scripts/trade_idea_generator.py --send-telegram` |
 
 **13F hardening:** CUSIP→ticker in `reference/cusip-to-ticker.json`; loader `scripts/cusip_loader.py`. Curated filers: `context/13f-filers.txt` (use with `ingest-13f.py --cik-list`). SEC ingest retries once on 403.
 
