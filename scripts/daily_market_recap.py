@@ -381,14 +381,25 @@ def fetch_earnings(report_date: str, api_key: str) -> list[dict[str, Any]]:
     us_style_rows = [
         row
         for row in rows
-        if is_us_style_symbol(str(row.get("symbol", "")))
+        if is_relevant_earnings_row(row)
     ]
     return (us_style_rows or rows)[:15]
+
+
+def is_relevant_earnings_row(row: dict[str, Any]) -> bool:
+    """Return True for a cleaner US-market earnings calendar row."""
+    symbol = str(row.get("symbol", ""))
+    has_schedule_detail = bool(
+        row.get("time") or row.get("epsEstimated") or row.get("revenueEstimated")
+    )
+    return has_schedule_detail and is_us_style_symbol(symbol)
 
 
 def is_us_style_symbol(symbol: str) -> bool:
     """Return True for common US ticker formats and False for dotted global symbols."""
     if not symbol or "." in symbol or any(char.isdigit() for char in symbol):
+        return False
+    if len(symbol) == 5 and symbol[-1] in {"F", "Y"}:
         return False
     allowed = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ-")
     return len(symbol) <= 7 and all(char in allowed for char in symbol)
