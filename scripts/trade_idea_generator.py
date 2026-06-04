@@ -155,9 +155,10 @@ def parse_watchlist() -> list[WatchlistItem]:
     return items
 
 
-def parse_short_premium_positions() -> list[ShortPremiumPosition]:
+def parse_short_premium_positions() -> tuple[list[ShortPremiumPosition], int]:
     text = read_text(OPTIONS_POSITIONS_FILE)
     positions: list[ShortPremiumPosition] = []
+    skipped_expired = 0
     in_table = False
 
     for line in text.splitlines():
@@ -177,6 +178,10 @@ def parse_short_premium_positions() -> list[ShortPremiumPosition]:
         contracts = parse_money(cells[6])
         if strike is None or credit is None or current is None or contracts is None:
             continue
+        dte = calc_dte(cells[3])
+        if dte is not None and dte < 0:
+            skipped_expired += 1
+            continue
         positions.append(
             ShortPremiumPosition(
                 ticker=cells[0].upper(),
@@ -189,7 +194,7 @@ def parse_short_premium_positions() -> list[ShortPremiumPosition]:
             )
         )
 
-    return positions
+    return positions, skipped_expired
 
 
 def extract_backticked_key(text: str, label: str) -> str | None:
@@ -793,6 +798,7 @@ def report_lines(
     call_ideas: list[dict[str, Any]],
     rejected: dict[str, list[str]],
     chain_errors: dict[str, str],
+    skipped_expired_positions: int,
 ) -> tuple[str, str]:
     option_notional = sum(p.strike * 100 * p.contracts for p in short_positions)
     option_notional_pct = option_notional / portfolio_value if portfolio_value else 0
@@ -818,6 +824,10 @@ def report_lines(
         msg.append("Position management:")
         for line in management[:3]:
             msg.append(f"- {line}")
+        msg.append("")
+    elif skipped_expired_positions:
+        msg.append("Position management:")
+        msg.append(f"- No active short-premium rows; skipped {skipped_expired_positions} expired context row(s).")
         msg.append("")
 
     msg.append("Top CSP candidates:")
@@ -871,6 +881,7 @@ def report_lines(
             f"- Option chains attempted: {len(option_symbols)} ({', '.join(option_symbols)})",
         f"- VIX regime: {vix:.2f} ({regime}), sizing multiplier {sizing_pct}%",
         f"- Current short-put notional: {money(option_notional)} ({pct(option_notional_pct * 100)} of portfolio)",
+        f"- Expired short-premium rows skipped: {skipped_expired_positions}",
         f"- Risk gate: {action_line}",
         "",
         "## Position Management Alerts",
@@ -878,7 +889,10 @@ def report_lines(
     ]
     md.extend(f"- {line}" for line in management)
     if not management:
-        md.append("- No short-premium positions found in context/options-positions.md.")
+        if skipped_expired_positions:
+            md.append(f"- No active short-premium positions found; skipped {skipped_expired_positions} expired row(s) from context/options-positions.md.")
+        else:
+            md.append("- No short-premium positions found in context/options-positions.md.")
 
     md.extend(["", "## Top CSP Candidates", ""])
     if csp_ideas:
@@ -959,7 +973,7 @@ def generate(max_options_tickers: int) -> tuple[str, str, Path, dict[str, Any]]:
     generated_at = datetime.now(timezone.utc)
     portfolio_value, holdings = parse_holdings()
     watchlist = parse_watchlist()
-    short_positions = parse_short_premium_positions()
+    short_positions, skipped_expired_positions = parse_short_premium_positions()
 
     holding_map = {h.symbol: h for h in holdings}
     watchlist_map = {w.symbol: w for w in watchlist}
@@ -1063,6 +1077,7 @@ def generate(max_options_tickers: int) -> tuple[str, str, Path, dict[str, Any]]:
         call_ideas=call_ideas,
         rejected=rejected,
         chain_errors=chain_errors,
+        skipped_expired_positions=skipped_expired_positions,
     )
 
     OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -1079,6 +1094,7 @@ def generate(max_options_tickers: int) -> tuple[str, str, Path, dict[str, Any]]:
         "covered_call_ideas": len(call_ideas),
         "rejections": len(rejected),
         "chain_errors": len(chain_errors),
+        "skipped_expired_positions": skipped_expired_positions,
     }
     return message, markdown, output_path, metadata
 
