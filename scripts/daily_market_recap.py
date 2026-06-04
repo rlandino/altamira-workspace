@@ -237,6 +237,7 @@ def sector_change(item: dict[str, Any]) -> float | None:
     for key in (
         "changesPercentage",
         "changePercentage",
+        "averageChange",
         "performance",
         "change",
         "changes",
@@ -314,7 +315,7 @@ def derive_index_context(
     quote: Quote | None, history: list[dict[str, Any]]
 ) -> dict[str, Any]:
     """Compute moving averages, support, resistance, and trend."""
-    closes = [as_float(row.get("close")) for row in history]
+    closes = [as_float(row.get("close") or row.get("price")) for row in history]
     closes = [value for value in closes if value is not None]
     highs = [as_float(row.get("high")) for row in history[-20:]]
     lows = [as_float(row.get("low")) for row in history[-20:]]
@@ -373,11 +374,24 @@ def fetch_earnings(report_date: str, api_key: str) -> list[dict[str, Any]]:
         return []
     if not isinstance(data, list):
         return []
-    rows = [row for row in data if isinstance(row, dict)]
-    return sorted(
-        rows,
+    rows = sorted(
+        [row for row in data if isinstance(row, dict)],
         key=lambda row: (str(row.get("date", "")), str(row.get("symbol", ""))),
-    )[:15]
+    )
+    us_style_rows = [
+        row
+        for row in rows
+        if is_us_style_symbol(str(row.get("symbol", "")))
+    ]
+    return (us_style_rows or rows)[:15]
+
+
+def is_us_style_symbol(symbol: str) -> bool:
+    """Return True for common US ticker formats and False for dotted global symbols."""
+    if not symbol or "." in symbol or any(char.isdigit() for char in symbol):
+        return False
+    allowed = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ-")
+    return len(symbol) <= 7 and all(char in allowed for char in symbol)
 
 
 def earnings_table(rows: list[dict[str, Any]]) -> str:
