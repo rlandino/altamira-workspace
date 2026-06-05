@@ -7,7 +7,7 @@ import argparse
 import json
 import os
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -164,8 +164,13 @@ def fetch_history(api_key: str, recap_date: str) -> list[dict[str, Any]]:
     try:
         rows = get_json(f"{FMP_STABLE}/historical-price-eod/light", params)
         if isinstance(rows, list):
+            normalized = []
+            for row in rows:
+                close = row.get("close", row.get("price"))
+                if row.get("date") and close is not None:
+                    normalized.append({**row, "close": close})
             return sorted(
-                [row for row in rows if row.get("date") and row.get("close") is not None],
+                normalized,
                 key=lambda row: str(row["date"]),
             )
     except requests.RequestException:
@@ -296,7 +301,7 @@ def report_for(
     report = f"""# Daily Market Recap - {recap_date}
 
 **Source:** Financial Modeling Prep.  
-**Generated:** {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+**Generated:** {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}
 
 ## Market indices
 
