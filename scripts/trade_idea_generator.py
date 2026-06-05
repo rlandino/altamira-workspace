@@ -207,6 +207,8 @@ def http_json(url: str, timeout: int = 25) -> Any:
         raise RuntimeError(f"HTTP {exc.code} for {url.split('?')[0]}: {detail}") from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(f"Network error for {url.split('?')[0]}: {exc.reason}") from exc
+    except TimeoutError as exc:
+        raise RuntimeError(f"Timeout for {url.split('?')[0]}") from exc
     return json.loads(payload)
 
 
