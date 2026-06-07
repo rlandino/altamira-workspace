@@ -817,6 +817,164 @@ def build_markdown_report(
     return "\n".join(lines)
 
 
+def top_static_holding_reviews(holdings: dict[str, Holding], limit: int = 5) -> list[Holding]:
+    eligible = [
+        holding
+        for holding in holdings.values()
+        if holding.ticker != "FFOLX" and SECTORS.get(holding.ticker) != "Fund" and holding.quantity >= 100
+    ]
+    eligible.sort(key=lambda holding: (holding.weight_pct, holding.pnl_pct or 0.0), reverse=True)
+    return eligible[:limit]
+
+
+def top_static_watchlist_reviews(watchlist: dict[str, WatchlistEntry], limit: int = 5) -> list[WatchlistEntry]:
+    eligible = [
+        entry
+        for entry in watchlist.values()
+        if entry.score is not None and entry.score >= 55 and "avoid" not in entry.status.lower()
+    ]
+    eligible.sort(key=lambda entry: entry.score or 0.0, reverse=True)
+    return eligible[:limit]
+
+
+def build_static_fallback_telegram_text(
+    report_date: date,
+    holdings: dict[str, Holding],
+    watchlist: dict[str, WatchlistEntry],
+    portfolio_value: float,
+    cash_pct: float,
+    reason: str,
+) -> str:
+    holding_reviews = top_static_holding_reviews(holdings, limit=4)
+    watch_reviews = top_static_watchlist_reviews(watchlist, limit=4)
+    lines = [
+        f"TRADE IDEA GENERATOR - {report_date.isoformat()}",
+        "Mode: static repository fallback",
+        f"Reason: {reason}",
+        f"Universe: {len(holdings)} portfolio holdings + {len(watchlist)} watchlist names",
+        f"Portfolio value: {fmt_money(portfolio_value)} | Cash: {cash_pct:.1f}%",
+        "",
+        "Portfolio holding reviews:",
+    ]
+
+    if holding_reviews:
+        for idx, holding in enumerate(holding_reviews, start=1):
+            pnl = f", P/L {holding.pnl_pct:.1f}%" if holding.pnl_pct is not None else ""
+            lines.append(
+                f"{idx}. {holding.ticker}: weight {holding.weight_pct:.1f}%, qty {holding.quantity:.0f}, "
+                f"context price {fmt_money(holding.current_price)}{pnl}. Review 30-45 DTE OTM covered-call "
+                "or trim only after live chain/liquidity check."
+            )
+    else:
+        lines.append("None: no holdings with 100+ shares passed the static review filter.")
+
+    lines.extend(["", "Watchlist CSP/entry reviews:"])
+    if watch_reviews:
+        for idx, entry in enumerate(watch_reviews, start=1):
+            lines.append(
+                f"{idx}. {entry.ticker} ({entry.grade}, score {entry.score:.1f}, {entry.status}): "
+                "review starter entry or CSP after live quote, valuation, earnings, and option-chain checks."
+            )
+    else:
+        lines.append("None: no watchlist names met the static score filter.")
+
+    cash_note = (
+        "Cash level is above the 15% reserve threshold, so CSP reviews may be considered after live validation."
+        if cash_pct >= 15
+        else "Cash level is below the 15% reserve threshold; avoid new CSP collateral until cash is rebuilt."
+    )
+    lines.extend(
+        [
+            "",
+            cash_note,
+            "",
+            "Risk note: live market-data credentials were unavailable, so no option contracts, premiums, "
+            "deltas, or earnings exclusions were verified.",
+            "Financial disclaimer: for informational purposes only; not investment advice.",
+        ]
+    )
+    return "\n".join(lines)[:3900]
+
+
+def build_static_fallback_report(
+    report_date: date,
+    portfolio_value: float,
+    cash_pct: float,
+    holdings: dict[str, Holding],
+    watchlist: dict[str, WatchlistEntry],
+    reason: str,
+    telegram_result: dict[str, Any] | None,
+) -> str:
+    holding_reviews = top_static_holding_reviews(holdings)
+    watch_reviews = top_static_watchlist_reviews(watchlist)
+    lines = [
+        f"# Trade Idea Generator - {report_date.isoformat()}",
+        "",
+        "Generated from `context/portfolio-details.md` and `context/watchlist.md`.",
+        "",
+        "## Summary",
+        "",
+        "- Mode: static repository fallback",
+        f"- Reason: {reason}",
+        f"- Portfolio value: {fmt_money(portfolio_value)}",
+        f"- Cash: {cash_pct:.1f}%",
+        f"- Universe: {len(holdings)} portfolio holdings + {len(watchlist)} watchlist names",
+        "",
+        "Live market-data credentials were unavailable, so this run does not include verified option contracts, "
+        "premiums, deltas, liquidity, or earnings exclusions. Treat every row below as a review queue, not a trade ticket.",
+        "",
+        "## Portfolio Holding Reviews",
+        "",
+    ]
+
+    if holding_reviews:
+        lines.append("| Rank | Ticker | Quantity | Context Price | Weight | P/L | Review |")
+        lines.append("|---:|---|---:|---:|---:|---:|---|")
+        for idx, holding in enumerate(holding_reviews, start=1):
+            pnl = f"{holding.pnl_pct:.1f}%" if holding.pnl_pct is not None else "n/a"
+            lines.append(
+                f"| {idx} | {holding.ticker} | {holding.quantity:.0f} | {fmt_money(holding.current_price)} | "
+                f"{holding.weight_pct:.1f}% | {pnl} | Review 30-45 DTE OTM covered-call or trim after live chain/liquidity check. |"
+            )
+    else:
+        lines.append("No holdings with 100+ shares passed the static review filter.")
+
+    lines.extend(["", "## Watchlist CSP / Entry Reviews", ""])
+    if watch_reviews:
+        lines.append("| Rank | Ticker | Grade | Score | Status | Review |")
+        lines.append("|---:|---|---|---:|---|---|")
+        for idx, entry in enumerate(watch_reviews, start=1):
+            lines.append(
+                f"| {idx} | {entry.ticker} | {entry.grade} | {entry.score:.1f} | {entry.status} | "
+                "Review starter entry or CSP after live quote, valuation, earnings, and option-chain checks. |"
+            )
+    else:
+        lines.append("No watchlist names met the static score filter.")
+
+    lines.extend(["", "## Delivery", ""])
+    if telegram_result:
+        lines.append(f"- Telegram sent: {telegram_result.get('ok')}")
+        result = telegram_result.get("result") or {}
+        if result:
+            lines.append(f"- Telegram message id: {result.get('message_id')}")
+            chat = result.get("chat") or {}
+            lines.append(f"- Telegram chat id: {chat.get('id')}")
+    else:
+        lines.append("- Telegram sent: false (dry run)")
+
+    lines.extend(
+        [
+            "",
+            "## Disclaimer",
+            "",
+            "This scan is for informational purposes only and is not investment advice or an order recommendation. "
+            "Verify live option chains, liquidity, earnings dates, position sizing, and portfolio risk limits before taking action.",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
 def send_telegram(token: str, chat_id: str, text: str) -> dict[str, Any]:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = urllib.parse.urlencode(
@@ -859,7 +1017,47 @@ def main() -> int:
     args = parser.parse_args()
 
     if not args.fmp_api_key:
-        raise SystemExit("Set FMP_API_KEY or pass --fmp-api-key.")
+        report_date = datetime.fromisoformat(args.date).date()
+        holdings, portfolio_value, cash_pct = parse_portfolio()
+        watchlist = parse_watchlist()
+        reason = "FMP_API_KEY was not set"
+        telegram_text = build_static_fallback_telegram_text(
+            report_date,
+            holdings,
+            watchlist,
+            portfolio_value,
+            cash_pct,
+            reason,
+        )
+
+        telegram_result = None
+        if args.send_telegram:
+            if not args.telegram_token:
+                raise SystemExit("Set TELEGRAM_BOT_TOKEN or pass --telegram-token to send Telegram.")
+            telegram_result = send_telegram(args.telegram_token, args.telegram_chat_id, telegram_text)
+
+        report = build_static_fallback_report(
+            report_date,
+            portfolio_value,
+            cash_pct,
+            holdings,
+            watchlist,
+            reason,
+            telegram_result,
+        )
+        OUTPUTS.mkdir(exist_ok=True)
+        output_path = OUTPUTS / f"trade-idea-generator-{report_date.isoformat()}.md"
+        output_path.write_text(report, encoding="utf-8")
+
+        print(telegram_text)
+        print()
+        print(f"Report written: {output_path.relative_to(WORKSPACE)}")
+        if telegram_result:
+            result = telegram_result.get("result") or {}
+            print(f"Telegram delivered: ok={telegram_result.get('ok')} message_id={result.get('message_id')}")
+        else:
+            print("Telegram delivered: false (dry run)")
+        return 0
 
     report_date = datetime.fromisoformat(args.date).date()
     holdings, portfolio_value, cash_pct = parse_portfolio()
