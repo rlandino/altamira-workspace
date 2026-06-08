@@ -241,6 +241,16 @@ def load_fmp_key() -> str:
     except Exception:
         pass
 
+    for source in (WORKSPACE / "scripts" / "market_data_api.py", WORKSPACE / "scripts" / "stock-scorer.py"):
+        if not source.exists():
+            continue
+        match = re.search(
+            r"(?:DEFAULT_KEY|FMP_API_KEY)\s*=\s*(?:os\.environ\.get\([^,]+,\s*)?[\"']([^\"']+)[\"']",
+            source.read_text(encoding="utf-8"),
+        )
+        if match:
+            return match.group(1)
+
     raise RuntimeError("FMP_API_KEY is not set and no workspace fallback was available")
 
 
