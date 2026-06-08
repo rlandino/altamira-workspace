@@ -17,7 +17,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -441,6 +441,13 @@ def dte_from_expiration(expiration: str) -> int:
         return 0
 
 
+def is_expired(expiration: str) -> bool:
+    try:
+        return datetime.strptime(expiration[:10], "%Y-%m-%d").date() < date.today()
+    except ValueError:
+        return False
+
+
 def has_earnings_conflict(next_earnings: str | None, expiration: str) -> bool:
     if not next_earnings:
         return False
@@ -484,7 +491,11 @@ def scan_options(
     end = date.today() + timedelta(days=60)
     ideas: list[TradeIdea] = []
     stats = {"put_contracts": 0, "call_contracts": 0, "tickers_with_options": 0}
-    existing_puts = {pos.symbol for pos in option_positions if pos.option_type.lower() == "put"}
+    existing_puts = {
+        pos.symbol
+        for pos in option_positions
+        if pos.option_type.lower() == "put" and not is_expired(pos.expiration)
+    }
 
     for symbol in symbols:
         context = contexts.get(symbol, MarketContext())
@@ -687,6 +698,26 @@ def fmt_delta(value: float | None) -> str:
     return "n/a" if value is None else f"{value:.2f}"
 
 
+def select_top_ideas(ideas: list[TradeIdea], limit: int) -> list[TradeIdea]:
+    """Pick the highest-scored ideas while avoiding a same-ticker top list."""
+    selected: list[TradeIdea] = []
+    used_tickers: set[str] = set()
+    for idea in ideas:
+        if idea.ticker in used_tickers:
+            continue
+        selected.append(idea)
+        used_tickers.add(idea.ticker)
+        if len(selected) >= limit:
+            return selected
+    for idea in ideas:
+        if idea in selected:
+            continue
+        selected.append(idea)
+        if len(selected) >= limit:
+            break
+    return selected
+
+
 def render_report(
     output_path: Path,
     holdings: dict[str, Holding],
@@ -701,8 +732,8 @@ def render_report(
     sizing_pct: int,
     telegram_status: str,
 ) -> str:
-    generated_at = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
-    top = ideas[:8]
+    generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    top = select_top_ideas(ideas, 8)
     lines = [
         f"# Trade Idea Generator - {date.today().isoformat()}",
         "",
@@ -803,13 +834,14 @@ def render_report(
     if option_positions:
         lines.extend(
             [
-                "| Ticker | Type | Expiration | Strike | Contracts |",
-                "|--------|------|------------|--------|-----------|",
+                "| Ticker | Type | Expiration | Strike | Contracts | Status |",
+                "|--------|------|------------|--------|-----------|--------|",
             ]
         )
         for pos in option_positions:
+            status = "Expired/stale in repo context" if is_expired(pos.expiration) else "Active per repo context"
             lines.append(
-                f"| {pos.symbol} | {pos.option_type} | {pos.expiration} | {fmt_money(pos.strike)} | {pos.contracts} |"
+                f"| {pos.symbol} | {pos.option_type} | {pos.expiration} | {fmt_money(pos.strike)} | {pos.contracts} | {status} |"
             )
     else:
         lines.append("No existing option positions found in context/options-positions.md.")
@@ -846,10 +878,11 @@ def build_telegram_message(
         f"VIX {vix:.1f} ({vix_regime}) | Sizing {sizing_pct}% | Universe {len(symbols)} tickers",
         "",
     ]
-    if not ideas:
+    top_ideas = select_top_ideas(ideas, 3)
+    if not top_ideas:
         lines.append("No qualifying options ideas passed today's filters.")
     else:
-        for idx, idea in enumerate(ideas[:3], start=1):
+        for idx, idea in enumerate(top_ideas, start=1):
             warn = f" Risk: {'; '.join(idea.warnings[:2])}" if idea.warnings else ""
             lines.extend(
                 [
