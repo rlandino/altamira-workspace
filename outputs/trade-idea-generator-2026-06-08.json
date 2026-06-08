@@ -1,0 +1,91 @@
+{
+  "date": "2026-06-08",
+  "idea_count": 584,
+  "report": "/workspace/outputs/trade-idea-generator-2026-06-08.md",
+  "stats": {
+    "call_contracts": 2172,
+    "put_contracts": 6644,
+    "tickers_with_options": 32
+  },
+  "telegram": {
+    "requested": true,
+    "sent": false,
+    "status": "not sent - TELEGRAM_CHAT_ID is not set and no unique chat could be inferred from bot updates"
+  },
+  "top_ideas": [
+    {
+      "credit": 5.6,
+      "expiration": "2026-07-17",
+      "score": 92.46,
+      "strategy": "CSP",
+      "strike": 105.0,
+      "ticker": "NOW"
+    },
+    {
+      "credit": 24.45,
+      "expiration": "2026-07-17",
+      "score": 89.4,
+      "strategy": "CSP",
+      "strike": 430.0,
+      "ticker": "AMAT"
+    },
+    {
+      "credit": 8.5,
+      "expiration": "2026-07-17",
+      "score": 86.64,
+      "strategy": "CSP",
+      "strike": 250.0,
+      "ticker": "PANW"
+    },
+    {
+      "credit": 12.45,
+      "expiration": "2026-07-02",
+      "score": 85.6,
+      "strategy": "CSP",
+      "strike": 400.0,
+      "ticker": "TSM"
+    },
+    {
+      "credit": 11.0,
+      "expiration": "2026-07-17",
+      "score": 85.3,
+      "strategy": "Covered Call",
+      "strike": 430.0,
+      "ticker": "AVGO"
+    }
+  ],
+  "universe": [
+    "SPY",
+    "AVGO",
+    "GOOGL",
+    "AMAT",
+    "MSFT",
+    "AMZN",
+    "AAPL",
+    "CRWD",
+    "COST",
+    "ABBV",
+    "V",
+    "GD",
+    "JPM",
+    "KMI",
+    "WM",
+    "QQQ",
+    "SPGI",
+    "NOW",
+    "NFLX",
+    "LRCX",
+    "NVDA",
+    "TSM",
+    "KLAC",
+    "ADBE",
+    "ASML",
+    "LLY",
+    "ACN",
+    "CRM",
+    "CDNS",
+    "ANET",
+    "PANW",
+    "MELI"
+  ]
+}
