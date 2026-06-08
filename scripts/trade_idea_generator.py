@@ -1019,7 +1019,7 @@ def run(args: argparse.Namespace) -> int:
                     "credit": idea.credit,
                     "score": round(idea.score, 2),
                 }
-                for idea in ideas[:5]
+                for idea in select_top_ideas(ideas, 5)
             ],
             "telegram": {"requested": bool(args.send), "sent": sent, "status": status},
             "stats": stats,
