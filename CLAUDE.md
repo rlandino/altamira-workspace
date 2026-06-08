@@ -37,6 +37,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── 0DTE-SPX-credit-spread-scanner.md # /0DTE-SPX-credit-spread-scanner — 0DTE SPX credit spread setup (Tastytrade-style)
 │   │   ├── analyze-ticker.md  # /analyze-ticker — financial ratio analysis
 │   │   ├── options-scan.md    # /options-scan — options chain scanning
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — portfolio/watchlist trade ideas + Telegram alert
 │   │   ├── portfolio-report.md # /portfolio-report — portfolio reports
 │   │   ├── paper-trade.md     # /paper-trade — log paper trades
 │   │   ├── client-report.md   # /client-report — client-facing portfolio reports
@@ -232,6 +233,14 @@ Example: `/moat GOOGL`
 Calculates five component scores (0-100 each) based on weighted financial metrics, combines into composite score, assigns letter grade (A+ to F), and identifies strengths/weaknesses. Scores all current portfolio holdings if no ticker provided, or evaluates new entrants before adding to portfolio. Outputs scoring reports to `outputs/`.
 
 Example: `/stockscore` (scores all holdings) or `/stockscore MSFT` (scores single ticker)
+
+### /trade-idea-generator
+
+**Purpose:** Generate daily trade ideas from the current portfolio and watchlist, write `outputs/trade-idea-generator-{DATE}.md`, and send a concise summary to Telegram when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are configured.
+
+Runs `python3 scripts/trade_idea_generator.py --send`. The scanner prioritizes current holdings and highest-scored watchlist names, fetches FMP quote/VIX/history/earnings data and Massive.com option snapshots, scores CSP and covered-call ideas, filters CSP ideas with earnings before expiration, and flags existing short-put exposure from `context/options-positions.md`.
+
+Example: `/trade-idea-generator` or `python3 scripts/trade_idea_generator.py --send --max-tickers 32`
 
 ### /pre-launch
 
@@ -586,6 +595,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
+| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist trade ideas, write a dated report, and optionally send Telegram summary | `python3 scripts/trade_idea_generator.py --send` (requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` or `--chat-id`) |
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
