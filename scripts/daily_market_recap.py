@@ -41,6 +41,12 @@ class MarketQuote:
     price: float | None
     change_pct: float | None
     change: float | None = None
+    avg_50: float | None = None
+    avg_200: float | None = None
+    day_low: float | None = None
+    day_high: float | None = None
+    year_low: float | None = None
+    year_high: float | None = None
 
 
 def request_json(url: str, params: dict[str, Any] | None = None) -> Any:
@@ -89,6 +95,12 @@ def quote_from_row(row: dict[str, Any], fallback_symbol: str) -> MarketQuote:
         price=as_float(row.get("price")),
         change_pct=as_float(row.get("changesPercentage") or row.get("changePercentage")),
         change=as_float(row.get("change")),
+        avg_50=as_float(row.get("priceAvg50")),
+        avg_200=as_float(row.get("priceAvg200")),
+        day_low=as_float(row.get("dayLow")),
+        day_high=as_float(row.get("dayHigh")),
+        year_low=as_float(row.get("yearLow")),
+        year_high=as_float(row.get("yearHigh")),
     )
 
 
@@ -336,7 +348,21 @@ def build_report(
     avg_5 = moving_average(history, 5)
     avg_20 = moving_average(history, 20)
     support, resistance = support_resistance(history)
-    trend = trend_label(spx.price if spx else None, avg_5, avg_20)
+    short_avg = avg_5 if avg_5 is not None else (spx.avg_50 if spx else None)
+    long_avg = avg_20 if avg_20 is not None else (spx.avg_200 if spx else None)
+    short_avg_label = "5-day average" if avg_5 is not None else "50-day average"
+    long_avg_label = "20-day average" if avg_20 is not None else "200-day average"
+    support_value = support
+    support_label = "20-day support"
+    if support_value is None and spx:
+        support_value = spx.day_low or spx.year_low
+        support_label = "Session support" if spx.day_low else "52-week support"
+    resistance_value = resistance
+    resistance_label = "20-day resistance"
+    if resistance_value is None and spx:
+        resistance_value = spx.day_high or spx.year_high
+        resistance_label = "Session resistance" if spx.day_high else "52-week resistance"
+    trend = trend_label(spx.price if spx else None, short_avg, long_avg)
     commentary = build_commentary(
         spx, nasdaq, dow, vix, best_sector, worst_sector, headlines
     )
@@ -412,10 +438,10 @@ def build_report(
 | Metric | Value |
 |---|---:|
 | Current level | {format_number(spx.price if spx else None)} |
-| 5-day average | {format_number(avg_5)} |
-| 20-day average | {format_number(avg_20)} |
-| 20-day support | {format_number(support)} |
-| 20-day resistance | {format_number(resistance)} |
+| {short_avg_label} | {format_number(short_avg)} |
+| {long_avg_label} | {format_number(long_avg)} |
+| {support_label} | {format_number(support_value)} |
+| {resistance_label} | {format_number(resistance_value)} |
 | Trend | {trend} |
 
 ## Earnings calendar - next 7 days
