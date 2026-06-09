@@ -96,6 +96,20 @@ def fetch_simple_list(api_key: str, path: str) -> list[dict[str, Any]]:
     return data if isinstance(data, list) else []
 
 
+def fetch_sector_snapshot(api_key: str, recap_date: date) -> list[dict[str, Any]]:
+    """Fetch the latest available sector snapshot, trying recent dates."""
+    for days_back in range(0, 8):
+        snapshot_date = recap_date - timedelta(days=days_back)
+        params = {"date": snapshot_date.isoformat(), "apikey": api_key}
+        try:
+            data = request_json(f"{FMP_STABLE}/sector-performance-snapshot", params)
+        except requests.RequestException:
+            continue
+        if isinstance(data, list) and data:
+            return data
+    return []
+
+
 def fetch_earnings(api_key: str, recap_date: date) -> list[dict[str, Any]]:
     end_date = recap_date + timedelta(days=7)
     params = {
@@ -429,7 +443,7 @@ def main() -> None:
     quotes = fetch_quotes(api_key)
     gainers = fetch_simple_list(api_key, "biggest-gainers")
     losers = fetch_simple_list(api_key, "biggest-losers")
-    sector_raw = fetch_simple_list(api_key, "sector-performance-snapshot")
+    sector_raw = fetch_sector_snapshot(api_key, recap_date)
     sectors = extract_sector_rows(sector_raw)
     earnings = fetch_earnings(api_key, recap_date)
     history = fetch_history(api_key, "^GSPC", recap_date)
