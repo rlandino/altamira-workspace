@@ -5,7 +5,7 @@ Generate the daily Altamira market recap, write a markdown report, and send both
 ## Usage
 
 ```bash
-python scripts/daily_market_recap.py
+python3 scripts/daily_market_recap.py
 ```
 
 Optional arguments:

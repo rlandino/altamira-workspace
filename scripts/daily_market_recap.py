@@ -17,6 +17,19 @@ WORKSPACE = Path(__file__).resolve().parent.parent
 OUTPUTS = WORKSPACE / "outputs"
 FMP_V3 = "https://financialmodelingprep.com/api/v3"
 FMP_STABLE = "https://financialmodelingprep.com/stable"
+SECTOR_ETFS = {
+    "XLK": "Technology",
+    "XLF": "Financials",
+    "XLV": "Health Care",
+    "XLY": "Consumer Discretionary",
+    "XLP": "Consumer Staples",
+    "XLE": "Energy",
+    "XLI": "Industrials",
+    "XLB": "Materials",
+    "XLU": "Utilities",
+    "XLRE": "Real Estate",
+    "XLC": "Communication Services",
+}
 
 
 @dataclass(frozen=True)
@@ -110,6 +123,28 @@ def fetch_sector_snapshot(api_key: str, recap_date: date) -> list[dict[str, Any]
     return []
 
 
+def fetch_sector_etf_snapshot(api_key: str) -> list[dict[str, Any]]:
+    """Fallback sector performance using liquid SPDR sector ETF quotes."""
+    symbols = ",".join(SECTOR_ETFS)
+    try:
+        data = request_json(f"{FMP_V3}/quote/{symbols}", {"apikey": api_key})
+    except requests.RequestException:
+        return []
+    rows = data if isinstance(data, list) else []
+    sectors: list[dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        symbol = str(row.get("symbol") or "")
+        sector = SECTOR_ETFS.get(symbol)
+        change_pct = as_float(row.get("changesPercentage") or row.get("changePercentage"))
+        if sector and change_pct is not None:
+            sectors.append(
+                {"sector": f"{sector} ({symbol})", "change_pct": change_pct}
+            )
+    return sectors
+
+
 def fetch_earnings(api_key: str, recap_date: date) -> list[dict[str, Any]]:
     end_date = recap_date + timedelta(days=7)
     params = {
@@ -129,8 +164,22 @@ def fetch_history(api_key: str, symbol: str, recap_date: date) -> list[dict[str,
         "to": recap_date.isoformat(),
         "apikey": api_key,
     }
-    data = request_json(f"{FMP_STABLE}/historical-price-eod/light", params)
-    rows = data if isinstance(data, list) else []
+    try:
+        data = request_json(f"{FMP_STABLE}/historical-price-eod/light", params)
+        rows = data if isinstance(data, list) else []
+    except requests.RequestException:
+        rows = []
+    if not rows:
+        v3_params = {
+            "from": start_date.isoformat(),
+            "to": recap_date.isoformat(),
+            "apikey": api_key,
+        }
+        try:
+            data = request_json(f"{FMP_V3}/historical-price-full/{symbol}", v3_params)
+            rows = data.get("historical", []) if isinstance(data, dict) else []
+        except requests.RequestException:
+            rows = []
     return sorted(
         [row for row in rows if isinstance(row, dict) and as_float(row.get("close"))],
         key=lambda row: str(row.get("date") or ""),
@@ -445,6 +494,8 @@ def main() -> None:
     losers = fetch_simple_list(api_key, "biggest-losers")
     sector_raw = fetch_sector_snapshot(api_key, recap_date)
     sectors = extract_sector_rows(sector_raw)
+    if not sectors:
+        sectors = fetch_sector_etf_snapshot(api_key)
     earnings = fetch_earnings(api_key, recap_date)
     history = fetch_history(api_key, "^GSPC", recap_date)
     headlines = fetch_general_news(api_key)

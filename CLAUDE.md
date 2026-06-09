@@ -593,7 +593,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `scripts/daily_market_recap.py` | Generate daily market recap markdown and send summary + report to Telegram | `python scripts/daily_market_recap.py` (requires `FMP_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` or `--chat-id`) |
+| `scripts/daily_market_recap.py` | Generate daily market recap markdown and send summary + report to Telegram | `python3 scripts/daily_market_recap.py` (requires `FMP_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` or `--chat-id`) |
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
