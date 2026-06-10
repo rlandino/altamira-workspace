@@ -119,8 +119,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--telegram-chat-id",
-        default=os.environ.get("TELEGRAM_CHAT_ID"),
-        help="Telegram chat id or @channel username. Defaults to TELEGRAM_CHAT_ID.",
+        default=None,
+        help=(
+            "Telegram chat id or @channel username. Defaults to TELEGRAM_CHAT_ID, "
+            "then a fixed chatId found in existing workflow exports."
+        ),
     )
     parser.add_argument(
         "--dry-run",
@@ -797,6 +800,25 @@ def send_telegram(message: str, chat_id: str) -> Dict[str, Any]:
         raise RuntimeError(f"Telegram send failed: {body}") from exc
 
 
+def discover_telegram_chat_id() -> Optional[str]:
+    env_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    if env_chat_id:
+        return env_chat_id
+
+    for path in sorted(OUTPUTS.glob("*.json")):
+        try:
+            data = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        for match in re.finditer(r'"chatId"\s*:\s*"([^"]+)"', data):
+            candidate = match.group(1).strip()
+            if candidate.startswith("=") and re.fullmatch(r"=-?\d+", candidate):
+                return candidate[1:]
+            if candidate and not candidate.startswith("=") and "TELEGRAM_CHAT_ID" not in candidate:
+                return candidate
+    return None
+
+
 def data_mode(api_key: Optional[str]) -> str:
     return "live FMP market data" if api_key else "context-only; FMP_API_KEY missing"
 
@@ -858,8 +880,9 @@ def main() -> int:
     print("\nTelegram preview:\n")
     print(telegram_message)
 
+    telegram_chat_id = args.telegram_chat_id or discover_telegram_chat_id()
     if args.send_telegram and not args.dry_run:
-        result = send_telegram(telegram_message, args.telegram_chat_id)
+        result = send_telegram(telegram_message, telegram_chat_id or "")
         message_id = result.get("result", {}).get("message_id")
         print(f"Telegram sent successfully; message_id={message_id}")
     elif args.send_telegram and args.dry_run:

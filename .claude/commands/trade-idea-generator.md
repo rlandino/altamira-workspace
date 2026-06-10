@@ -69,7 +69,8 @@ python3 scripts/trade_idea_generator.py --send-telegram --telegram-chat-id "$TEL
 Requirements:
 
 - `TELEGRAM_BOT_TOKEN` must be set.
-- `TELEGRAM_CHAT_ID` or `--telegram-chat-id` must identify the destination channel/chat.
+- `TELEGRAM_CHAT_ID` or `--telegram-chat-id` should identify the destination channel/chat.
+- If no chat id is provided, the script searches existing workflow exports for a fixed `chatId` value and uses that as a fallback.
 
 Use `--dry-run --send-telegram` to preview without sending.
 
