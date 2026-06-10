@@ -467,9 +467,9 @@ def main() -> int:
         return 1
 
     report_path, summary_path, summary = build_report(run_date)
-    print(summary)
-    print(f"Report: {report_path}")
-    print(f"Summary: {summary_path}")
+    print(summary, flush=True)
+    print(f"Report: {report_path}", flush=True)
+    print(f"Summary: {summary_path}", flush=True)
 
     if args.skip_telegram:
         print("Telegram delivery skipped by --skip-telegram.")
