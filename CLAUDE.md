@@ -435,6 +435,12 @@ Example: `/macro-tail-head-wind-scanner COST`
 
 Uses Market Data API (port 8001) or FMP for indices and VIX; presents levels and day change; writes a brief narrative. Fallback when Market Commenter workflow has not run.
 
+### /daily-market-recap
+
+**Purpose:** Generate a daily market recap markdown report and send both a concise summary and the markdown file to Telegram.
+
+Runs `python3 scripts/daily_market_recap.py`; writes `outputs/daily-market-recap-{DATE}.md` and `outputs/daily-market-recap-summary-{DATE}.txt`. Uses Yahoo Finance chart data by default, optional FMP enrichment when `FMP_API_KEY` is set, and requires `TELEGRAM_BOT_TOKEN` plus `TELEGRAM_CHAT_ID` for Telegram delivery.
+
 ### /briefing
 
 **Purpose:** Daily market briefing (Market Commenter style): indices, hot stock/biggest loser, sectors, SPY/QQQ/VIX, earnings calendar, index vs 5D/20D, support/resistance, trend, commentary, index chart.
@@ -588,6 +594,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
+| `scripts/daily_market_recap.py` | Generate daily market recap files and send summary + markdown report to Telegram | `python3 scripts/daily_market_recap.py` (requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` for delivery) |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
