@@ -12,7 +12,7 @@ import argparse
 import os
 import sys
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -323,7 +323,7 @@ def build_report(run_date: date) -> tuple[Path, Path, str]:
 
     report = f"""# Daily Market Recap - {run_date.isoformat()}
 
-**Generated:** {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}  
+**Generated:** {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}  
 **Data sources:** Yahoo Finance chart API; FMP enrichment {'enabled' if fmp_key else 'not configured'}
 
 > Informational market recap for Altamira Capital. Not investment advice.
