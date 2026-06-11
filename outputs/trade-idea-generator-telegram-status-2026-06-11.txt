@@ -1,0 +1,7 @@
+Generated report: outputs/trade-idea-generator-2026-06-11.md
+Generated JSON: outputs/trade-idea-generator-2026-06-11.json
+Telegram sent: ok
+Telegram message_id: 1225
+Telegram chat_id: 7830722515
+Sent at: 2026-06-11T10:04:25Z
+Notes: Ignored 5 expired short-premium rows from context/options-positions.md.
