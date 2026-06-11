@@ -1,0 +1,7 @@
+Telegram sent successfully
+Date: 2026-06-11
+Chat ID: 7830722515
+Message ID: 1226
+Report: outputs/trade-ideas-2026-06-11.md
+Data mode: context-only; FMP_API_KEY missing
+Expired static option rows skipped: 5
