@@ -1,0 +1,7 @@
+Telegram delivery succeeded.
+
+Date: 2026-06-12
+Chat ID: 7830722515
+Message ID: 1234
+Report: outputs/trade-idea-generator-2026-06-12.md
+JSON: outputs/trade-idea-generator-2026-06-12.json
