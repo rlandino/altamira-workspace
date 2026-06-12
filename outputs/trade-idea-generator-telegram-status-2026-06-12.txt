@@ -1,0 +1,17 @@
+Trade idea generator Telegram delivery status
+
+Date: 2026-06-12
+Report: outputs/trade-idea-generator-2026-06-12.md
+JSON: outputs/trade-idea-generator-2026-06-12.json
+Telegram: sent successfully
+Message ID: 1229
+Chat ID: 7830722515
+
+Run command:
+python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram --telegram-chat-id "${TELEGRAM_CHAT_ID:-7830722515}" --print-message
+
+Summary:
+- Market regime: NORMAL, VIX 18.55.
+- Top CSP watch: AAPL near $295.63; target 20-30 delta put, 30-45 DTE after chain check.
+- Covered-call/trim watch: AMAT at 12.6% portfolio weight.
+- Expired static short-premium rows ignored: 5.
