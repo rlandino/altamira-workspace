@@ -1,0 +1,74 @@
+# Trade Idea Generator - 2026-06-13
+
+Generated: 2026-06-13T14:03:04.566109+00:00
+
+## Executive Summary
+
+- **Market regime:** VIX 17.68 (NORMAL); Standard CSP/spread sizing is acceptable.
+- **Sizing:** Use 100% of normal premium-selling size based on the VIX regime.
+- **Universe:** 20 portfolio holdings, 26 watchlist names, 0 active short-premium positions.
+
+## Top Cash-Secured Put / Put-Spread Ideas
+
+| Rank | Ticker | Score | Price | 1D | RSI | 20D | Earnings | Suggested Action | Key Risks |
+|---:|---|---:|---:|---:|---:|---:|---|---|---|
+| 1 | LLY | 64.2 | $1,133.00 | -2.4% | 62 | +12.7% | 2026-08-05 | Review 20-30 delta put or defined-risk put spread, 30-45 DTE | None flagged |
+| 2 | TSM | 57.0 | $423.93 | +0.7% | 56 | +4.8% | 2026-07-16 | Review 20-30 delta put or defined-risk put spread, 30-45 DTE | earnings in 33 days (2026-07-16) |
+| 3 | LRCX | 54.4 | $366.81 | +1.2% | 69 | +28.8% | 2026-07-29 | Review 20-30 delta put or defined-risk put spread, 30-45 DTE | extended 20D move +28.8% |
+| 4 | NVDA | 54.0 | $205.19 | +0.2% | 42 | -8.9% | 2026-08-26 | Review 20-30 delta put or defined-risk put spread, 30-45 DTE | below 20-day trend |
+| 5 | MSFT | 48.0 | $390.74 | +0.1% | 39 | -7.4% | 2026-07-29 | Review 20-30 delta put or defined-risk put spread, 30-45 DTE | below 20-day trend |
+
+## Covered Call / Trim Watch
+
+| Rank | Ticker | Weight | Price | 1D | RSI | Rationale |
+|---:|---|---:|---:|---:|---:|---|
+| 1 | AMAT | 12.6% | $567.25 | +2.6% | 77 | 12.6% portfolio weight; RSI elevated at 77; 20D move +29.9%; up +2.6% today |
+| 2 | SPY | 17.1% | $741.75 | +0.5% | 47 | 17.1% portfolio weight |
+| 3 | AVGO | 16.7% | $382.07 | -0.9% | 43 | 16.7% portfolio weight |
+| 4 | GOOGL | 13.8% | $359.68 | +0.5% | 34 | 13.8% portfolio weight |
+| 5 | CRWD | 4.3% | $682.80 | -1.3% | 53 | 20D move +14.9% |
+
+## Existing Short-Premium Review
+
+| Ticker | Expiration | Strike | Credit | Current | Status |
+|---|---|---:|---:|---:|---|
+| - | - | - | - | - | No active rows after filtering expired static context |
+
+## Portfolio Risk Flags
+
+- Technology exposure is high at 45.4% across listed holdings.
+- SPY is above 15% single-name/ETF weight at 17.1%.
+- AVGO is above 15% single-name/ETF weight at 16.7%.
+
+## Telegram Message
+
+```text
+Altamira Trade Ideas - 2026-06-13
+Market: SPY +0.5% | QQQ +0.6% | VIX 17.68 (NORMAL)
+Sizing: 100% of standard premium-selling size. Standard CSP/spread sizing is acceptable.
+
+1) CSP watch: LLY near $1,133.00; target 20-30 delta put, 30-45 DTE after chain check.
+   Rationale: watchlist score 58.7 (C+); price above 20-day trend; RSI balanced at 62
+
+2) Covered-call/trim watch: AMAT at 12.6% weight.
+   Rationale: 12.6% portfolio weight; RSI elevated at 77; 20D move +29.9%
+
+Risk flags:
+- Technology exposure is high at 45.4% across listed holdings.
+- SPY is above 15% single-name/ETF weight at 17.1%.
+- AVGO is above 15% single-name/ETF weight at 16.7%.
+
+Static options note: ignored 5 expired short-premium rows from context/options-positions.md.
+
+Educational only - not financial advice. Verify quotes, greeks, liquidity, earnings, and order tickets before trading.
+```
+
+## Data Notes
+
+- Portfolio/watchlist positions are sourced from repository context files.
+- Live quotes and historical prices are sourced from FMP at runtime.
+- Option contracts are included only when the FMP options chain endpoint returns usable data.
+- Expired static short-premium rows skipped: 5.
+- Financial calculations are estimates for research and workflow triage only.
+
+> Disclaimer: This report is for educational and operational planning purposes only. It is not financial advice. Verify live quotes, greeks, liquidity, earnings dates, portfolio exposure, and order tickets before placing any trade.
