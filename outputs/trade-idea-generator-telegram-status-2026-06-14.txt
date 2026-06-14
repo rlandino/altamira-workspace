@@ -1,0 +1,7 @@
+Sent Altamira trade idea generator summary to Telegram.
+
+Date: 2026-06-14
+Chat ID: 7830722515
+Message ID: 1242
+Report: outputs/trade-idea-generator-2026-06-14.md
+JSON: outputs/trade-idea-generator-2026-06-14.json
