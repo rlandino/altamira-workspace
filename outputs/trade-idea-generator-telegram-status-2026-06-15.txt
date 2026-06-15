@@ -1,0 +1,8 @@
+generated_at_utc=2026-06-15T10:04:30.304086+00:00
+telegram_sent=true
+telegram_ok=true
+telegram_message_id=1244
+telegram_chat_id=7830722515
+report=outputs/trade-idea-generator-2026-06-15.md
+json=outputs/trade-idea-generator-2026-06-15.json
+command=python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram --telegram-chat-id 7830722515 --print-message
