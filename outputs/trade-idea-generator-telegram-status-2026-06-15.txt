@@ -1,0 +1,5 @@
+Telegram send ok: True
+message_id=1247
+chat_id=7830722515
+sent_at=2026-06-15T14:02:48Z
+report=outputs/trade-idea-generator-2026-06-15.md
