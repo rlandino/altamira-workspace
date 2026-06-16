@@ -209,6 +209,16 @@ def parse_float(value: str) -> float | None:
         return None
 
 
+def parse_parenthetical_percent(value: str) -> float | None:
+    match = re.search(r"\(([+-]?\d+(?:\.\d+)?)%\)", clean_cell(value))
+    if match:
+        try:
+            return float(match.group(1))
+        except ValueError:
+            return None
+    return parse_float(value)
+
+
 def split_markdown_row(line: str) -> list[str]:
     return [part.strip() for part in line.strip().strip("|").split("|")]
 
@@ -231,8 +241,6 @@ def parse_portfolio(path: Path) -> list[Holding]:
             if len(cells) < 9:
                 continue
             symbol = clean_cell(cells[0]).upper()
-            if symbol in EXCLUDED_SYMBOLS:
-                continue
             rows.append(
                 Holding(
                     symbol=symbol,
@@ -241,7 +249,7 @@ def parse_portfolio(path: Path) -> list[Holding]:
                     current_price=parse_float(cells[3]),
                     market_value=parse_float(cells[4]),
                     cost_basis=parse_float(cells[5]),
-                    pnl_pct=parse_float(cells[6]),
+                    pnl_pct=parse_parenthetical_percent(cells[6]),
                     weight_pct=parse_float(cells[8]),
                 )
             )
