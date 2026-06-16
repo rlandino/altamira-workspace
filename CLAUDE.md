@@ -73,6 +73,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── macro-tail-head-wind-scanner.md # /macro-tail-head-wind-scanner — macro tailwind/headwind by factor, net score, positioning
 │   │   ├── management-quality-evaluator.md # /management-quality-evaluator — management quality (capital allocation, compensation, insider, communication, strategy)
 │   │   ├── market-brief.md    # /market-brief — short market snapshot
+│   │   ├── daily-market-recap.md # /daily-market-recap — end-of-day recap with Telegram summary + markdown
 │   │   ├── briefing.md        # /briefing — daily market briefing (Market Commenter style)
 │   │   ├── speak.md          # /speak — TTS: speak text or briefing aloud / save MP3
 │   │   ├── sig-daily-theta-decay-calculator.md # /sig-daily-theta-decay-calculator — theta dashboard (position/portfolio theta, hourly decay, compounding)
@@ -435,6 +436,12 @@ Example: `/macro-tail-head-wind-scanner COST`
 
 Uses Market Data API (port 8001) or FMP for indices and VIX; presents levels and day change; writes a brief narrative. Fallback when Market Commenter workflow has not run.
 
+### /daily-market-recap
+
+**Purpose:** Generate the end-of-day market recap, write `outputs/daily-market-recap-{DATE}.md`, and optionally send both the summary and Markdown file to Telegram.
+
+Run `python3 scripts/daily_market_recap.py --send-telegram`; set `FMP_API_KEY` for market data when available and `TELEGRAM_BOT_TOKEN` plus `TELEGRAM_CHAT_ID` for delivery.
+
 ### /briefing
 
 **Purpose:** Daily market briefing (Market Commenter style): indices, hot stock/biggest loser, sectors, SPY/QQQ/VIX, earnings calendar, index vs 5D/20D, support/resistance, trend, commentary, index chart.
@@ -603,6 +610,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | `scripts/build-holding-monthly-snapshots.py` | Build monthly snapshot per holding for Holding Snapshot dashboard | `python scripts/build-holding-monthly-snapshots.py --sheets` or `--file context/position-history-export.csv`; writes `context/holding-monthly-snapshots.json` |
 | `scripts/streamlit_holding_snapshot.py` | Streamlit Holding Snapshot section for page /a (copy or import into app) | `streamlit run scripts/streamlit_holding_snapshot.py` for standalone preview; see `reference/holding-snapshot-dashboard.md` |
 | `scripts/deploy-holding-snapshot-to-app.py` | Deploy Holding Snapshot to Streamlit app (copy fragment + JSON, inject into page /a) | `python scripts/deploy-holding-snapshot-to-app.py --app-dir "X:\path\to\streamlit-app"`; use `--snippet-only` to print paste snippet |
+| `scripts/daily_market_recap.py` | Generate the daily market recap Markdown report and optionally send summary + file to Telegram | `python3 scripts/daily_market_recap.py --send-telegram` |
 
 **13F hardening:** CUSIP→ticker in `reference/cusip-to-ticker.json`; loader `scripts/cusip_loader.py`. Curated filers: `context/13f-filers.txt` (use with `ingest-13f.py --cik-list`). SEC ingest retries once on 403.
 
