@@ -41,6 +41,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── paper-trade.md     # /paper-trade — log paper trades
 │   │   ├── client-report.md   # /client-report — client-facing portfolio reports
 │   │   ├── thesis.md          # /thesis — investment thesis generator
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — daily portfolio/watchlist trade ideas with Telegram summary
 │   │   ├── moat.md            # /moat — economic moat analysis (Morningstar-style)
 │   │   ├── stockscore.md      # /stockscore — stock scoring system
 │   │   ├── pre-launch.md      # /pre-launch — paper trading readiness check
@@ -216,6 +217,14 @@ Example: `/client-report quarterly`
 Pulls 5 years of financials, runs DCF with sensitivity analysis, compares against sector peers, analyzes insider/institutional ownership, and produces a full publishable thesis document with bull/bear/base cases and Altamira fit assessment. Deeper than `/analyze-ticker`.
 
 Example: `/thesis AVGO`
+
+### /trade-idea-generator
+
+**Purpose:** Generate daily trade ideas from the current repository portfolio and watchlist, write an audit report, and optionally send the Telegram summary.
+
+Runs `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram`. Reads `context/portfolio-details.md`, `context/watchlist.md`, and `context/options-positions.md`; writes `outputs/trade-idea-generator-{DATE}.md` and `.json`. Requires Telegram credentials for delivery.
+
+Example: `/trade-idea-generator`
 
 ### /moat [TICKER]
 
