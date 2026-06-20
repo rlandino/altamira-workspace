@@ -37,6 +37,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── 0DTE-SPX-credit-spread-scanner.md # /0DTE-SPX-credit-spread-scanner — 0DTE SPX credit spread setup (Tastytrade-style)
 │   │   ├── analyze-ticker.md  # /analyze-ticker — financial ratio analysis
 │   │   ├── options-scan.md    # /options-scan — options chain scanning
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — portfolio/watchlist trade ideas + Telegram
 │   │   ├── portfolio-report.md # /portfolio-report — portfolio reports
 │   │   ├── paper-trade.md     # /paper-trade — log paper trades
 │   │   ├── client-report.md   # /client-report — client-facing portfolio reports
@@ -168,6 +169,14 @@ Example: `/analyze-ticker MSFT`
 Fetches real-time options chain, filters by delta/DTE/liquidity, and recommends CSP, covered call, bull put spread, and jade lizard strategies with position sizing. Outputs a scan report to `outputs/`.
 
 Example: `/options-scan AAPL`
+
+### /trade-idea-generator
+
+**Purpose:** Generate daily trade ideas from the existing portfolio and watchlist, write an audit report, and optionally send the Telegram summary.
+
+Runs `scripts/trade_idea_generator.py`, using `context/portfolio-details.md`, `context/watchlist.md`, and `context/options-positions.md`. Writes `outputs/trade-idea-generator-{DATE}.md` and `.json`; with `--send-telegram`, sends the concise summary to the configured Telegram channel.
+
+Example: `/trade-idea-generator` or `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram`
 
 ### /0DTE-SPX-credit-spread-scanner [optional date]
 
@@ -599,6 +608,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | `scripts/13f-backtest.py` | Backtest copycat/13F strategy (FMP prices) | `python scripts/13f-backtest.py --portfolio copycat.json --from YYYY-MM-DD --to YYYY-MM-DD` or `--cik CIK` |
 | **13F API (Option B)** | FastAPI bridge for dashboard (run scripts, return JSON, 5 min cache) | `pip install fastapi uvicorn` then `uvicorn scripts.13f_api:app --host 0.0.0.0 --port 8000` — base URL `http://localhost:8000/api/13f/` |
 | **Market Data API** | FastAPI bridge to FMP for dashboard (quotes, indices, earnings) | `uvicorn scripts.market_data_api:app --host 0.0.0.0 --port 8001` — base URL `http://localhost:8001/api/market/` (alt-dash-06) |
+| `scripts/trade_idea_generator.py` | Generate portfolio/watchlist trade ideas and optional Telegram summary | `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram` |
 | `scripts/streamlit_13f.py` | Streamlit 13F section for dashboard (copy or import into app; calls 13F API) | `streamlit run scripts/streamlit_13f.py` for standalone preview; see `reference/13f-dashboard-integration.md` |
 | `scripts/build-holding-monthly-snapshots.py` | Build monthly snapshot per holding for Holding Snapshot dashboard | `python scripts/build-holding-monthly-snapshots.py --sheets` or `--file context/position-history-export.csv`; writes `context/holding-monthly-snapshots.json` |
 | `scripts/streamlit_holding_snapshot.py` | Streamlit Holding Snapshot section for page /a (copy or import into app) | `streamlit run scripts/streamlit_holding_snapshot.py` for standalone preview; see `reference/holding-snapshot-dashboard.md` |
