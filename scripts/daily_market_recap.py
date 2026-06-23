@@ -196,10 +196,15 @@ def fetch_history(api_key: str, recap_date: str, symbol: str = "^GSPC") -> list[
         {"symbol": symbol, "from": start_date, "to": recap_date},
     )
     rows = data if isinstance(data, list) else []
-    return sorted(
-        [row for row in rows if isinstance(row, dict) and row.get("date") and row.get("close")],
-        key=lambda row: row["date"],
-    )
+    normalized_rows = []
+    for row in rows:
+        if not isinstance(row, dict) or not row.get("date"):
+            continue
+        close_value = row_value(row, "close", "adjClose", "price")
+        if close_value is None:
+            continue
+        normalized_rows.append({"date": row["date"], "close": close_value})
+    return sorted(normalized_rows, key=lambda row: row["date"])
 
 
 def average(values: list[float]) -> float | None:
