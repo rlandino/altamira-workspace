@@ -25,7 +25,20 @@ WORKSPACE = Path(__file__).resolve().parent.parent
 OUTPUTS = WORKSPACE / "outputs"
 FMP_V3 = "https://financialmodelingprep.com/api/v3"
 FMP_STABLE = "https://financialmodelingprep.com/stable"
-INDEX_SYMBOLS = "^GSPC,^DJI,^IXIC,^VIX,SPY,QQQ,DIA,IWM"
+INDEX_SYMBOLS = "^GSPC,^DJI,^IXIC,^VIX,SPY,QQQ,DIA,IWM,XLC,XLY,XLP,XLE,XLF,XLV,XLI,XLB,XLRE,XLK,XLU"
+SECTOR_ETFS = {
+    "XLC": "Communication Services",
+    "XLY": "Consumer Discretionary",
+    "XLP": "Consumer Staples",
+    "XLE": "Energy",
+    "XLF": "Financials",
+    "XLV": "Health Care",
+    "XLI": "Industrials",
+    "XLB": "Materials",
+    "XLRE": "Real Estate",
+    "XLK": "Technology",
+    "XLU": "Utilities",
+}
 
 
 @dataclass
@@ -158,14 +171,29 @@ def fetch_sector_snapshot(api_key: str, recap_date: str) -> tuple[dict[str, Any]
     return {}, {}, recap_date
 
 
-def fetch_history(api_key: str, recap_date: str) -> list[dict[str, Any]]:
+def sector_snapshot_from_etfs(quotes: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build sector leadership from sector ETF quote performance."""
+    scored = []
+    for symbol, sector_name in SECTOR_ETFS.items():
+        quote = quotes.get(symbol, {})
+        performance = parse_percent(row_value(quote, "changesPercentage", "changePercentage"))
+        if performance is None:
+            continue
+        scored.append((performance, {"sector": sector_name, "changesPercentage": performance, "proxy": symbol}))
+    if not scored:
+        return {}, {}
+    scored.sort(key=lambda item: item[0])
+    return scored[-1][1], scored[0][1]
+
+
+def fetch_history(api_key: str, recap_date: str, symbol: str = "^GSPC") -> list[dict[str, Any]]:
     end_date = datetime.strptime(recap_date, "%Y-%m-%d").date()
     start_date = (end_date - timedelta(days=45)).isoformat()
     data = fmp_get(
         FMP_STABLE,
         "/historical-price-eod/light",
         api_key,
-        {"symbol": "^GSPC", "from": start_date, "to": recap_date},
+        {"symbol": symbol, "from": start_date, "to": recap_date},
     )
     rows = data if isinstance(data, list) else []
     return sorted(
@@ -194,6 +222,7 @@ def technicals(history: list[dict[str, Any]], current_price: float | None) -> di
     else:
         trend = "Mixed"
     return {
+        "current": current_price,
         "sma_5": sma_5,
         "sma_20": sma_20,
         "support": support,
@@ -230,7 +259,13 @@ def earnings_rows(rows: Any, limit: int = 12) -> list[dict[str, Any]]:
     if not isinstance(rows, list):
         return []
     clean_rows = [row for row in rows if isinstance(row, dict)]
-    return sorted(clean_rows, key=lambda row: (row.get("date") or "", row.get("symbol") or ""))[:limit]
+    us_like_rows = []
+    for row in clean_rows:
+        symbol = str(row.get("symbol") or "")
+        if symbol.isalpha() and 1 <= len(symbol) <= 5:
+            us_like_rows.append(row)
+    selected_rows = us_like_rows or clean_rows
+    return sorted(selected_rows, key=lambda row: (row.get("date") or "", row.get("symbol") or ""))[:limit]
 
 
 def news_rows(rows: Any, limit: int = 5) -> list[dict[str, Any]]:
@@ -349,9 +384,11 @@ def build_report(
     else:
         news_block = "No broad-market headlines returned by FMP."
 
+    technical_label = technical.get("symbol", "S&P 500")
+    technical_current = technical.get("current") or row_value(spx, "price")
     commentary = (
         f"Markets are {direction} on the major index tape, with the S&P 500 "
-        f"{'above' if technical['sma_5'] and row_value(spx, 'price') and float(row_value(spx, 'price')) > technical['sma_5'] else 'near or below'} "
+        f"{'above' if technical['sma_5'] and technical_current and float(technical_current) > technical['sma_5'] else 'near or below'} "
         "its 5-day average. "
         f"Sector leadership is led by {best_sector_name}, while {worst_sector_name} is lagging. "
         f"VIX is {vix_state}, which keeps the risk backdrop "
@@ -387,10 +424,10 @@ def build_report(
 - Hot stock: **{hot_symbol}** ({fmt_pct(hot_change)})
 - Biggest loser: **{loser_symbol}** ({fmt_pct(loser_change)})
 
-## Technical Posture - S&P 500
+## Technical Posture - {technical_label}
 
 - Trend: **{technical["trend"]}**
-- Current level: {fmt_num(row_value(spx, "price"))}
+- Current level: {fmt_num(technical_current)}
 - 5-day average: {fmt_num(technical["sma_5"])}
 - 20-day average: {fmt_num(technical["sma_20"])}
 - 20-day resistance: {fmt_num(technical["resistance"])}
@@ -470,10 +507,19 @@ def generate_recap(args: argparse.Namespace) -> RecapResult:
     gainer = first_row(fmp_get(FMP_STABLE, "/biggest-gainers", args.fmp_api_key))
     loser = first_row(fmp_get(FMP_STABLE, "/biggest-losers", args.fmp_api_key))
     best_sector, worst_sector, sector_date = fetch_sector_snapshot(args.fmp_api_key, args.date)
-    history = fetch_history(args.fmp_api_key, args.date)
-    spx_price = row_value(quotes.get("^GSPC", {}), "price")
-    current_spx = float(spx_price) if spx_price is not None else None
-    technical = technicals(history, current_spx)
+    if not best_sector or not worst_sector:
+        best_sector, worst_sector = sector_snapshot_from_etfs(quotes)
+        sector_date = f"{args.date} ETF proxy quotes"
+    history = fetch_history(args.fmp_api_key, args.date, "^GSPC")
+    technical_symbol = "S&P 500"
+    technical_price = row_value(quotes.get("^GSPC", {}), "price")
+    if not history:
+        history = fetch_history(args.fmp_api_key, args.date, "SPY")
+        technical_symbol = "SPY proxy"
+        technical_price = row_value(quotes.get("SPY", {}), "price")
+    current_technical = float(technical_price) if technical_price is not None else None
+    technical = technicals(history, current_technical)
+    technical["symbol"] = technical_symbol
     try:
         headlines = news_rows(
             fmp_get(
