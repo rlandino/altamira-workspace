@@ -38,6 +38,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── analyze-ticker.md  # /analyze-ticker — financial ratio analysis
 │   │   ├── options-scan.md    # /options-scan — options chain scanning
 │   │   ├── portfolio-report.md # /portfolio-report — portfolio reports
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — portfolio/watchlist daily trade ideas with Telegram delivery
 │   │   ├── paper-trade.md     # /paper-trade — log paper trades
 │   │   ├── client-report.md   # /client-report — client-facing portfolio reports
 │   │   ├── thesis.md          # /thesis — investment thesis generator
@@ -192,6 +193,14 @@ Example: `/DE-shaw-iron-condor-income-machine SPY 500000 weekly` or `/DE-shaw-ir
 Types: `daily` (default), `weekly`, `monthly`, `holdings`. Covers market summary, watchlist performance, sector exposure, options landscape, risk dashboard, and action items. Outputs to `outputs/`.
 
 Example: `/portfolio-report weekly`
+
+### /trade-idea-generator
+
+**Purpose:** Generate daily trade ideas from the existing portfolio and watchlist, write `outputs/trade-idea-generator-{DATE}.md` and `.json`, and optionally send the Telegram summary.
+
+Runs `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram`. Inputs are `context/portfolio-details.md`, `context/watchlist.md`, and `context/options-positions.md`.
+
+Example: `/trade-idea-generator`
 
 ### /paper-trade [details]
 
