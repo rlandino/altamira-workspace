@@ -429,6 +429,14 @@ Uses FMP (profile, quote, income, balance sheet, cash flow, key metrics, ratios,
 
 Example: `/macro-tail-head-wind-scanner COST`
 
+### /daily-market-recap
+
+**Purpose:** Generate the daily market recap, write a Markdown report, and send both the summary and Markdown file to the configured Telegram channel.
+
+Runs `scripts/daily_market_recap.py`, using FMP for index, volatility, sector, movers, headline, and earnings data. Writes `outputs/daily-market-recap-{DATE}.md`; use `--send-telegram` with `TELEGRAM_BOT_TOKEN` / `TELEGRAM_API_TOKEN` and `TELEGRAM_CHAT_ID` configured, or pass `--telegram-chat-id`.
+
+Example: `/daily-market-recap`
+
 ### /market-brief
 
 **Purpose:** Short market snapshot (indices, VIX, one- to two-sentence narrative).
@@ -588,6 +596,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
+| `scripts/daily_market_recap.py` | Generate daily market recap markdown and optionally send summary/document to Telegram | `python3 scripts/daily_market_recap.py --send-telegram` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
