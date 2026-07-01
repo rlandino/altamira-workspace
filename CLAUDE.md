@@ -84,6 +84,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── short-thesis-generator.md # /short-thesis-generator — short-side thesis (bull case, pillars, catalysts, downside)
 │   │   ├── global-macro-event-trader.md  # /global-macro-event-trader — Soros-style event-driven macro analysis
 │   │   ├── distressed-debt-opportunity-finder.md  # /distressed-debt-opportunity-finder — Appaloosa-style distressed credit analysis
+│   │   ├── trade-idea-generator.md  # /trade-idea-generator — daily portfolio/watchlist trade ideas with Telegram delivery
 │   │   ├── portfolio-construction-optimizer.md  # /portfolio-construction-optimizer — Citadel-style portfolio construction framework
 │   │   ├── risk-adjusted-portfolio-builder.md   # /risk-adjusted-portfolio-builder — risk-adjusted build from watchlist (Kelly, correlation, tiers, stress test)
 │   │   └── hedgefund-quantitative-analyzer.md  # /hedgefund-quantitative-analyzer — Renaissance-style factor decomposition
@@ -503,6 +504,14 @@ Uses FMP (balance sheet, income statement, cash flow, key-metrics, ratios, profi
 
 Example: `/distressed-debt-opportunity-finder Revlon` or `/distressed-debt-opportunity-finder WBA`
 
+### /trade-idea-generator
+
+**Purpose:** Generate daily trade ideas from the current portfolio and watchlist context, write an audit report, and optionally send a concise Telegram summary.
+
+Runs `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram`. Reads `context/portfolio-details.md`, `context/watchlist.md`, and `context/options-positions.md`; writes `outputs/trade-idea-generator-{DATE}.md` and `.json`. Uses FMP for live quote/history data and Telegram env vars for delivery.
+
+Example: `/trade-idea-generator`
+
 ### /portfolio-construction-optimizer [POSITIONS WITH CONVICTION AND THESIS | current]
 
 **Purpose:** Citadel-style portfolio construction: position sizing by conviction and risk, Kelly Criterion, correlation-aware allocation, risk budget, gross/net exposure, concentration limits, liquidity-adjusted sizing, 5-regime stress test, rebalancing triggers, and performance attribution framework.
@@ -589,6 +598,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
+| `scripts/trade_idea_generator.py` | Generate daily portfolio/watchlist trade ideas and optionally send Telegram summary | `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
 | `scripts/13f-holdings-diff.py` | Compare 13F holdings between two periods (new buys, sells, increased/decreased) | `python scripts/13f-holdings-diff.py --cik CIK --prior YYYY-MM-DD --current YYYY-MM-DD` (optional `--out report.md`, `--json-out diff.json`) |
