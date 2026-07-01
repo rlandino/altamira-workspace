@@ -73,6 +73,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── macro-tail-head-wind-scanner.md # /macro-tail-head-wind-scanner — macro tailwind/headwind by factor, net score, positioning
 │   │   ├── management-quality-evaluator.md # /management-quality-evaluator — management quality (capital allocation, compensation, insider, communication, strategy)
 │   │   ├── market-brief.md    # /market-brief — short market snapshot
+│   │   ├── daily-market-recap.md # /daily-market-recap — daily market recap with Telegram delivery
 │   │   ├── briefing.md        # /briefing — daily market briefing (Market Commenter style)
 │   │   ├── speak.md          # /speak — TTS: speak text or briefing aloud / save MP3
 │   │   ├── sig-daily-theta-decay-calculator.md # /sig-daily-theta-decay-calculator — theta dashboard (position/portfolio theta, hourly decay, compounding)
@@ -434,6 +435,14 @@ Example: `/macro-tail-head-wind-scanner COST`
 **Purpose:** Short market snapshot (indices, VIX, one- to two-sentence narrative).
 
 Uses Market Data API (port 8001) or FMP for indices and VIX; presents levels and day change; writes a brief narrative. Fallback when Market Commenter workflow has not run.
+
+### /daily-market-recap
+
+**Purpose:** Generate the daily market recap and send both a concise summary and the Markdown file to Telegram.
+
+Runs `scripts/daily_market_recap.py`, using FMP for index, volatility, sector, movers, headline, and earnings data. Writes `outputs/daily-market-recap-{DATE}.md`; use `--send-telegram` with `TELEGRAM_BOT_TOKEN` / `TELEGRAM_API_TOKEN` and `TELEGRAM_CHAT_ID` configured, or pass `--telegram-chat-id`.
+
+Example: `/daily-market-recap`
 
 ### /briefing
 
