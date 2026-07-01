@@ -429,6 +429,14 @@ Uses FMP (profile, quote, income, balance sheet, cash flow, key metrics, ratios,
 
 Example: `/macro-tail-head-wind-scanner COST`
 
+### /daily-market-recap
+
+**Purpose:** Generate the daily market recap, write a Markdown report, and send both the summary and Markdown file to the configured Telegram channel.
+
+Runs `scripts/daily_market_recap.py`, using FMP for index, volatility, sector, movers, headline, and earnings data. Writes `outputs/daily-market-recap-{DATE}.md`; use `--send-telegram` with `TELEGRAM_BOT_TOKEN` / `TELEGRAM_API_TOKEN` and `TELEGRAM_CHAT_ID` configured, or pass `--telegram-chat-id`.
+
+Example: `/daily-market-recap`
+
 ### /market-brief
 
 **Purpose:** Short market snapshot (indices, VIX, one- to two-sentence narrative).
