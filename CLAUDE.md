@@ -74,6 +74,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── management-quality-evaluator.md # /management-quality-evaluator — management quality (capital allocation, compensation, insider, communication, strategy)
 │   │   ├── market-brief.md    # /market-brief — short market snapshot
 │   │   ├── briefing.md        # /briefing — daily market briefing (Market Commenter style)
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — portfolio/watchlist trade ideas with Telegram delivery
 │   │   ├── speak.md          # /speak — TTS: speak text or briefing aloud / save MP3
 │   │   ├── sig-daily-theta-decay-calculator.md # /sig-daily-theta-decay-calculator — theta dashboard (position/portfolio theta, hourly decay, compounding)
 │   │   ├── activist-investor-analyzer.md  # /activist-investor-analyzer — Pershing Square-style activist situation analysis
@@ -168,6 +169,14 @@ Example: `/analyze-ticker MSFT`
 Fetches real-time options chain, filters by delta/DTE/liquidity, and recommends CSP, covered call, bull put spread, and jade lizard strategies with position sizing. Outputs a scan report to `outputs/`.
 
 Example: `/options-scan AAPL`
+
+### /trade-idea-generator
+
+**Purpose:** Generate daily trade ideas from the current portfolio and watchlist context, write an audit report, and optionally send the concise summary to Telegram.
+
+Reads `context/portfolio-details.md`, `context/watchlist.md`, and `context/options-positions.md`; fetches live FMP quote/history data when available; ranks CSP/put-spread candidates, covered-call/trim candidates, and active short-premium reviews. Writes `outputs/trade-idea-generator-{DATE}.md` and `.json`.
+
+Example: `/trade-idea-generator` or `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram`
 
 ### /0DTE-SPX-credit-spread-scanner [optional date]
 
