@@ -435,6 +435,12 @@ Example: `/macro-tail-head-wind-scanner COST`
 
 Uses Market Data API (port 8001) or FMP for indices and VIX; presents levels and day change; writes a brief narrative. Fallback when Market Commenter workflow has not run.
 
+### /daily-market-recap
+
+**Purpose:** Generate Altamira Capital's daily market recap, write a Markdown report, and send both the short summary and Markdown file to the configured Telegram channel.
+
+Runs `python3 scripts/daily_market_recap.py --send-telegram`; uses FMP quotes, movers, sector snapshot with sector ETF fallback, headlines, and earnings calendar. Writes `outputs/daily-market-recap-{DATE}.md`. Telegram delivery uses `TELEGRAM_BOT_TOKEN` or `TELEGRAM_API_TOKEN` and `TELEGRAM_CHAT_ID` unless a chat ID/token override is provided.
+
 ### /briefing
 
 **Purpose:** Daily market briefing (Market Commenter style): indices, hot stock/biggest loser, sectors, SPY/QQQ/VIX, earnings calendar, index vs 5D/20D, support/resistance, trend, commentary, index chart.
@@ -599,6 +605,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 | `scripts/13f-backtest.py` | Backtest copycat/13F strategy (FMP prices) | `python scripts/13f-backtest.py --portfolio copycat.json --from YYYY-MM-DD --to YYYY-MM-DD` or `--cik CIK` |
 | **13F API (Option B)** | FastAPI bridge for dashboard (run scripts, return JSON, 5 min cache) | `pip install fastapi uvicorn` then `uvicorn scripts.13f_api:app --host 0.0.0.0 --port 8000` — base URL `http://localhost:8000/api/13f/` |
 | **Market Data API** | FastAPI bridge to FMP for dashboard (quotes, indices, earnings) | `uvicorn scripts.market_data_api:app --host 0.0.0.0 --port 8001` — base URL `http://localhost:8001/api/market/` (alt-dash-06) |
+| `scripts/daily_market_recap.py` | Generate daily market recap Markdown and optionally send summary + file to Telegram | `python3 scripts/daily_market_recap.py --send-telegram --telegram-chat-id CHAT_ID` |
 | `scripts/streamlit_13f.py` | Streamlit 13F section for dashboard (copy or import into app; calls 13F API) | `streamlit run scripts/streamlit_13f.py` for standalone preview; see `reference/13f-dashboard-integration.md` |
 | `scripts/build-holding-monthly-snapshots.py` | Build monthly snapshot per holding for Holding Snapshot dashboard | `python scripts/build-holding-monthly-snapshots.py --sheets` or `--file context/position-history-export.csv`; writes `context/holding-monthly-snapshots.json` |
 | `scripts/streamlit_holding_snapshot.py` | Streamlit Holding Snapshot section for page /a (copy or import into app) | `streamlit run scripts/streamlit_holding_snapshot.py` for standalone preview; see `reference/holding-snapshot-dashboard.md` |
