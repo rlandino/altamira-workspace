@@ -435,6 +435,12 @@ Example: `/macro-tail-head-wind-scanner COST`
 
 Uses Market Data API (port 8001) or FMP for indices and VIX; presents levels and day change; writes a brief narrative. Fallback when Market Commenter workflow has not run.
 
+### /daily-market-recap
+
+**Purpose:** Generate Altamira Capital's daily market recap, write `outputs/daily-market-recap-{DATE}.md`, and send both a short summary and the Markdown file to the configured Telegram channel.
+
+Runs `python3 scripts/daily_market_recap.py --send-telegram`. Uses FMP for indices, movers, sectors, headlines, and upcoming earnings; falls back to sector ETF proxies when sector snapshot data is unavailable.
+
 ### /briefing
 
 **Purpose:** Daily market briefing (Market Commenter style): indices, hot stock/biggest loser, sectors, SPY/QQQ/VIX, earnings calendar, index vs 5D/20D, support/resistance, trend, commentary, index chart.
