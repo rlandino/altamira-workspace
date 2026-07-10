@@ -37,6 +37,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── 0DTE-SPX-credit-spread-scanner.md # /0DTE-SPX-credit-spread-scanner — 0DTE SPX credit spread setup (Tastytrade-style)
 │   │   ├── analyze-ticker.md  # /analyze-ticker — financial ratio analysis
 │   │   ├── options-scan.md    # /options-scan — options chain scanning
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — daily portfolio/watchlist trade ideas + Telegram
 │   │   ├── portfolio-report.md # /portfolio-report — portfolio reports
 │   │   ├── paper-trade.md     # /paper-trade — log paper trades
 │   │   ├── client-report.md   # /client-report — client-facing portfolio reports
@@ -168,6 +169,14 @@ Example: `/analyze-ticker MSFT`
 Fetches real-time options chain, filters by delta/DTE/liquidity, and recommends CSP, covered call, bull put spread, and jade lizard strategies with position sizing. Outputs a scan report to `outputs/`.
 
 Example: `/options-scan AAPL`
+
+### /trade-idea-generator
+
+**Purpose:** Generate daily trade ideas from the current repository portfolio and watchlist, write an audit report, and optionally send the Telegram-ready summary to the configured Telegram channel.
+
+Reads `context/portfolio-details.md`, `context/watchlist.md`, and `context/options-positions.md`; fetches live FMP market data when available; filters expired static option rows; ranks CSP/put-spread and covered-call/trim candidates; writes `outputs/trade-idea-generator-{DATE}.md` and `.json`; and can send with `--send-telegram`.
+
+Example: `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram`
 
 ### /0DTE-SPX-credit-spread-scanner [optional date]
 
