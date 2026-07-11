@@ -43,6 +43,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   │   ├── thesis.md          # /thesis — investment thesis generator
 │   │   ├── moat.md            # /moat — economic moat analysis (Morningstar-style)
 │   │   ├── stockscore.md      # /stockscore — stock scoring system
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — daily portfolio/watchlist trade ideas with Telegram summary
 │   │   ├── pre-launch.md      # /pre-launch — paper trading readiness check
 │   │   ├── backtest.md        # /backtest — strategy backtests
 │   │   ├── risk-check.md      # /risk-check — portfolio risk limit validation
@@ -232,6 +233,14 @@ Example: `/moat GOOGL`
 Calculates five component scores (0-100 each) based on weighted financial metrics, combines into composite score, assigns letter grade (A+ to F), and identifies strengths/weaknesses. Scores all current portfolio holdings if no ticker provided, or evaluates new entrants before adding to portfolio. Outputs scoring reports to `outputs/`.
 
 Example: `/stockscore` (scores all holdings) or `/stockscore MSFT` (scores single ticker)
+
+### /trade-idea-generator
+
+**Purpose:** Generate daily actionable trade ideas from the current portfolio and watchlist, including cash-secured put/put-spread candidates, covered-call or trim candidates, existing short-premium reviews, VIX-adjusted sizing, and a Telegram-ready summary.
+
+Runs `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram`; writes `outputs/trade-idea-generator-{DATE}.md` and `outputs/trade-idea-generator-{DATE}.json`, and sends Telegram when credentials are available.
+
+Example: `/trade-idea-generator`
 
 ### /pre-launch
 
@@ -588,6 +597,7 @@ Google Sheets setup: `outputs/paper-trading-workbook.gs` — paste into Apps Scr
 |--------|---------|-------|
 | `scripts/backtest-strategies.py` | Run backtests for CSP, momentum, and hedging strategies | `python scripts/backtest-strategies.py` |
 | `scripts/pre-launch-check.py` | Validate all paper trading prerequisites before Mar 1 launch | `python scripts/pre-launch-check.py` |
+| `scripts/trade_idea_generator.py` | Generate daily trade ideas from portfolio/watchlist context and optionally send Telegram summary | `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram` |
 | `scripts/deploy-csp-workflow-to-n8n.py` | Deploy CSP Daily Scan workflow to n8n cloud via REST API | Set `N8N_API_KEY` (and optional `N8N_API_URL`), then `python scripts/deploy-csp-workflow-to-n8n.py` |
 | `scripts/ingest-13f.py` | Ingest SEC 13F-HR filings into JSON (EDGAR or sample) | `python scripts/ingest-13f.py --cik 1067983` or `--sample`; set `SEC_EDGAR_USER_AGENT` if 403 |
 | `scripts/query-13f.py` | Query ingested 13F JSON by filer, period, CUSIP | `python scripts/query-13f.py --list` or `--cik X --period Y` |
