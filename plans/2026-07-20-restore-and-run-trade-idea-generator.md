@@ -1,7 +1,7 @@
 # Plan: Restore and Run the Trade Idea Generator
 
 **Created:** 2026-07-20
-**Status:** In Progress
+**Status:** Complete
 **Request:** Execute the repository's portfolio/watchlist trade idea generator and deliver the result to Telegram.
 
 ---
@@ -138,11 +138,11 @@ This restores an existing daily workflow without changing unrelated commands.
 
 ## Validation Checklist
 
-- [ ] Script compiles and `--help` succeeds.
-- [ ] Generator writes today's Markdown and JSON outputs.
-- [ ] Expired static option rows are excluded and disclosed.
-- [ ] Telegram delivery returns a successful message identifier.
-- [ ] Changes are committed and pushed on the designated branch.
+- [x] Script compiles and `--help` succeeds.
+- [x] Generator writes today's Markdown and JSON outputs.
+- [x] Expired static option rows are excluded and disclosed.
+- [x] Telegram delivery returns a successful message identifier (`1445`).
+- [x] Changes are committed and pushed on the designated branch.
 
 ---
 
