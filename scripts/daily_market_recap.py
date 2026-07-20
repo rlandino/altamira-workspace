@@ -203,18 +203,38 @@ def pick_first_mover(path: str) -> dict[str, Any] | None:
     data = get_json(FMP_STABLE, path)
     if not isinstance(data, list) or not data:
         return None
-    row = data[0]
-    symbol = row.get("symbol") or row.get("ticker") or "N/A"
-    return {
-        "symbol": symbol,
-        "name": row.get("name") or row.get("companyName") or symbol,
-        "change_pct": as_float(
+    for row in data:
+        if not isinstance(row, dict):
+            continue
+        symbol = row.get("symbol") or row.get("ticker") or "N/A"
+        name = str(row.get("name") or row.get("companyName") or symbol)
+        change_pct = as_float(
             row.get("changesPercentage")
             if row.get("changesPercentage") is not None
             else row.get("changePercentage")
-        ),
-        "price": as_float(row.get("price")),
-    }
+        )
+        if not is_eligible_mover(row, name, change_pct):
+            continue
+        return {
+            "symbol": symbol,
+            "name": name,
+            "change_pct": change_pct,
+            "price": as_float(row.get("price")),
+        }
+    return None
+
+
+def is_eligible_mover(
+    row: dict[str, Any], name: str, change_pct: float | None
+) -> bool:
+    """Exclude non-stock instruments and obvious split/data anomalies."""
+    normalized_name = name.lower()
+    excluded_name_terms = (" etf", " etn", " warrant", " right", " unit")
+    if str(row.get("exchange") or "").upper() == "INDEX":
+        return False
+    if any(term in normalized_name for term in excluded_name_terms):
+        return False
+    return change_pct is not None and abs(change_pct) <= 500
 
 
 def parse_sector_snapshot(data: Any) -> list[dict[str, Any]]:
