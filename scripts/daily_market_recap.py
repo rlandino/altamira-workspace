@@ -344,6 +344,8 @@ def earnings_sort_key(row: dict[str, Any]) -> tuple[str, int, float, str]:
 def is_us_style_symbol(symbol: str) -> bool:
     if not symbol or "." in symbol or symbol[0].isdigit():
         return False
+    if "-P" in symbol:
+        return False
     normalized = symbol.replace("-", "").replace("/", "")
     if not normalized.isalnum() or not any(char.isalpha() for char in normalized):
         return False
@@ -394,6 +396,24 @@ def describe_market_direction(spx_change: float | None, nasdaq_change: float | N
     if all(value < -0.15 for value in changes):
         return "lower"
     return "mixed"
+
+
+def market_session_context(report_date: str) -> tuple[str, str]:
+    """Return a summary timestamp and direction verb appropriate for US hours."""
+    if ZoneInfo is None:
+        return "", "finished"
+
+    now_et = datetime.now(ZoneInfo("America/New_York"))
+    if datetime.fromisoformat(report_date).date() != now_et.date():
+        return "", "finished"
+
+    minute_of_day = now_et.hour * 60 + now_et.minute
+    timestamp = now_et.strftime("%-I:%M %p ET")
+    if minute_of_day < 9 * 60 + 30:
+        return f" (pre-market as of {timestamp})", "are indicating"
+    if minute_of_day < 16 * 60:
+        return f" (intraday as of {timestamp})", "are trading"
+    return f" (after close as of {timestamp})", "finished"
 
 
 def top_news_lines(news: list[dict[str, Any]], limit: int = 5) -> list[str]:
@@ -462,9 +482,11 @@ def build_recap(report_date: str) -> tuple[str, str]:
     best_sector = max(sectors, key=lambda row: row["change_pct"]) if sectors else None
     worst_sector = min(sectors, key=lambda row: row["change_pct"]) if sectors else None
     direction = describe_market_direction(spx.get("change_pct"), nasdaq.get("change_pct"))
+    session_suffix, direction_verb = market_session_context(report_date)
 
     summary = (
-        f"Daily Market Recap {report_date}: S&P 500 {fmt_pct(spx.get('change_pct'))} "
+        f"Daily Market Recap {report_date}{session_suffix}: "
+        f"S&P 500 {fmt_pct(spx.get('change_pct'))} "
         f"at {fmt_num(spx_price)}, Nasdaq {fmt_pct(nasdaq.get('change_pct'))}; "
         f"trend {trend}, VIX {fmt_num(vix.get('price'))} ({vix_context})."
     )
@@ -550,7 +572,7 @@ def build_recap(report_date: str) -> tuple[str, str]:
             "## Market Drivers",
             "",
             (
-                f"Markets finished {direction} based on the S&P 500 and Nasdaq moves. "
+                f"Markets {direction_verb} {direction} based on the S&P 500 and Nasdaq moves. "
                 "Use the headlines below as context for possible drivers; avoid "
                 "over-attributing price action without direct confirmation."
             ),
