@@ -1,0 +1,276 @@
+{
+  "generatedAt": "2026-07-24T10:03:44.313143+00:00",
+  "market": {
+    "spyChangePct": -1.23493,
+    "qqqChangePct": -1.89835,
+    "vix": 18.62,
+    "regime": "NORMAL",
+    "sizingPct": 100
+  },
+  "topCsp": [
+    {
+      "ticker": "ASML",
+      "score": 64.225,
+      "price": 1803.0,
+      "metrics": {
+        "price": 1803.0,
+        "change_pct": 0.06326796,
+        "sma20": 1802.9035,
+        "sma50": 1737.0056,
+        "rsi14": 53.380304307679964,
+        "change_20d": -2.0736701463192118,
+        "change_60d": 30.221875541688338,
+        "above_sma20": true
+      },
+      "watch": "WatchlistEntry(ticker='ASML', score=58.9, grade='C+', company='ASML Holding N.V.', status='Consider')",
+      "earnings": "2026-10-14",
+      "positives": [
+        "watchlist score 58.9 (C+)",
+        "price above 20-day trend",
+        "RSI balanced at 53",
+        "no near-term earnings conflict (2026-10-14)"
+      ],
+      "risks": [],
+      "contract": null
+    },
+    {
+      "ticker": "ADBE",
+      "score": 59.525,
+      "price": 212.17,
+      "metrics": {
+        "price": 212.17,
+        "change_pct": -2.83477,
+        "sma20": 219.30349999999999,
+        "sma50": 228.303,
+        "rsi14": 44.34626329189756,
+        "change_20d": 9.699601882012301,
+        "change_60d": -12.75904605263158,
+        "above_sma20": false
+      },
+      "watch": "WatchlistEntry(ticker='ADBE', score=60.1, grade='B-', company='Adobe Inc.', status='\u2b50 Top Candidate')",
+      "earnings": "2026-09-10",
+      "positives": [
+        "watchlist score 60.1 (B-)",
+        "RSI balanced at 44",
+        "constructive 20D move +9.7%",
+        "red-day premium setup -2.8%",
+        "no near-term earnings conflict (2026-09-10)"
+      ],
+      "risks": [
+        "below 20-day trend"
+      ],
+      "contract": null
+    },
+    {
+      "ticker": "NVDA",
+      "score": 58.05,
+      "price": 208.76,
+      "metrics": {
+        "price": 208.76,
+        "change_pct": -1.55616,
+        "sma20": 202.77550000000002,
+        "sma50": 209.4632,
+        "rsi14": 62.123585726718865,
+        "change_20d": 6.651680801062625,
+        "change_60d": -2.0687714031055013,
+        "above_sma20": true
+      },
+      "watch": "WatchlistEntry(ticker='NVDA', score=66.2, grade='B', company='NVIDIA Corporation', status='\u2b50 Top Candidate')",
+      "earnings": "2026-08-26",
+      "positives": [
+        "watchlist score 66.2 (B)",
+        "price above 20-day trend",
+        "RSI balanced at 62",
+        "constructive 20D move +6.7%"
+      ],
+      "risks": [
+        "earnings in 33 days (2026-08-26)"
+      ],
+      "contract": null
+    },
+    {
+      "ticker": "AVGO",
+      "score": 58.0,
+      "price": 392.47,
+      "metrics": {
+        "price": 392.47,
+        "change_pct": -1.09372,
+        "sma20": 381.25149999999996,
+        "sma50": 400.0946,
+        "rsi14": 62.511722413254155,
+        "change_20d": 3.578686231558946,
+        "change_60d": -1.8407823324912982,
+        "above_sma20": true
+      },
+      "watch": null,
+      "earnings": "2026-09-03",
+      "positives": [
+        "already approved portfolio name",
+        "price above 20-day trend",
+        "RSI balanced at 63",
+        "constructive 20D move +3.6%"
+      ],
+      "risks": [
+        "earnings in 41 days (2026-09-03)"
+      ],
+      "contract": null
+    },
+    {
+      "ticker": "AAPL",
+      "score": 54.0,
+      "price": 321.66,
+      "metrics": {
+        "price": 321.66,
+        "change_pct": -1.29798,
+        "sma20": 311.492,
+        "sma50": 305.467,
+        "rsi14": 62.980673440924484,
+        "change_20d": 16.90350717790298,
+        "change_60d": 18.820878430793115,
+        "above_sma20": true
+      },
+      "watch": null,
+      "earnings": "2026-07-30",
+      "positives": [
+        "already approved portfolio name",
+        "price above 20-day trend",
+        "RSI balanced at 63"
+      ],
+      "risks": [
+        "earnings in 6 days (2026-07-30)"
+      ],
+      "contract": null
+    }
+  ],
+  "topCoveredCall": [
+    {
+      "ticker": "SPY",
+      "score": 17.1,
+      "holding": "Holding(ticker='SPY', quantity=300.0, avg_price=479.0, current_context=686.29, market_value=205887.0, cost_basis=143700.0, pnl_text='+$62,187 (+43.3%)', day_change_text='+$1,032 (+0.5%)', weight=17.1)",
+      "metrics": {
+        "price": 738.18,
+        "change_pct": -1.23493,
+        "sma20": 745.9215,
+        "sma50": 745.053,
+        "rsi14": 44.7081462475946,
+        "change_20d": 0.528394389214217,
+        "change_60d": 3.7221262066348966,
+        "above_sma20": false
+      },
+      "reasons": [
+        "17.1% portfolio weight"
+      ]
+    },
+    {
+      "ticker": "AVGO",
+      "score": 16.7,
+      "holding": "Holding(ticker='AVGO', quantity=606.0, avg_price=121.11, current_context=333.51, market_value=202107.0, cost_basis=73393.0, pnl_text='+$128,714 (+175.4%)', day_change_text='+$588 (+0.3%)', weight=16.7)",
+      "metrics": {
+        "price": 392.47,
+        "change_pct": -1.09372,
+        "sma20": 381.25149999999996,
+        "sma50": 400.0946,
+        "rsi14": 62.511722413254155,
+        "change_20d": 3.578686231558946,
+        "change_60d": -1.8407823324912982,
+        "above_sma20": true
+      },
+      "reasons": [
+        "16.7% portfolio weight"
+      ]
+    },
+    {
+      "ticker": "AMAT",
+      "score": 15.6,
+      "holding": "Holding(ticker='AMAT', quantity=413.0, avg_price=184.18, current_context=369.3, market_value=152521.0, cost_basis=76066.0, pnl_text='+$76,455 (+100.5%)', day_change_text='+$4,200 (+2.8%)', weight=12.6)",
+      "metrics": {
+        "price": 562.8,
+        "change_pct": 1.60312,
+        "sma20": 596.173,
+        "sma50": 535.3846,
+        "rsi14": 42.611633372502936,
+        "change_20d": -15.748502994011984,
+        "change_60d": 47.67389992390647,
+        "above_sma20": false
+      },
+      "reasons": [
+        "12.6% portfolio weight",
+        "up +1.6% today"
+      ]
+    },
+    {
+      "ticker": "GOOGL",
+      "score": 13.8,
+      "holding": "Holding(ticker='GOOGL', quantity=551.0, avg_price=174.33, current_context=303.33, market_value=167135.0, cost_basis=96056.0, pnl_text='+$71,079 (+74.0%)', day_change_text='+$722 (+0.4%)', weight=13.8)",
+      "metrics": {
+        "price": 317.69,
+        "change_pct": -7.13262,
+        "sma20": 353.3905,
+        "sma50": 366.056,
+        "rsi14": 29.647126880061705,
+        "change_20d": -7.570335457216835,
+        "change_60d": -9.174338155411967,
+        "above_sma20": false
+      },
+      "reasons": [
+        "13.8% portfolio weight"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "score": 6.0,
+      "holding": "Holding(ticker='AAPL', quantity=212.0, avg_price=181.5, current_context=264.35, market_value=56042.0, cost_basis=38478.0, pnl_text='+$17,564 (+45.6%)', day_change_text='+$100 (+0.2%)', weight=4.6)",
+      "metrics": {
+        "price": 321.66,
+        "change_pct": -1.29798,
+        "sma20": 311.492,
+        "sma50": 305.467,
+        "rsi14": 62.980673440924484,
+        "change_20d": 16.90350717790298,
+        "change_60d": 18.820878430793115,
+        "above_sma20": true
+      },
+      "reasons": [
+        "20D move +16.9%"
+      ]
+    }
+  ],
+  "riskFlags": [
+    "Technology exposure is high at 45.4% across listed holdings.",
+    "SPY is above 15% single-name/ETF weight at 17.1%.",
+    "AVGO is above 15% single-name/ETF weight at 16.7%."
+  ],
+  "skippedExpiredOptions": [
+    {
+      "ticker": "MSFT",
+      "expiration": "2026-03-20",
+      "strike": 430.0,
+      "type": "Put"
+    },
+    {
+      "ticker": "MSFT",
+      "expiration": "2026-05-15",
+      "strike": 380.0,
+      "type": "Put"
+    },
+    {
+      "ticker": "AVGO",
+      "expiration": "2026-03-20",
+      "strike": 310.0,
+      "type": "Put"
+    },
+    {
+      "ticker": "SPY",
+      "expiration": "2026-05-15",
+      "strike": 620.0,
+      "type": "Put"
+    },
+    {
+      "ticker": "COST",
+      "expiration": "2026-05-15",
+      "strike": 900.0,
+      "type": "Put"
+    }
+  ],
+  "telegramText": "Altamira Trade Ideas - 2026-07-24\nMarket: SPY -1.2% | QQQ -1.9% | VIX 18.62 (NORMAL)\nSizing: 100% of standard premium-selling size. Standard CSP/spread sizing is acceptable.\n\n1) CSP watch: ASML near $1,803.00; target 20-30 delta put, 30-45 DTE after chain check.\n   Rationale: watchlist score 58.9 (C+); price above 20-day trend; RSI balanced at 53\n\n2) Covered-call/trim watch: SPY at 17.1% weight.\n   Rationale: 17.1% portfolio weight\n\nRisk flags:\n- Technology exposure is high at 45.4% across listed holdings.\n- SPY is above 15% single-name/ETF weight at 17.1%.\n- AVGO is above 15% single-name/ETF weight at 16.7%.\n\nStatic options note: ignored 5 expired short-premium rows from context/options-positions.md.\n\nEducational only - not financial advice. Verify quotes, greeks, liquidity, earnings, and order tickets before trading."
+}
