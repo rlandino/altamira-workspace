@@ -684,7 +684,8 @@ def build_report(args: argparse.Namespace) -> tuple[str, str, dict[str, Any]]:
             )
 
     now = datetime.now(timezone.utc)
-    today_str = today.isoformat()
+    # Use UTC calendar date at write time so report/Telegram titles match generatedAt.
+    today_str = now.date().isoformat()
     report_path = OUTPUTS_DIR / f"trade-idea-generator-{today_str}.md"
     json_path = OUTPUTS_DIR / f"trade-idea-generator-{today_str}.json"
 
