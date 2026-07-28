@@ -1,0 +1,276 @@
+{
+  "generatedAt": "2026-07-28T14:02:45.748780+00:00",
+  "market": {
+    "spyChangePct": -0.18807,
+    "qqqChangePct": -1.58477,
+    "vix": 19.04,
+    "regime": "NORMAL",
+    "sizingPct": 100
+  },
+  "topCsp": [
+    {
+      "ticker": "COST",
+      "score": 66.0,
+      "price": 983.6,
+      "metrics": {
+        "price": 983.6,
+        "change_pct": 3.36493,
+        "sma20": 936.7085,
+        "sma50": 967.0136,
+        "rsi14": 59.5792899064443,
+        "change_20d": 5.145007322522368,
+        "change_60d": -2.7775032124147496,
+        "above_sma20": true
+      },
+      "watch": null,
+      "earnings": "2026-09-24",
+      "positives": [
+        "already approved portfolio name",
+        "price above 20-day trend",
+        "RSI balanced at 60",
+        "constructive 20D move +5.1%",
+        "no near-term earnings conflict (2026-09-24)"
+      ],
+      "risks": [
+        "chasing after +3.4% day"
+      ],
+      "contract": null
+    },
+    {
+      "ticker": "MSFT",
+      "score": 58.0,
+      "price": 392.36499,
+      "metrics": {
+        "price": 392.36499,
+        "change_pct": 0.83911,
+        "sma20": 388.909,
+        "sma50": 398.524,
+        "rsi14": 56.08718080990455,
+        "change_20d": 5.186046324593855,
+        "change_60d": -5.326467039861022,
+        "above_sma20": true
+      },
+      "watch": null,
+      "earnings": "2026-07-29",
+      "positives": [
+        "already approved portfolio name",
+        "price above 20-day trend",
+        "RSI balanced at 56",
+        "constructive 20D move +5.2%"
+      ],
+      "risks": [
+        "earnings in 1 days (2026-07-29)"
+      ],
+      "contract": null
+    },
+    {
+      "ticker": "LLY",
+      "score": 56.175,
+      "price": 1220.925,
+      "metrics": {
+        "price": 1220.925,
+        "change_pct": 1.9536,
+        "sma20": 1189.4635899999998,
+        "sma50": 1137.384436,
+        "rsi14": 51.62230787595222,
+        "change_20d": 1.7921012480928349,
+        "change_60d": 26.74005792407585,
+        "above_sma20": true
+      },
+      "watch": "WatchlistEntry(ticker='LLY', score=58.7, grade='C+', company='Eli Lilly and Company', status='Consider')",
+      "earnings": "2026-08-05",
+      "positives": [
+        "watchlist score 58.7 (C+)",
+        "price above 20-day trend",
+        "RSI balanced at 52",
+        "constructive 20D move +1.8%"
+      ],
+      "risks": [
+        "earnings in 8 days (2026-08-05)"
+      ],
+      "contract": null
+    },
+    {
+      "ticker": "V",
+      "score": 52.0,
+      "price": 365.10501,
+      "metrics": {
+        "price": 365.10501,
+        "change_pct": 0.71029,
+        "sma20": 355.41275,
+        "sma50": 338.1667,
+        "rsi14": 66.55924868796615,
+        "change_20d": 6.416686583695245,
+        "change_60d": 11.302322958266018,
+        "above_sma20": true
+      },
+      "watch": null,
+      "earnings": "2026-07-28",
+      "positives": [
+        "already approved portfolio name",
+        "price above 20-day trend",
+        "constructive 20D move +6.4%"
+      ],
+      "risks": [
+        "earnings in 0 days (2026-07-28)"
+      ],
+      "contract": null
+    },
+    {
+      "ticker": "AAPL",
+      "score": 48.0,
+      "price": 337.70001,
+      "metrics": {
+        "price": 337.70001,
+        "change_pct": 0.23449,
+        "sma20": 319.83500050000004,
+        "sma50": 307.7800002,
+        "rsi14": 71.09988302250598,
+        "change_20d": 16.70583701962953,
+        "change_60d": 20.546872992075404,
+        "above_sma20": true
+      },
+      "watch": null,
+      "earnings": "2026-07-30",
+      "positives": [
+        "already approved portfolio name",
+        "price above 20-day trend"
+      ],
+      "risks": [
+        "earnings in 2 days (2026-07-30)"
+      ],
+      "contract": null
+    }
+  ],
+  "topCoveredCall": [
+    {
+      "ticker": "SPY",
+      "score": 17.1,
+      "holding": "Holding(ticker='SPY', quantity=300.0, avg_price=479.0, current_context=686.29, market_value=205887.0, cost_basis=143700.0, pnl_text='+$62,187 (+43.3%)', day_change_text='+$1,032 (+0.5%)', weight=17.1)",
+      "metrics": {
+        "price": 737.7,
+        "change_pct": -0.18807,
+        "sma20": 746.4649999999999,
+        "sma50": 744.783,
+        "rsi14": 42.18395155185468,
+        "change_20d": -1.21456405586726,
+        "change_60d": 2.3659196558662416,
+        "above_sma20": false
+      },
+      "reasons": [
+        "17.1% portfolio weight"
+      ]
+    },
+    {
+      "ticker": "AVGO",
+      "score": 16.7,
+      "holding": "Holding(ticker='AVGO', quantity=606.0, avg_price=121.11, current_context=333.51, market_value=202107.0, cost_basis=73393.0, pnl_text='+$128,714 (+175.4%)', day_change_text='+$588 (+0.3%)', weight=16.7)",
+      "metrics": {
+        "price": 378.55499,
+        "change_pct": -1.21732,
+        "sma20": 382.518,
+        "sma50": 397.4112,
+        "rsi14": 44.58831934273977,
+        "change_20d": 0.21310125744539382,
+        "change_60d": -10.141713349791113,
+        "above_sma20": false
+      },
+      "reasons": [
+        "16.7% portfolio weight"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "score": 14.0,
+      "holding": "Holding(ticker='AAPL', quantity=212.0, avg_price=181.5, current_context=264.35, market_value=56042.0, cost_basis=38478.0, pnl_text='+$17,564 (+45.6%)', day_change_text='+$100 (+0.2%)', weight=4.6)",
+      "metrics": {
+        "price": 337.70001,
+        "change_pct": 0.23449,
+        "sma20": 319.83500050000004,
+        "sma50": 307.7800002,
+        "rsi14": 71.09988302250598,
+        "change_20d": 16.70583701962953,
+        "change_60d": 20.546872992075404,
+        "above_sma20": true
+      },
+      "reasons": [
+        "RSI elevated at 71",
+        "20D move +16.7%"
+      ]
+    },
+    {
+      "ticker": "GOOGL",
+      "score": 13.8,
+      "holding": "Holding(ticker='GOOGL', quantity=551.0, avg_price=174.33, current_context=303.33, market_value=167135.0, cost_basis=96056.0, pnl_text='+$71,079 (+74.0%)', day_change_text='+$722 (+0.4%)', weight=13.8)",
+      "metrics": {
+        "price": 326.8,
+        "change_pct": 0.07349339,
+        "sma20": 350.25225,
+        "sma50": 361.6749,
+        "rsi14": 32.10352150935944,
+        "change_20d": -8.554159554523322,
+        "change_60d": -15.268739142834917,
+        "above_sma20": false
+      },
+      "reasons": [
+        "13.8% portfolio weight"
+      ]
+    },
+    {
+      "ticker": "AMAT",
+      "score": 12.6,
+      "holding": "Holding(ticker='AMAT', quantity=413.0, avg_price=184.18, current_context=369.3, market_value=152521.0, cost_basis=76066.0, pnl_text='+$76,455 (+100.5%)', day_change_text='+$4,200 (+2.8%)', weight=12.6)",
+      "metrics": {
+        "price": 478.18,
+        "change_pct": -7.48902,
+        "sma20": 573.2610004999999,
+        "sma50": 539.8420001999999,
+        "rsi14": 34.20404930949293,
+        "change_20d": -33.861687413554634,
+        "change_60d": 22.900174771255273,
+        "above_sma20": false
+      },
+      "reasons": [
+        "12.6% portfolio weight"
+      ]
+    }
+  ],
+  "riskFlags": [
+    "Technology exposure is high at 45.4% across listed holdings.",
+    "SPY is above 15% single-name/ETF weight at 17.1%.",
+    "AVGO is above 15% single-name/ETF weight at 16.7%."
+  ],
+  "skippedExpiredOptions": [
+    {
+      "ticker": "MSFT",
+      "expiration": "2026-03-20",
+      "strike": 430.0,
+      "type": "Put"
+    },
+    {
+      "ticker": "MSFT",
+      "expiration": "2026-05-15",
+      "strike": 380.0,
+      "type": "Put"
+    },
+    {
+      "ticker": "AVGO",
+      "expiration": "2026-03-20",
+      "strike": 310.0,
+      "type": "Put"
+    },
+    {
+      "ticker": "SPY",
+      "expiration": "2026-05-15",
+      "strike": 620.0,
+      "type": "Put"
+    },
+    {
+      "ticker": "COST",
+      "expiration": "2026-05-15",
+      "strike": 900.0,
+      "type": "Put"
+    }
+  ],
+  "telegramText": "Altamira Trade Ideas - 2026-07-28\nMarket: SPY -0.2% | QQQ -1.6% | VIX 19.04 (NORMAL)\nSizing: 100% of standard premium-selling size. Standard CSP/spread sizing is acceptable.\n\n1) CSP watch: COST near $983.60; target 20-30 delta put, 30-45 DTE after chain check.\n   Rationale: already approved portfolio name; price above 20-day trend; RSI balanced at 60\n   Risk: chasing after +3.4% day\n\n2) Covered-call/trim watch: SPY at 17.1% weight.\n   Rationale: 17.1% portfolio weight\n\nRisk flags:\n- Technology exposure is high at 45.4% across listed holdings.\n- SPY is above 15% single-name/ETF weight at 17.1%.\n- AVGO is above 15% single-name/ETF weight at 16.7%.\n\nStatic options note: ignored 5 expired short-premium rows from context/options-positions.md.\n\nEducational only - not financial advice. Verify quotes, greeks, liquidity, earnings, and order tickets before trading."
+}
