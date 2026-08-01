@@ -199,22 +199,50 @@ def fetch_quotes(symbols: list[str]) -> dict[str, dict[str, Any]]:
     return {row.get("symbol"): normalize_quote(row) for row in data if row.get("symbol")}
 
 
+def is_usable_mover(symbol: str, name: str, change_pct: float | None) -> bool:
+    """Skip index/ETF clutter and extreme split/data anomalies from mover feeds."""
+    if not symbol or change_pct is None:
+        return False
+    symbol_u = symbol.strip().upper()
+    name_l = (name or "").lower()
+    if symbol_u.startswith("^") or "index" in name_l:
+        return False
+    if any(token in name_l for token in (" etf", " etn", "fund", "trust")):
+        return False
+    if symbol_u.endswith(("W", "WS", "R", "RT", "U", "UN")) and len(symbol_u) >= 4:
+        # Warrants, rights, and units often dominate junk mover lists.
+        if any(token in name_l for token in ("warrant", "right", "unit")):
+            return False
+    if any(token in name_l for token in ("warrant", "right", " unit")):
+        return False
+    if abs(change_pct) > 500:
+        return False
+    return True
+
+
 def pick_first_mover(path: str) -> dict[str, Any] | None:
     data = get_json(FMP_STABLE, path)
     if not isinstance(data, list) or not data:
         return None
-    row = data[0]
-    symbol = row.get("symbol") or row.get("ticker") or "N/A"
-    return {
-        "symbol": symbol,
-        "name": row.get("name") or row.get("companyName") or symbol,
-        "change_pct": as_float(
+    for row in data:
+        if not isinstance(row, dict):
+            continue
+        symbol = str(row.get("symbol") or row.get("ticker") or "").strip().upper()
+        name = str(row.get("name") or row.get("companyName") or symbol)
+        change_pct = as_float(
             row.get("changesPercentage")
             if row.get("changesPercentage") is not None
             else row.get("changePercentage")
-        ),
-        "price": as_float(row.get("price")),
-    }
+        )
+        if not is_usable_mover(symbol, name, change_pct):
+            continue
+        return {
+            "symbol": symbol or "N/A",
+            "name": name,
+            "change_pct": change_pct,
+            "price": as_float(row.get("price")),
+        }
+    return None
 
 
 def parse_sector_snapshot(data: Any) -> list[dict[str, Any]]:
@@ -344,13 +372,15 @@ def earnings_sort_key(row: dict[str, Any]) -> tuple[str, int, float, str]:
 def is_us_style_symbol(symbol: str) -> bool:
     if not symbol or "." in symbol or symbol[0].isdigit():
         return False
-    normalized = symbol.replace("-", "").replace("/", "")
-    if not normalized.isalnum() or not any(char.isalpha() for char in normalized):
+    # Preferred shares and share-class suffixes (e.g. COF-PI) clutter calendars.
+    if "-" in symbol or "/" in symbol:
         return False
-    if len(normalized) > 5:
+    if not symbol.isalnum() or not any(char.isalpha() for char in symbol):
+        return False
+    if len(symbol) > 5:
         return False
     # Common OTC/foreign/bankruptcy suffixes clutter broad FMP calendars.
-    if len(normalized) == 5 and normalized[-1] in {"F", "Q", "R", "U", "W", "Y"}:
+    if len(symbol) == 5 and symbol[-1] in {"F", "Q", "R", "U", "W", "Y"}:
         return False
     return True
 
@@ -394,6 +424,27 @@ def describe_market_direction(spx_change: float | None, nasdaq_change: float | N
     if all(value < -0.15 for value in changes):
         return "lower"
     return "mixed"
+
+
+def market_session_sentence(report_date: str, direction: str) -> str:
+    """Describe session state for weekend, intraday, or post-close reports."""
+    if ZoneInfo is None:
+        return f"Markets finished {direction} based on the S&P 500 and Nasdaq moves."
+    now_et = datetime.now(ZoneInfo("America/New_York"))
+    try:
+        report_day = datetime.fromisoformat(report_date).date()
+    except ValueError:
+        report_day = now_et.date()
+    if report_day != now_et.date() or now_et.weekday() >= 5:
+        return (
+            f"The latest session finished {direction} based on the S&P 500 and Nasdaq moves."
+        )
+    if now_et.hour < 16:
+        stamp = now_et.strftime("%I:%M %p ET").lstrip("0")
+        return (
+            f"As of {stamp}, markets are {direction} based on the S&P 500 and Nasdaq moves."
+        )
+    return f"Markets finished {direction} based on the S&P 500 and Nasdaq moves."
 
 
 def top_news_lines(news: list[dict[str, Any]], limit: int = 5) -> list[str]:
@@ -550,7 +601,7 @@ def build_recap(report_date: str) -> tuple[str, str]:
             "## Market Drivers",
             "",
             (
-                f"Markets finished {direction} based on the S&P 500 and Nasdaq moves. "
+                f"{market_session_sentence(report_date, direction)} "
                 "Use the headlines below as context for possible drivers; avoid "
                 "over-attributing price action without direct confirmation."
             ),
