@@ -32,6 +32,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 │   ├── commands/          # Slash commands Claude can execute
 │   │   ├── prime.md       # /prime — session initialization
 │   │   ├── list-commands.md # /list-commands — list all commands (args, I/O)
+│   │   ├── trade-idea-generator.md # /trade-idea-generator — daily portfolio/watchlist trade ideas to Telegram
 │   │   ├── create-plan.md # /create-plan — create implementation plans
 │   │   ├── implement.md   # /implement — execute plans
 │   │   ├── 0DTE-SPX-credit-spread-scanner.md # /0DTE-SPX-credit-spread-scanner — 0DTE SPX credit spread setup (Tastytrade-style)
@@ -128,6 +129,14 @@ Run this at the start of every session. Claude will:
 Reads every command file in `.claude/commands/`, extracts command name, arguments, functionality, input, and output for each, and writes a single reference table to `outputs/commands-reference-{DATE}.md`. No arguments required.
 
 Example: `/list-commands`
+
+### /trade-idea-generator
+
+**Purpose:** Generate daily trade ideas from the existing portfolio and watchlist, write an audit report, and optionally send the Telegram summary.
+
+Runs `python3 scripts/trade_idea_generator.py --include-options-chain --send-telegram`. Reads `context/portfolio-details.md`, `context/watchlist.md`, and `context/options-positions.md`; writes `outputs/trade-idea-generator-{DATE}.md` and `outputs/trade-idea-generator-{DATE}.json`. Requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (or `--telegram-chat-id`) for Telegram delivery.
+
+Example: `/trade-idea-generator`
 
 ### /create-plan [request]
 
